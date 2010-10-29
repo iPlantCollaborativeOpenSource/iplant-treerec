@@ -1,0 +1,9 @@
+# Ignore backup files.
+*~
+*.bak
+.#*
+
+# Ignore generated files and directories.
+Makefile
+blib
+pm_to_blib
