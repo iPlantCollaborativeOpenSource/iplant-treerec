@@ -232,7 +232,7 @@ use Time::HiRes qw(time);
             $self->_gene_ids_to_family_names(@gene_ids);
         $self->_load_gene_family_summaries(\@results);
 
-        return \@results;
+        return { 'families', \@results };
     }
 
     ##########################################################################
@@ -298,7 +298,7 @@ use Time::HiRes qw(time);
         # Convert the hash keys to camel-case.
         @results = map { camel_case_keys($_) } @results;
 
-        return \@results;
+        return { 'families' => \@results };
     }
 
     ##########################################################################
@@ -340,41 +340,92 @@ __END__
 
 =head1 NAME
 
-IPlant::TreeRec   perl extension for accessing reconciled gene trees.
+IPlant::TreeRec - perl extension for accessing reconciled gene trees.
 
 =head1 VERSION
 
-The initial template usually just has:
-This documentation refers to <Module: : Name> version 0. 0. 1.
+This documentation refers to IPlant::TreeRec version 0.0.1.
 
 =head1 SYNOPSIS
 
-    use <Module: : Name>;
-    # Brief but working code example(s) here showing the most common usage(s)
-    # This section will be as far as many users bother reading,
-    # so make it as educational and exemplary as possible.
+    use IPlant::TreeRec;
+
+    # Create a new object.
+    $treerec = IPlant::TreeRec->new(
+        {   dbh              => $dbh,
+            gene_tree_loader => $tree_loader,
+            gene_family_info => $info,
+            file_retreiver   => $file_retriever,
+            blast_searcher   => $blast_searcher,
+        }
+    );
+
+    # Perform a GO term search.
+    $results_ref = $treerec->go_search($search_term);
+
+    # Perform a GO accession search.
+    $results_ref = $treerec->go_accession_search($accession);
+
+    # Perform a BLAST search.
+    $results_ref = $treerec->blast_search($blast_args);
+
+    # Perform a gene identifier search.
+    $results_ref = $treerec->gene_id_search($gene_id);
+
+    # Get information about a gene family.
+    $details_ref = $treerec->gene_family_details($family_name);
+
+    # Get file metadata and contents.
+    $file_info = $treerec->get_file( $file_type, $file_name_prefix );
 
 =head1 DESCRIPTION
 
-A full description of the module and its features.
-May include numerous subsections (i. e. , =head2, =head3, etc. ).
+Provides high-level functions for obtaining information about reconciled
+gene families.
 
 =head1 SUBROUTINES/METHODS
 
-A separate section listing the public components of the module's interface.
-These normally consist of either subroutines that may be exported, or methods
-that may be called on objects belonging to the classes that the module provides.
-Name the section accordingly.
+=head2 new
 
-In an object-oriented module, this section should begin with a sentence of the
-form "An object of this class represents. . . ", to give the reader a high-level
-context to help them understand the methods that are subsequently described.
+Creates and initializes a new instance of this class.
+
+=head3 Parameters
+
+=over 2
+
+=item dbh
+
+An instance of IPlant::DB::TreeRec.
+
+=item gene_tree_loader
+
+A class that is capable of loading gene trees.  The two classes currently
+available for this are IPlant::TreeRec::FileTreeLoader and
+IPlant::TreeRec::DatabaseTreeLoader.
+
+=item gene_family_info
+
+An instance of IPlant::TreeRec::GeneFamilyInfo.
+
+=item file_retriever
+
+An instance of IPlant::TreeRec::FileRetriever.
+
+=item blast_searcher
+
+An instance of IPlant::TreeRec::BlastSearcher.
+
+=back
+
+=head3 Return Value
+
+The new object instance.
+
+=head2 
 
 =head1 DIAGNOSTICS
 
-A list of every error and warning message that the module can generate
-(even the ones that will "never happen"), with a full explanation of each
-problem, one or more likely causes, and any suggested remedies.
+
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
