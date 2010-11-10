@@ -232,6 +232,9 @@ use Time::HiRes qw(time);
             $self->_gene_ids_to_family_names(@gene_ids);
         $self->_load_gene_family_summaries(\@results);
 
+        # Convert the hash keys to camel-case.
+        @results = map { camel_case_keys($_) } @results;
+
         return { 'families', \@results };
     }
 
