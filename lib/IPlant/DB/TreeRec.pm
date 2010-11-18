@@ -6,6 +6,8 @@ package IPlant::DB::TreeRec;
 use strict;
 use warnings;
 
+our $VERSION = '0.0.1';
+
 use base 'DBIx::Class::Schema';
 
 __PACKAGE__->load_namespaces;
@@ -15,5 +17,4 @@ __PACKAGE__->load_namespaces;
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OLbb8jUOKwB9ieqiEG/gdg
 
 
-# You can replace this text with custom content, and it will be preserved on regeneration
 1;
