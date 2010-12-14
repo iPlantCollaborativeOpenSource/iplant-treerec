@@ -16,6 +16,7 @@ WriteMakefile(
         'Carp'                   => 0,
         'Class::Std::Utils'      => 0,
         'Data::Dumper'           => 0,
+        'DBIx::Class'            => 0,
         'English'                => 0,
         'Exception::Class'       => 0,
         'File::Path'             => 0,
