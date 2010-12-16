@@ -18,6 +18,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class SearchServiceImpl extends RemoteServiceServlet implements SearchService
 {
+	private static final String HOSTNAME = "http://gargery.iplantcollaborative.org/";
+	
 	private HttpURLConnection getUrlConnection(String address) throws IOException
 	{
 		URL url = new URL(address);
@@ -106,7 +108,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = update("http://votan.iplantcollaborative.org/treereconciliation/search/blast-search", json);
+			URLConnection connection = update(HOSTNAME + "treereconciliation/search/blast-search", json);
 
 			ret = retrieveResult(connection);
 		}
@@ -126,7 +128,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = get("http://votan.iplantcollaborative.org/treereconciliation/search/gene-id-search/" + term);
+			URLConnection connection = get(HOSTNAME + "treereconciliation/search/gene-id-search/" + term);
 
 			ret = retrieveResult(connection);
 		}
@@ -146,7 +148,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = update("http://votan.iplantcollaborative.org/treereconciliation/search/go-accession-search/", term);
+			URLConnection connection = update(HOSTNAME + "treereconciliation/search/go-accession-search/", term);
 
 			ret = retrieveResult(connection);
 		}
@@ -166,7 +168,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = update("http://votan.iplantcollaborative.org/treereconciliation/search/go-search/", term);
+			URLConnection connection = update(HOSTNAME + "treereconciliation/search/go-search/", term);
 
 			ret = retrieveResult(connection);
 		}
@@ -186,7 +188,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = get("http://votan.iplantcollaborative.org/treereconciliation/get/gene-family-details/" + idGeneFamily);
+			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
 		}

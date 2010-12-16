@@ -84,7 +84,7 @@ public class TRViewerPanel extends ContentPanel
 				{
 					if(jsonUrl.containsKey(key))
 					{
-						ret = "http://votan.iplantcollaborative.org/treereconciliation/"
+						ret = "http://gargery.iplantcollaborative.org/treereconciliation/"
 								+ jsonUrl.get(key).isString().stringValue();
 					}
 				}
