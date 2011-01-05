@@ -175,7 +175,10 @@ use Time::HiRes qw(time);
         my $suffixes_ref   = $file_retriever->get_url_suffixes($family_name);
 
         # Add the gene family details URL suffix.
-        $suffixes_ref->{getGeneFamilyDetails} = "get/gene-family-details";
+        $suffixes_ref->{getGeneFamilyDetails} = {
+            relativeUrl => 'get/gene-family-details',
+            fileFormat  => 'TEXT',
+        };
         $details_ref->{relative_urls} = $suffixes_ref;
 
         return camel_case_keys($details_ref);
@@ -225,12 +228,12 @@ use Time::HiRes qw(time);
             = IPlant::TreeRec::BlastArgs->from_json($blast_args_json);
 
         # Get the list of matching gene identifiers.
-        my @gene_ids = $searcher->search( $blast_args );
+        my @gene_ids = $searcher->search($blast_args);
 
         # Get the summary information for each matching gene ID.
         my @results = map { { name => $_ } }
             $self->_gene_ids_to_family_names(@gene_ids);
-        $self->_load_gene_family_summaries(\@results);
+        $self->_load_gene_family_summaries( \@results );
 
         # Convert the hash keys to camel-case.
         @results = map { camel_case_keys($_) } @results;
@@ -259,9 +262,8 @@ use Time::HiRes qw(time);
         my @family_names;
         for my $gene_id (@gene_ids) {
             $gene_id =~ s/ _ [^_]+ \z //gxms;
-            my $member = $dbh->resultset('Member')->find(
-                { stable_id => $gene_id }
-            );
+            my $member = $dbh->resultset('Member')
+                ->find( { stable_id => $gene_id } );
             if ( defined $member ) {
                 for my $family ( $member->families() ) {
                     push @family_names, $family->stable_id();

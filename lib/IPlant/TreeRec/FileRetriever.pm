@@ -20,42 +20,52 @@ Readonly my %INFO_FOR => (
     'fat-tree' => {
         filename_suffix => '_reconciled.nhx',
         content_type    => 'text/plain',
+        file_format     => 'NEWICK',
     },
     'fat-tree-image' => {
         filename_suffix => '_fattree.nhx.gif',
         content_type    => 'image/gif',
+        file_format     => 'IMAGE',
     },
     'gene-tree' => {
         filename_suffix => '_genetree.nhx',
         content_type    => 'text/plain',
+        file_format     => 'NEWICK',
     },
     'gene-tree-image' => {
         filename_suffix => '_genetree.nhx.png',
         content_type    => 'image/png',
+        file_format     => 'IMAGE',
     },
     'amino-acid-sequence' => {
         filename_suffix => '_AA.fa',
         content_type    => 'text/plain',
+        file_format     => 'FASTA',
     },
     'amino-acid-multiple-sequence-alignment' => {
         filename_suffix => '_AA.mfa',
         content_type    => 'text/plain',
+        file_format     => 'FASTA',
     },
     'dna-sequence' => {
         filename_suffix => '_DNA.fa',
         content_type    => 'text/plain',
+        file_format     => 'FASTA',
     },
     'dna-multiple-sequence-alignment' => {
         filename_suffix => '_DNA.mfa',
         content_type    => 'text/plain',
+        file_format     => 'FASTA',
     },
     'species-tree-image' => {
         filename     => 'species_tree.png',
         content_type => 'image/png',
+        file_format  => 'IMAGE',
     },
     'species-tree' => {
         filename     => 'species_tree.nwk',
         content_type => 'text/plain',
+        file_format  => 'NEWICK',
     },
 );
 
@@ -189,6 +199,7 @@ Readonly my %INFO_FOR => (
         my %url_suffix_for;
         for my $file_type ( keys %INFO_FOR ) {
             my $file_type_info_ref = $INFO_FOR{$file_type};
+            my $file_format        = $file_type_info_ref->{file_format};
 
             # Determine the trailing part of the URL suffix.
             my $partial_suffix
@@ -201,7 +212,10 @@ Readonly my %INFO_FOR => (
             for my $action qw( get download ) {
                 my $description = "$action\u$camel_case_file_type";
                 my $full_suffix = "$action/$partial_suffix";
-                $url_suffix_for{$description} = $full_suffix;
+                $url_suffix_for{$description} = {
+                    'relativeUrl' => $full_suffix,
+                    'fileFormat'  => $file_format,
+                };
             }
         }
 
