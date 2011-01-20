@@ -9,6 +9,7 @@ our $VERSION = '0.0.1';
 
 use Carp;
 use Class::Std::Utils;
+use Readonly;
 
 {
     my %dbh_of;
@@ -106,6 +107,11 @@ use Class::Std::Utils;
         return $tree_node;
     }
 
+    # Used to translate attribute values.
+    Readonly my %ATTRIBUTE_TRANSLATOR_FOR => (
+        D => sub { $_[0] ? 'Y' : 'N' },
+    );
+
     ##########################################################################
     # Usage      : $node = $loader->_build_tree_node($database_node);
     #
@@ -131,11 +137,23 @@ use Class::Std::Utils;
             : $node->id();
         $node->id($id);
 
-        # Add the duplication annotation if this is an interior node.
-        if ( scalar $database_node->children() != 0 ) {
-            my $is_on_node
-                = $database_node->reconciliation_node()->is_on_node();
-            $node->nhx_tag( { D => $is_on_node ? "N" : "Y" } );
+        # Add any attributes that are associated with the node.
+        for my $attr ( $database_node->attributes() ) {
+            my $attr_name = $attr->get_name();
+            my $attr_value = $attr->value();
+            if ( defined $attr_name && defined $attr_value ) {
+                my $translator_ref = $ATTRIBUTE_TRANSLATOR_FOR{$attr_name};
+                if ( defined $translator_ref ) {
+                    $attr_value = $translator_ref->($attr_value);
+                }
+                $node->nhx_tag( { $attr_name => $attr_value } );
+            }
+        }
+
+        # Add the species annotation if this node has one.
+        my $species = $database_node->get_attribute_value('S');
+        if ( defined $species ) {
+            $node->nhx_tag( { S => $species } );
         }
 
         return $node;

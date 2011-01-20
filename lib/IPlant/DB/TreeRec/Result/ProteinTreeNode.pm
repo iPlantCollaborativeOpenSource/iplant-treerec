@@ -104,6 +104,31 @@ __PACKAGE__->has_one(
     protein_tree_member => "IPlant::DB::TreeRec::Result::ProteinTreeMember",
     { "foreign.node_id" => "self.node_id" }
 );
+__PACKAGE__->has_many(
+    attributes => "IPlant::DB::TreeRec::Result::ProteinTreeNodeAttribute",
+    { "foreign.node_id" => "self.node_id" }
+);
+
+##########################################################################
+# Usage      : $value = $node->get_attribute_value($attribute_name);
+#
+# Purpose    : Gets the value of the first attribute found with the given
+#              attribute name.
+#
+# Returns    : The attribute value or undef if no such attribute is found.
+#
+# Parameters : $desired_name - the name of the attribute to search for.
+#
+# Throws     : No exceptions.
+sub get_attribute_value {
+    my ( $self, $desired_name ) = @_;
+    for my $attribute ( $self->attributes() ) {
+        my $current_name = $attribute->get_name();
+        return $attribute->value()
+            if defined $current_name && $current_name eq $desired_name;
+    }
+    return;
+}
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
