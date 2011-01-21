@@ -97,6 +97,44 @@ use Readonly;
         my $filename = $family_name . $filename_extension_of{ ident $self };
         my $path     = File::Spec->catfile( $data_dir, $filename );
 
+        # Load the file.
+        return $self->_load_tree($path);
+    }
+
+    ##########################################################################
+    # Usage      : $species_tree = $loader->load_species_tree();
+    #
+    # Purpose    : Loads the species tree from a file.
+    #
+    # Returns    : The species tree.
+    #
+    # Parameters : None.
+    #
+    # Throws     : No exceptions.
+    sub load_species_tree {
+        my ($self) = @_;
+
+        # Determine the path to the file.
+        my $data_dir = $data_dir_of{ ident $self };
+        my $path     = File::Spec->catfile( $data_dir, 'species_tree.nwk' );
+
+        # Load the file.
+        return $self->_load_tree($path);
+    }
+
+    ##########################################################################
+    # Usage      : $tree = $loader->_load_tree($path)
+    #
+    # Purpose    : Loads an arbitrary tree from a file.
+    #
+    # Returns    : The tree.
+    #
+    # Parameters : $path - the path to the file to load.
+    #
+    # Throws     : No exceptions.
+    sub _load_tree {
+        my ( $self, $path ) = @_;
+
         # Open the file.
         my $input = Bio::TreeIO->new(
             -file   => $path,

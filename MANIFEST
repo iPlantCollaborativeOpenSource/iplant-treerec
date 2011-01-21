@@ -10,6 +10,7 @@ lib/IPlant/DB/TreeRec/Result/Cvtermsynonym.pm
 lib/IPlant/DB/TreeRec/Result/Db.pm
 lib/IPlant/DB/TreeRec/Result/Dbxref.pm
 lib/IPlant/DB/TreeRec/Result/Dbxrefprop.pm
+lib/IPlant/DB/TreeRec/Result/EdgeDuplicationCount.pm
 lib/IPlant/DB/TreeRec/Result/Family.pm
 lib/IPlant/DB/TreeRec/Result/FamilyMember.pm
 lib/IPlant/DB/TreeRec/Result/GeneIdSearch.pm
@@ -18,6 +19,7 @@ lib/IPlant/DB/TreeRec/Result/GoSearch.pm
 lib/IPlant/DB/TreeRec/Result/GoTermsForFamily.pm
 lib/IPlant/DB/TreeRec/Result/Member.pm
 lib/IPlant/DB/TreeRec/Result/MemberAttribute.pm
+lib/IPlant/DB/TreeRec/Result/NodeDuplicationCount.pm
 lib/IPlant/DB/TreeRec/Result/ProteinTree.pm
 lib/IPlant/DB/TreeRec/Result/ProteinTreeAttribute.pm
 lib/IPlant/DB/TreeRec/Result/ProteinTreeMember.pm

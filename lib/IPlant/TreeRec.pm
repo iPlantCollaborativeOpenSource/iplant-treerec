@@ -13,6 +13,7 @@ use Carp;
 use Class::Std::Utils;
 use Data::Dumper;
 use English qw( -no_match_vars );
+use IO::Scalar;
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastArgs;
 use IPlant::TreeRec::Utils qw(camel_case_keys);
@@ -158,7 +159,8 @@ use Time::HiRes qw(time);
     #
     # Parameters : $family_name - the gene family name.
     #
-    # Throws     : No exceptions.
+    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::TreeNotFoundException
     sub get_gene_family_details {
         my ( $self, $family_name ) = @_;
 
@@ -182,6 +184,53 @@ use Time::HiRes qw(time);
         $details_ref->{relative_urls} = $suffixes_ref;
 
         return camel_case_keys($details_ref);
+    }
+
+    ##########################################################################
+    # Usage      : $text = $treerec->get_gene_tree($name);
+    #
+    # Purpose    : Gets the gene tree for the gene family with the given name.
+    #
+    # Returns    : The gene tree.
+    #
+    # Parameters : $name - the name of the gene family.
+    #
+    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::TreeNotFoundException
+    sub get_gene_tree {
+        my ( $self, $name ) = @_;
+
+        # Fetch the tree loader.
+        my $tree_loader = $gene_tree_loader_of{ ident $self };
+
+        # Load the tree.
+        my $tree = $tree_loader->load_gene_tree($name);
+
+        # Format the NHX.
+        return $self->_format_tree( $tree, 'NHX' );
+    }
+
+    ##########################################################################
+    # Usage      : $text = $treerec->get_species_tree($name);
+    #
+    # Purpose    : Retrieves the species tree in NHX format.
+    #
+    # Returns    : The species tree.
+    #
+    # Parameters : $name - the name of the species tree.
+    #
+    # Throws     : IPlant::TreeRec::TreeNotFoundException
+    sub get_species_tree {
+        my ( $self, $name ) = @_;
+
+        # Fetch the tree loader.
+        my $tree_loader = $gene_tree_loader_of{ ident $self };
+
+        # Load the tree.
+        my $tree = $tree_loader->load_species_tree($name);
+
+        # Format the NHX.
+        return $self->_format_tree( $tree, 'NHX' );
     }
 
     ##########################################################################
@@ -239,6 +288,32 @@ use Time::HiRes qw(time);
         @results = map { camel_case_keys($_) } @results;
 
         return { 'families', \@results };
+    }
+
+    ##########################################################################
+    # Usage      : $formatted_tree = $treerec->_format_tree( $tree, $format );
+    #
+    # Purpose    : Produces a representation of the given tree in the given
+    #              format.
+    #
+    # Returns    : The formatted representation of the tree.
+    #
+    # Parameters : $tree   - the tree being formatted.
+    #              $format - the format of the text represenation of the tree.
+    #
+    # Throws     : No exceptions.
+    sub _format_tree {
+        my ( $self, $tree, $format ) = @_;
+
+        # Initialize the result.
+        my $result = '';
+
+        # Format the tree.
+        my $handle = IO::Scalar->new(\$result);
+        my $treeio = Bio::TreeIO->new( -format => $format, -fh => $handle );
+        $treeio->write_tree($tree);
+
+        return $result;
     }
 
     ##########################################################################

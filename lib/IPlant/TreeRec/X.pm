@@ -31,6 +31,16 @@ use Exception::Class (
     'IPlant::TreeRec::CloseException' => {
         'isa' => 'IPlant::TreeRec::IOException',
     },
+
+    # Thrown when a selected tree can't be located.
+    'IPlant::TreeRec::TreeNotFoundException' => {
+        'isa' => 'IPlant::TreeRec::Exception',
+    },
+
+    # Thrown when a gene family can't be located.
+    'IPlant::TreeRec::GeneFamilyNotFoundException' => {
+        'isa' => 'IPlant::TreeRec::Exception',
+    },
 );
 
 1;
@@ -54,6 +64,21 @@ This documentation refers to IPlant::TreeRec::X version 0.0.1.
     # An exception that is thrown when a database error occurs.
     IPlant::TreeRec::DatabaseException->throw( error => $message );
 
+    # An exception that is thrown when an illegal argument is encountered.
+    IPlant::TreeRec::IllegalArgumentException->throw( error => $message );
+
+    # An exception that is thrown when an I/O error occurs.
+    IPlant::TreeRec::IOException->throw( error => $message );
+
+    # An exception that is thrown when a file can't be closed.
+    IPlant::TreeRec::CloseException->throw( error => $message );
+
+    # An exception that is thrown when a tree can't be loacated.
+    IPlant::TreeRec::TreeNotFoundException->throw( error => $message );
+
+    # An exception that is thrown when a gene family can't be located.
+    IPlant::TreeRec::GeneFamilyNotFoundException->throw( error => $message );
+
 =head1 DESCRIPTION
 
 Exceptions for iPlant tree reconciliation classes.
@@ -66,6 +91,26 @@ all other exceptions in the tree reconciliation library.
 =head2 IPlant::TreeRec::DatabaseException
 
 Thrown when a database error occurs.
+
+=head2 IPlant::TreeRec::IllegalArgumentException
+
+Thrown when an illegal argument value is passed to any subroutine.
+
+=head2 IPlant::TreeRec::IOException
+
+Thrown when a general I/O exception occurs.
+
+=head2 IPlant::TreeRec::CloseException
+
+Thrown when a file handle can't be closed.
+
+=head2 IPlant::TreeRec::TreeNotFoundException
+
+Thrown when either a gene tree or a species tree can't be found.
+
+=head2 IPlant::TreeRec::GeneFamilyNotFoundException
+
+Thrown when a gene family can't be found.
 
 =head1 DEPENDENCIES
 

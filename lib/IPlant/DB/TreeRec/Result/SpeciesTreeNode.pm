@@ -73,6 +73,14 @@ __PACKAGE__->set_primary_key("species_tree_node_id");
 # Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-10-25 09:42:48
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:xQYzaEX/cnBaMc4mELtLhg
 
+__PACKAGE__->belongs_to(
+    species_tree => "IPlant::DB::TreeRec::Result::SpeciesTree",
+    { "foreign.species_tree_id" => "self.species_tree_id" }
+);
+__PACKAGE__->has_many(
+    children => "IPlant::DB::TreeRec::Result::SpeciesTreeNode",
+    { "foreign.parent_id" => "self.species_tree_node_id" }
+);
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
