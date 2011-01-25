@@ -16,6 +16,7 @@ use English qw( -no_match_vars );
 use IO::Scalar;
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastArgs;
+use IPlant::TreeRec::DuplicationEventFinder;
 use IPlant::TreeRec::Utils qw(camel_case_keys);
 use IPlant::TreeRec::X;
 use List::MoreUtils qw(uniq);
@@ -231,6 +232,43 @@ use Time::HiRes qw(time);
 
         # Format the NHX.
         return $self->_format_tree( $tree, 'NHX' );
+    }
+
+    ##########################################################################
+    # Usage      : @families = $treerec->find_duplication_events($json);
+    #
+    # Purpose    : Retrieves the names of gene families with duplication
+    #              events at a selected location in a species tree.
+    #
+    # Returns    : A reference to a hash containing the list of family names.
+    #
+    # Parameters : node_id       - the identifier of the selected node or the
+    #                              node that the selected edge leads into.
+    #              edge_selected - true if the edge leading into the node is
+    #                              selected rather than the node itself.
+    #
+    # Throws     : IPlant::TreeRec::IllegalArgumentException
+    sub find_duplication_events {
+        my ( $self, $json ) = @_;
+
+        # Extract the arguments.
+        my $args_ref      = JSON->new->decode($json);
+        my $node_id       = $args_ref->{'node_id'};
+        my $edge_selected = $args_ref->{'edge_selected'};
+
+        # Validate the arguments.
+        IPlant::TreeRec::IllegalArgumentException->throw()
+            if !defined $node_id || !defined $edge_selected;
+
+        # Create a new duplication event finder.
+        my $dbh    = $dbh_of{ ident $self };
+        my $finder = IPlant::TreeRec::DuplicationEventFinder->new($dbh);
+
+        # Find the gene families containing duplication events.
+        my @families
+            = $finder->find_duplication_events( $node_id, $edge_selected );
+
+        return { 'families' => \@families };
     }
 
     ##########################################################################

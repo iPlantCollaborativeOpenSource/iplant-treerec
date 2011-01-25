@@ -21,7 +21,8 @@ Readonly my %SUPPORTED_METHODS_FOR => (
     'go-search'           => [qw( GET POST )],
     'go-accession-search' => [qw( GET POST )],
     'gene-id-search'      => [qw( GET POST )],
-    'blast-search'        => [qw( GET POST )],
+    'blast-search'        => [qw( POST )],
+    'duplication-search'  => [qw( POST )],
 );
 
 # The search subroutines fo each of the search types.
@@ -30,6 +31,7 @@ Readonly my %SEARCHER_FOR => (
     'go-accession-search' => sub { $_[0]->go_accession_search( $_[1] ) },
     'gene-id-search'      => sub { $_[0]->gene_id_search( $_[1] ) },
     'blast-search'        => sub { $_[0]->blast_search( $_[1], $_[2] ) },
+    'duplication-search'  => sub { $_[0]->find_duplication_events( $_[1] ) },
 );
 
 use base 'IPlant::TreeRec::REST::Handler';

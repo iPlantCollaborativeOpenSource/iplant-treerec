@@ -15,6 +15,7 @@ our $VERSION = '0.0.1';
 
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastSearcher;
+use IPlant::TreeRec::DatabaseTreeLoader;
 use IPlant::TreeRec::FileRetriever;
 use IPlant::TreeRec::FileTreeLoader;
 use IPlant::TreeRec::GeneFamilyInfo;
@@ -50,12 +51,7 @@ sub get_tree_rec {
     IPlant::TreeRec::DatabaseException->throw() if !defined $dbh;
 
     # Create the tree loader.
-    my $tree_loader = IPlant::TreeRec::FileTreeLoader->new(
-        {   data_dir           => $data_dir,
-            filename_extension => $TREE_FILE_EXTENSION,
-            tree_format        => $TREE_FILE_FORMAT,
-        }
-    );
+    my $tree_loader = IPlant::TreeRec::DatabaseTreeLoader->new($dbh);
 
     # Create the gene family info.
     my $gene_family_info = IPlant::TreeRec::GeneFamilyInfo->new(

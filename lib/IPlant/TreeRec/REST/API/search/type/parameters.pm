@@ -19,7 +19,6 @@ Readonly my %SEARCHER_FOR => (
     'go-search'           => sub { $_[0]->go_search( $_[1] ) },
     'go-accession-search' => sub { $_[0]->go_accession_search( $_[1] ) },
     'gene-id-search'      => sub { $_[0]->gene_id_search( $_[1] ) },
-    'blast-search'        => sub { $_[0]->blast_search( $_[1] ) },
 );
 
 use base 'IPlant::TreeRec::REST::Handler';

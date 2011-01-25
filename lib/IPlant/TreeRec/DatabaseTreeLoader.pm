@@ -72,7 +72,7 @@ use Readonly;
         my ( $self, $family_name ) = @_;
 
         # Get the root node of the gene tree.
-        my $dbh = $dbh_of{ ident $self };
+        my $dbh    = $dbh_of{ ident $self };
         my $family = $dbh->resultset('Family')
             ->find( { 'stable_id' => $family_name } );
         IPlant::TreeRec::GeneFamilyNotFound->throw()
@@ -167,9 +167,8 @@ use Readonly;
     }
 
     # Used to translate attribute values.
-    Readonly my %ATTRIBUTE_TRANSLATOR_FOR => (
-        D => sub { $_[0] ? 'Y' : 'N' },
-    );
+    Readonly my %ATTRIBUTE_TRANSLATOR_FOR =>
+        ( D => sub { $_[0] ? 'Y' : 'N' }, );
 
     ##########################################################################
     # Usage      : $node = $loader->_build_gene_tree_node($database_node);
@@ -258,7 +257,7 @@ use Readonly;
     # Throws     : No exceptions.
     sub _count_edge_dups {
         my ( $self, $node_id ) = @_;
-       return $self->_count_dups( $node_id, 1 );
+        return $self->_count_dups( $node_id, 0 );
     }
 
     ##########################################################################
@@ -274,7 +273,7 @@ use Readonly;
     # Throws     : No exceptions.
     sub _count_node_dups {
         my ( $self, $node_id ) = @_;
-        return $self->_count_dups( $node_id, 0 );
+        return $self->_count_dups( $node_id, 1 );
     }
 
     ##########################################################################
@@ -298,18 +297,19 @@ use Readonly;
 
         # Count the edge duplications.
         my $dbh = $dbh_of{ ident $self };
-        my $rs = $dbh->resultset('ReconciliationNode')->search(
-            {
-                -and => [
-                    host_child_node_id => $node_id,
-                    is_on_node => $is_on_node,
+        my $rs  = $dbh->resultset('ReconciliationNode')->search(
+            {   -and => [
+                    host_child_node_id  => $node_id,
+                    host_parent_node_id => { '!=' => undef },
+                    is_on_node          => $is_on_node,
                 ],
             },
-            {
-                columns => [ qw(reconciliation_id) ],
+            {   columns  => [qw(reconciliation_id)],
                 distinct => 1,
             },
         );
+
+        return $rs->count();
     }
 }
 
