@@ -84,6 +84,7 @@ use Readonly;
 
         # Build the tree.
         my $tree = Bio::Tree::Tree->new();
+        $tree->id( $db_tree->protein_tree_id() );
         $tree->set_root_node( $self->_build_gene_subtree($root) );
         return $tree;
     }
@@ -113,6 +114,7 @@ use Readonly;
 
         # Build the tree.
         my $tree = Bio::Tree::Tree->new();
+        $tree->id( $db_tree->species_tree_id() );
         $tree->set_root_node( $self->_build_species_subtree($root) );
         return $tree;
     }

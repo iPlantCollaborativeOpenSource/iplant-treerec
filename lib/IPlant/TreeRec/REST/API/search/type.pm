@@ -10,6 +10,7 @@ our $VERSION = '0.0.1';
 use Apache2::RequestUtil;
 use Class::Std::Utils;
 use Data::Dumper;
+use Exception::Class;
 use IPlant::TreeRec::REST::Handler;
 use IPlant::TreeRec::REST::API::search::type::parameters;
 use IPlant::TreeRec::REST::Initializer qw(get_tree_rec);
@@ -118,7 +119,16 @@ use base 'IPlant::TreeRec::REST::Handler';
             if !defined $search_sub_ref;
 
         # Perform the search.
-        my $result_ref = $search_sub_ref->( $treerec, $parameters );
+        my $result_ref = eval { $search_sub_ref->( $treerec, $parameters ) };
+        if ( my $e = Exception::Class->caught() ) {
+            $request->log_error("Exception: $e");
+            if ( ref $e ) {
+                $request->log_error( $e->trace()->as_string() );
+            }
+            $e->rethrow();
+        }
+        
+        # Add the search results to the service results.
         $response->data()->{item} = $result_ref;
 
         return Apache2::Const::HTTP_OK;

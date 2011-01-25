@@ -21,6 +21,7 @@ Readonly my $SPECIES_TREE => 'bowers_rosids';
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
     'species-tree' => sub { $_[0]->get_species_tree_file($SPECIES_TREE) },
+    'species-data' => sub { $_[0]->get_species_tree_data($SPECIES_TREE) },
     'default'      => sub { $_[0]->get_file( $_[1], "" ) },
 );
 

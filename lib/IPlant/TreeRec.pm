@@ -17,6 +17,7 @@ use IO::Scalar;
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastArgs;
 use IPlant::TreeRec::DuplicationEventFinder;
+use IPlant::TreeRec::TreeDataFormatter;
 use IPlant::TreeRec::Utils qw(camel_case_keys);
 use IPlant::TreeRec::X;
 use List::MoreUtils qw(uniq);
@@ -215,6 +216,32 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
+    # Usage      : $data_ref = $treerec->get_gene_tree_data($name);
+    #
+    # Purpose    : Retrieves the gene tree for thge gene family with the given
+    #              name as a Perl data structure.
+    #
+    # Returns    : The tree data.
+    #
+    # Parameters : $name - the name of the gene family.
+    #
+    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::TreeNotFoundException
+    sub get_gene_tree_data {
+        my ( $self, $name ) = @_;
+
+        # Fetch the tree loader and create a tree formatter.
+        my $tree_loader = $gene_tree_loader_of{ ident $self };
+        my $formatter = IPlant::TreeRec::TreeDataFormatter->new();
+
+        # Load the tree.
+        my $tree = $tree_loader->load_gene_tree($name);
+
+        # Format and return the tree.
+        return $formatter->format_tree($tree);
+    }
+
+    ##########################################################################
     # Usage      : $text = $treerec->get_species_tree_file($name);
     #
     # Purpose    : Retrieves the species tree in NHX format.
@@ -241,6 +268,30 @@ use Time::HiRes qw(time);
         my $content_type = "application/nhx";
         my $contents = $self->_format_tree( $tree, 'NHX' );
         return $self->_build_file_result($filename, $content_type, $contents);
+    }
+
+    ##########################################################################
+    # Usage      : $data_ref = $treerec->get_species_tree_data($name)
+    #
+    # Purpose    : Retrieves species tree data in NHX format.
+    #
+    # Returns    : The species tree data.
+    #
+    # Parameters : $name - the name of the species tree.
+    #
+    # Throws     : IPlant::TreeRec::TreeNotFoundException
+    sub get_species_tree_data {
+        my ( $self, $name ) = @_;
+
+        # Fetch the tree loader and create a tree formatter.
+        my $tree_loader = $gene_tree_loader_of{ ident $self };
+        my $formatter   = IPlant::TreeRec::TreeDataFormatter->new();
+
+        # Load the tree.
+        my $tree = $tree_loader->load_species_tree($name);
+
+        # Format and return the tree.
+        return $formatter->format_tree($tree);
     }
 
     ##########################################################################

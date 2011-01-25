@@ -54,6 +54,7 @@ lib/IPlant/TreeRec/REST/API/search/type.pm
 lib/IPlant/TreeRec/REST/API/search/type/parameters.pm
 lib/IPlant/TreeRec/REST/Handler.pm
 lib/IPlant/TreeRec/REST/Initializer.pm
+lib/IPlant/TreeRec/TreeDataFormatter.pm
 lib/IPlant/TreeRec/Utils.pm
 lib/IPlant/TreeRec/X.pm
 Makefile.PL

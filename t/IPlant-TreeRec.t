@@ -5,7 +5,7 @@ use strict;
 
 #########################
 
-use Test::More tests => 52;
+use Test::More tests => 57;
 BEGIN { use_ok('IPlant::DB::TreeRec') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cv') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvterm') };
@@ -17,6 +17,7 @@ BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvtermsynonym') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Db') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Dbxref') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Dbxrefprop') };
+BEGIN { use_ok('IPlant::DB::TreeRec::Result::DuplicationSearch') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Family') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::FamilyMember') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::GeneIdSearch') };
@@ -42,6 +43,7 @@ BEGIN { use_ok('IPlant::TreeRec') };
 BEGIN { use_ok('IPlant::TreeRec::BlastArgs') };
 BEGIN { use_ok('IPlant::TreeRec::BlastSearcher') };
 BEGIN { use_ok('IPlant::TreeRec::DatabaseTreeLoader') };
+BEGIN { use_ok('IPlant::TreeRec::DuplicationEventFinder') };
 BEGIN { use_ok('IPlant::TreeRec::FileRetriever') };
 BEGIN { use_ok('IPlant::TreeRec::FileTreeLoader') };
 BEGIN { use_ok('IPlant::TreeRec::GeneFamilyInfo') };
@@ -58,5 +60,8 @@ BEGIN { use_ok('IPlant::TreeRec::REST::API::search::type') };
 BEGIN { use_ok('IPlant::TreeRec::REST::API::search::type::parameters') };
 BEGIN { use_ok('IPlant::TreeRec::REST::Handler') };
 BEGIN { use_ok('IPlant::TreeRec::REST::Initializer') };
+BEGIN { use_ok('IPlant::TreeRec::ReconciliationResolver') };
+BEGIN { use_ok('IPlant::TreeRec::Utils') };
+BEGIN { use_ok('IPlant::TreeRec::X') };
 
 #########################
