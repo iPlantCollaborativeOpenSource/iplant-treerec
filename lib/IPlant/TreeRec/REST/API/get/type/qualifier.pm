@@ -15,6 +15,7 @@ use Readonly;
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
     'gene-family-details' => sub { $_[0]->get_gene_family_details( $_[2] ) },
+    'gene-tree'           => sub { $_[0]->get_gene_tree_file( $_[2] ) },
     'default'             => sub { $_[0]->get_file( $_[1], $_[2] ) },
 );
 

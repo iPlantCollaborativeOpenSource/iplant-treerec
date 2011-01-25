@@ -47,7 +47,7 @@ sub buildNext {
     my $current_package = ref $self;
     my $next_package    = "${current_package}::type";
 
-    # Instantiate and return the next handler.                                                                                                                                                                                                                                
+    # Instantiate and return the next handler.
     return $next_package->new($type);
 }
 

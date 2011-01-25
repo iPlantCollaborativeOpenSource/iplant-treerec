@@ -167,8 +167,9 @@ use Readonly;
     }
 
     # Used to translate attribute values.
-    Readonly my %ATTRIBUTE_TRANSLATOR_FOR =>
-        ( D => sub { $_[0] ? 'Y' : 'N' }, );
+    Readonly my %ATTRIBUTE_TRANSLATOR_FOR => (
+        D  => sub { $_[0] ? 'Y' : 'N' },
+    );
 
     ##########################################################################
     # Usage      : $node = $loader->_build_gene_tree_node($database_node);

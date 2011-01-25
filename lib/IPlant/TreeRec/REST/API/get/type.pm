@@ -8,14 +8,20 @@ use warnings;
 our $VERSION = '0.0.1';
 
 use Class::Std::Utils;
+use English qw(-no_match_vars);
+use Exception::Class;
 use IPlant::TreeRec::REST::Handler;
 use IPlant::TreeRec::REST::API::get::type::qualifier;
 use IPlant::TreeRec::REST::Initializer qw(get_tree_rec);
 use Readonly;
 
+# The name of the default species tree.
+Readonly my $SPECIES_TREE => 'bowers_rosids';
+
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
-    'default'             => sub { $_[0]->get_file( $_[1], "" ) },
+    'species-tree' => sub { $_[0]->get_species_tree_file($SPECIES_TREE) },
+    'default'      => sub { $_[0]->get_file( $_[1], "" ) },
 );
 
 use base 'IPlant::TreeRec::REST::Handler';

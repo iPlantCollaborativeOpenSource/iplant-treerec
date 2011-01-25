@@ -188,7 +188,7 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
-    # Usage      : $text = $treerec->get_gene_tree($name);
+    # Usage      : $text = $treerec->get_gene_tree_file($name);
     #
     # Purpose    : Gets the gene tree for the gene family with the given name.
     #
@@ -198,7 +198,7 @@ use Time::HiRes qw(time);
     #
     # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
     #              IPlant::TreeRec::TreeNotFoundException
-    sub get_gene_tree {
+    sub get_gene_tree_file {
         my ( $self, $name ) = @_;
 
         # Fetch the tree loader.
@@ -207,12 +207,15 @@ use Time::HiRes qw(time);
         # Load the tree.
         my $tree = $tree_loader->load_gene_tree($name);
 
-        # Format the NHX.
-        return $self->_format_tree( $tree, 'NHX' );
+        # Format and return the tree.
+        my $filename = "${name}_genetree.nhx";
+        my $content_type = "application/nhx";
+        my $contents = $self->_format_tree( $tree, 'NHX' );
+        return $self->_build_file_result($filename, $content_type, $contents);
     }
 
     ##########################################################################
-    # Usage      : $text = $treerec->get_species_tree($name);
+    # Usage      : $text = $treerec->get_species_tree_file($name);
     #
     # Purpose    : Retrieves the species tree in NHX format.
     #
@@ -221,7 +224,7 @@ use Time::HiRes qw(time);
     # Parameters : $name - the name of the species tree.
     #
     # Throws     : IPlant::TreeRec::TreeNotFoundException
-    sub get_species_tree {
+    sub get_species_tree_file {
         my ( $self, $name ) = @_;
 
         # Fetch the tree loader.
@@ -230,8 +233,14 @@ use Time::HiRes qw(time);
         # Load the tree.
         my $tree = $tree_loader->load_species_tree($name);
 
-        # Format the NHX.
-        return $self->_format_tree( $tree, 'NHX' );
+        # Determine the file name.
+        my $filename
+            = defined $name ? "${name}_speciestree.nhx" : "species_tree.nhx";
+
+        # Format and return the tree.
+        my $content_type = "application/nhx";
+        my $contents = $self->_format_tree( $tree, 'NHX' );
+        return $self->_build_file_result($filename, $content_type, $contents);
     }
 
     ##########################################################################
@@ -326,6 +335,28 @@ use Time::HiRes qw(time);
         @results = map { camel_case_keys($_) } @results;
 
         return { 'families', \@results };
+    }
+
+    ##########################################################################
+    # Usage      : $result_ref = $treerec->_build_file_result( $filename,
+    #                  $content_type, $contents );
+    #
+    # Purpose    : Creates a result that represents the contents of a file
+    #
+    # Returns    : The result.
+    #
+    # Parameters : $filename     - the name of the file.
+    #              $content_type - the MIME content type for the file.
+    #              $contents     - the file contents.
+    #
+    # Throws     : No exceptions.
+    sub _build_file_result {
+        my ( $self, $filename, $content_type, $contents ) = @_;
+        return {
+            "filename"     => $filename,
+            "content_type" => $content_type,
+            "contents"     => $contents,
+        };
     }
 
     ##########################################################################
