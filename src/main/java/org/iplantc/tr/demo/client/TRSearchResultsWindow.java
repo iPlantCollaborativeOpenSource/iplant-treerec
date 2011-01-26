@@ -34,13 +34,16 @@ public class TRSearchResultsWindow extends Window
 {
 	private static final String TR_VIEW_BTN_ID = "idTRDataViewBtn";
 	private Grid<TRSearchResult> gridResults;
+	private boolean showBlastColumns;
 	private ClientCommand cmdView;
 	private ArrayList<Button> buttons;
 	private ContentPanel pnlGrid;
 
-	public TRSearchResultsWindow(String searchTerms, String results, ClientCommand cmdView)
+	public TRSearchResultsWindow(String searchTerms, String results, boolean showBlastColumns,
+			ClientCommand cmdView)
 	{
 		init(searchTerms, results);
+		this.showBlastColumns = showBlastColumns;
 		this.cmdView = cmdView;
 	}
 
@@ -119,7 +122,7 @@ public class TRSearchResultsWindow extends Window
 			}
 		}
 
-		final ColumnModel cm = buildColumnModel(true);
+		final ColumnModel cm = buildColumnModel();
 
 		final Grid<TRSearchResult> ret = new Grid<TRSearchResult>(store, cm);
 
@@ -160,7 +163,7 @@ public class TRSearchResultsWindow extends Window
 		return ret;
 	}
 
-	private ColumnModel buildColumnModel(boolean showBlastColumns)
+	private ColumnModel buildColumnModel()
 	{
 		List<ColumnConfig> config = new ArrayList<ColumnConfig>();
 
@@ -169,11 +172,13 @@ public class TRSearchResultsWindow extends Window
 		geneFamilyConfig.setRenderer(new GeneFamilyColumnRenderer());
 		config.add(geneFamilyConfig);
 
-		if (showBlastColumns) {
+		if(showBlastColumns)
+		{
 			config.add(buildConfig("eValue", "E value", 80, HorizontalAlignment.CENTER));
-			config.add(buildConfig("alignLength", "Length of<br/>Alignment", 80, HorizontalAlignment.CENTER));
+			config.add(buildConfig("alignLength", "Length of<br/>Alignment", 80,
+					HorizontalAlignment.CENTER));
 		}
-		
+
 		config.add(buildConfig("goAnnotations", "Molecular Function/<br/>Biological Process", 200,
 				HorizontalAlignment.LEFT));
 

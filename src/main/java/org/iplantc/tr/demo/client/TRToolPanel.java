@@ -1,45 +1,28 @@
 package org.iplantc.tr.demo.client;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.iplantc.tr.demo.client.images.Resources;
-
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
-import com.extjs.gxt.ui.client.Style.SelectionMode;
-import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
-import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.KeyListener;
-import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
-import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.extjs.gxt.ui.client.widget.Status;
 import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
-import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
-import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
-import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.layout.TableData;
-import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
-import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -172,6 +155,7 @@ public class TRToolPanel extends VerticalPanel
 	{
 		if(searchService != null && term != null)
 		{
+			pnlSearchSimple.searchBegin();
 			searchService.doGeneIdSearch(term, pnlSearchSimple.getSearchCallback(term));
 		}
 	}
@@ -180,6 +164,7 @@ public class TRToolPanel extends VerticalPanel
 	{
 		if(term != null)
 		{
+			pnlSearchSimple.searchBegin();
 			searchService.doGoTermSearch(term, pnlSearchSimple.getSearchCallback(term));
 		}
 	}
@@ -188,6 +173,7 @@ public class TRToolPanel extends VerticalPanel
 	{
 		if(term != null)
 		{
+			pnlSearchSimple.searchBegin();
 			searchService.doGoAccessionSearch(term, pnlSearchSimple.getSearchCallback(term));
 		}
 	}
@@ -210,6 +196,7 @@ public class TRToolPanel extends VerticalPanel
 	{
 		String json = buildBLASTJson();
 
+		pnlSearchBlast.searchBegin();
 		searchService.doBLASTSearch(json, pnlSearchBlast.getSearchCallback());
 	}
 
@@ -220,8 +207,6 @@ public class TRToolPanel extends VerticalPanel
 			@Override
 			public void componentSelected(ButtonEvent ce)
 			{
-				searchBegin();
-				
 				String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
 
 				if(type.equals(SEARCH_TYPE_GENE_NAME))
@@ -288,28 +273,15 @@ public class TRToolPanel extends VerticalPanel
 		return pnlSearchSimple.getFocusWidget();
 	}
 
-	private void searchBegin()
-	{
-		if(cmdSearchBegin != null)
-		{
-			cmdSearchBegin.execute(null);
-		}
-	}
-	
-	private void searchComplete()
-	{
-		if(cmdSearchComplete != null)
-		{
-			cmdSearchComplete.execute(null);
-		}
-	}
-	
 	// simple search panel - contains text field and search button
-	class SimpleSearchPanel extends HorizontalPanel
+	class SimpleSearchPanel extends VerticalPanel
 	{
 		private static final String TR_SEARCH_FIELD_ID = "idTRSearchField";
 
 		private TextField<String> entrySearch;
+		private Button searchButton;
+		private Button cancelButton;
+		private Status waitIcon;
 
 		public SimpleSearchPanel()
 		{
@@ -320,16 +292,36 @@ public class TRToolPanel extends VerticalPanel
 		private void init()
 		{			
 			entrySearch = buildSearchEntry();
+			searchButton = buildSearchButton();
+			cancelButton = buildCancelButton();
+			cancelButton.disable();
+			waitIcon = new Status();
 		}
 
 		private void compose()
 		{
 			TableData td = buildSearchTable();
-
+			
 			add(entrySearch, td);
-			add(buildSearchButton(), td);
+
+			HorizontalPanel panelBottom = new HorizontalPanel();
+			panelBottom.add(waitIcon);
+			panelBottom.add(cancelButton);
+			panelBottom.add(searchButton);
+			add(panelBottom, td);
 		}
 
+		private Button buildCancelButton() {
+			return PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
+					{
+						@Override
+						public void componentSelected(ButtonEvent ce)
+						{
+							searchComplete();
+						}
+					});
+		}
+		
 		private TextField<String> buildSearchEntry()
 		{
 			final TextField<String> ret = new TextField<String>();
@@ -385,10 +377,25 @@ public class TRToolPanel extends VerticalPanel
 				@Override
 				public void onSuccess(String result)
 				{					
-					searchComplete();
-					showResultsWindow("Results for term " + term + ":", result);
+					// show results unless the search has been cancelled
+					if (cancelButton.isEnabled()) {
+						searchComplete();
+						showSimpleResultsWindow("Results for term " + term + ":", result);
+					}
 				}
 			};
+		}
+		
+		private void searchBegin() {
+			waitIcon.setBusy("Working");
+			searchButton.disable();
+			cancelButton.enable();
+		}
+		
+		private void searchComplete() {
+			cancelButton.disable();
+			searchButton.enable();
+			waitIcon.clearStatus("");
 		}
 	}
 
@@ -399,6 +406,9 @@ public class TRToolPanel extends VerticalPanel
 		private static final String TR_BLAST_SEARCH_AREA_ID = "idTRSearchField";
 
 		private SearchTextArea areaSearch;
+		private Button searchButton;
+		private Button cancelButton;
+		private Status waitIcon;
 
 		public BLASTSearchPanel()
 		{
@@ -421,6 +431,10 @@ public class TRToolPanel extends VerticalPanel
 		private void init()
 		{			
 			areaSearch = buildSearchArea();
+			searchButton = buildSearchButton();
+			cancelButton = buildCancelButton();
+			cancelButton.disable();
+			waitIcon = new Status();
 		}
 
 		private void compose()
@@ -429,16 +443,32 @@ public class TRToolPanel extends VerticalPanel
 			add(new Label("Enter protein or nucleotide sequence for gene of interest below:"));
 
 			// add search components
-			HorizontalPanel panelInner = new HorizontalPanel();
+			VerticalPanel panelInner = new VerticalPanel();
 
 			TableData td = buildSearchTable();
 
 			panelInner.add(areaSearch, td);
-			panelInner.add(buildSearchButton(), td);
+			
+			HorizontalPanel panelBottom = new HorizontalPanel();
+			panelBottom.add(waitIcon);
+			panelBottom.add(cancelButton);
+			panelBottom.add(searchButton);
+			panelInner.add(panelBottom, td);
 
 			add(panelInner);
 		}
 
+		private Button buildCancelButton() {
+			return PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
+					{
+						@Override
+						public void componentSelected(ButtonEvent ce)
+						{
+							searchComplete();
+						}
+					});
+		}
+		
 		public String getSearchTerms()
 		{
 			return areaSearch.getValue();
@@ -473,10 +503,25 @@ public class TRToolPanel extends VerticalPanel
 				@Override
 				public void onSuccess(String result)
 				{
-					searchComplete();
-					showResultsWindow("Results for BLAST search for entered sequence:", result);
+					// show results unless the search has been cancelled
+					if (cancelButton.isEnabled()) {
+						searchComplete();
+						showBlastResultsWindow("Results for BLAST search for entered sequence:", result);
+					}
 				}
 			};
+		}
+		
+		private void searchBegin() {
+			waitIcon.setBusy("Working");
+			searchButton.disable();
+			cancelButton.enable();
+		}
+		
+		private void searchComplete() {
+			searchButton.enable();
+			cancelButton.disable();
+			waitIcon.clearStatus("");
 		}
 		
 		class SearchTextArea extends TextArea
@@ -491,7 +536,11 @@ public class TRToolPanel extends VerticalPanel
 		}
 	}	
 	
-	private void showResultsWindow(String heading, String results) {
-		new TRSearchResultsWindow(heading, results, cmdView).show();
+	private void showSimpleResultsWindow(String heading, String results) {
+		new TRSearchResultsWindow(heading, results, false, cmdView).show();
+	}
+	
+	private void showBlastResultsWindow(String heading, String results) {
+		new TRSearchResultsWindow(heading, results, true, cmdView).show();
 	}
 }
