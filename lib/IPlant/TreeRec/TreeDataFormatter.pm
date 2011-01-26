@@ -50,7 +50,7 @@ use Readonly;
         # Build and return the tree.
         return {
             'tree' => {
-                'id'   => $tree->id(),
+                'id'   => int $tree->id(),
                 'root' => $self->_build_node( $tree->get_root_node() ),
             },
         };
@@ -77,7 +77,7 @@ use Readonly;
 
         # Build the formatted node.
         my $formatted_node = {
-            'id'       => scalar $node->get_tag_values('ID'),
+            'id'       => int scalar $node->get_tag_values('ID'),
             'children' => \@children,
         };
 
