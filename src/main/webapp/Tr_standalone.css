@@ -60,3 +60,9 @@ h1 {
 	text-align: left;
 	background-color: white;	
 }
+
+.de_tr_hyperlink {
+	cursor: pointer;
+	color: #0098AA;
+	text-decoration: underline;
+}

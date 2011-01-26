@@ -16,9 +16,12 @@ public class TRSearchResult extends BaseModel
 	public TRSearchResult(JsTRSearchResult jsResult)
 	{		
 		set("name", jsResult.getName());
+		set("eValue", "blah");
+		set("alignLength", "foobar?");
 		set("goAnnotations", jsResult.getGOAnnotations());
 		set("numGenes", Integer.toString(jsResult.getGeneCount()));
 		set("numSpecies", Integer.toString(jsResult.getSpeciesCount()));
+		set("numDuplications", Integer.toString(jsResult.getDuplicationCount()));
 	}
 
 	/**
@@ -42,6 +45,16 @@ public class TRSearchResult extends BaseModel
 	}
 	
 	/**
+	 * Retrieve GO term count.
+	 * 
+	 * @return number of GO terms in the family.
+	 */
+	public String getNumGoTerms()
+	{
+		return "12345";
+	}
+	
+	/**
 	 * Retrieve our gene count.
 	 * 
 	 * @return number of genes.
@@ -59,6 +72,26 @@ public class TRSearchResult extends BaseModel
 	public String getNumSpecies()
 	{
 		return get("numSpecies");
+	}
+	
+	/**
+	 * Retrieve the number of duplication events.
+	 * 
+	 * @return number of duplication events.
+	 */
+	public String getNumDuplications()
+	{
+		return get("duplicationEvents");
+	}
+	
+	public String getEValue()
+	{
+		return get("eValue");
+	}
+	
+	public String getAlignLength()
+	{
+		return get("alignLength");
 	}
 }
 

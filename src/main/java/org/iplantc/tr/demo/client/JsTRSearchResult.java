@@ -39,6 +39,15 @@ public class JsTRSearchResult extends JavaScriptObject
 	}-*/;
 
 	/**
+	 * Retrieve number of duplication events.
+	 * 
+	 * @return number of duplication events.
+	 */
+	public final native int getDuplicationCount() /*-{
+		return this.duplicationEvents;
+	}-*/;
+
+	/**
 	 * Retrieve GO annotations.
 	 * 
 	 * @return GO annotations for a family.

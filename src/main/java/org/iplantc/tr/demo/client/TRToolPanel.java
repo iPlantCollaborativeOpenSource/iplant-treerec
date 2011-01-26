@@ -46,12 +46,11 @@ import com.google.gwt.user.client.ui.Widget;
 public class TRToolPanel extends VerticalPanel
 {
 	private static final String TR_SEARCH_TYPE_LIST_BOX_ID = "idTRSearchTypeSelection";
-	private static final String TR_VIEW_BTN_ID = "idTRDataViewBtn";
 
-	private static final String SEARCH_TYPE_GENE_CLUSTER = "gene_cluster";
 	private static final String SEARCH_TYPE_BLAST = "blast";
-	private static final String SEARCH_TYPE_GO_TERM = "go_term";
-	private static final String SEARCH_TYPE_GO_ACCESSION = "go_accession";
+	private static final String SEARCH_TYPE_GENE_NAME = "gene_name";
+	private static final String SEARCH_TYPE_GO = "go";
+	private static final String SEARCH_TYPE_FAMILY_ID = "family_id";
 
 	private final int GRID_HEIGHT_NORMAL = 260;
 	private final int GRID_HEIGHT_SHORT = 142;
@@ -63,11 +62,6 @@ public class TRToolPanel extends VerticalPanel
 	private SimpleSearchPanel pnlSearchSimple;
 
 	private BLASTSearchPanel pnlSearchBlast;
-
-	private ContentPanel pnlGrid;
-	private Grid<TRSearchResult> gridResults;
-
-	private ArrayList<Button> buttons;
 
 	private SearchServiceAsync searchService;
 	private ClientCommand cmdView;
@@ -113,8 +107,6 @@ public class TRToolPanel extends VerticalPanel
 		pnlSearch.layout();
 
 		pnlSearchSimple.setFocusWidget();
-
-		gridResults.setHeight(GRID_HEIGHT_NORMAL);
 	}
 
 	private void showTextAreaSearchInput()
@@ -124,8 +116,6 @@ public class TRToolPanel extends VerticalPanel
 		pnlSearch.layout();
 
 		pnlSearchBlast.setFocusWidget();
-
-		gridResults.setHeight(GRID_HEIGHT_SHORT);
 	}
 
 	private void updateSelection()
@@ -148,10 +138,10 @@ public class TRToolPanel extends VerticalPanel
 
 		ret.getElement().setId(TR_SEARCH_TYPE_LIST_BOX_ID);
 
-		ret.addItem("Gene Identifier", SEARCH_TYPE_GENE_CLUSTER);
 		ret.addItem("BLAST", SEARCH_TYPE_BLAST);
-		ret.addItem("GO Term", SEARCH_TYPE_GO_TERM);
-		ret.addItem("GO Accession", SEARCH_TYPE_GO_ACCESSION);
+		ret.addItem("Gene Name", SEARCH_TYPE_GENE_NAME);
+		ret.addItem("Gene Ontology", SEARCH_TYPE_GO);
+		ret.addItem("Gene Family ID", SEARCH_TYPE_FAMILY_ID);
 
 		// handle selection changed
 		ret.addChangeHandler(new ChangeHandler()
@@ -176,82 +166,6 @@ public class TRToolPanel extends VerticalPanel
 		ret.add(selectSearchType);
 
 		return ret;
-	}
-
-	private void updateSearchPanelCaption(String term)
-	{
-		if(pnlGrid != null)
-		{
-			pnlGrid.setHeading("Results for:" + term);
-		}
-	}
-
-	private boolean isEmpty(JSONValue in)
-	{
-		boolean ret = true; // assume we have an empty value
-
-		if(in != null)
-		{
-			String test = in.toString();
-
-			if(test.length() > 0 && !test.equals("[]"))
-			{
-				ret = false;
-			}
-		}
-
-		return ret;
-	}
-
-	private void clearGrid()
-	{
-		ListStore<TRSearchResult> store = gridResults.getStore();
-
-		store.removeAll();
-	}
-
-	private JSONValue parseFamilies(JSONObject jsonObj)
-	{
-		JSONValue ret = null;
-	
-		//drill down to families array
-		JSONValue val = jsonObj.get("data");
-		
-		if(val != null)
-		{
-			val = ((JSONObject)val).get("item");
-
-			if(val != null)
-			{
-				ret = ((JSONObject)val).get("families");
-			}
-		}
-		
-		return ret;
-	}
-	
-	private void updateSearchGrid(String json)
-	{
-		ListStore<TRSearchResult> store = gridResults.getStore();
-
-		clearGrid();
-
-		if(json != null)
-		{
-			JSONObject jsonObj = (JSONObject)JSONParser.parse(json);
-			JSONValue valItems = parseFamilies(jsonObj);
-
-			if(!isEmpty(valItems))
-			{
-				JsArray<JsTRSearchResult> arr = JsonUtil.asArrayOf(valItems.toString());
-
-				for(int i = 0,len = arr.length();i < len;i++)
-				{
-					TRSearchResult item = new TRSearchResult(arr.get(i));
-					store.add(item);
-				}
-			}
-		}
 	}
 
 	private void performGeneIdSearch(final String term)
@@ -282,7 +196,9 @@ public class TRToolPanel extends VerticalPanel
 	{
 		String ret = "{";
 
-		ret += "\"sequenceType\": \"" + pnlSearchBlast.getSearchType() + "\", ";
+		// XXX delete me
+		ret += "\"sequenceType\": \"protein\",";
+		
 		ret += "\"sequence\": \"" + JsonUtil.escapeNewLine(pnlSearchBlast.getSearchTerms()) + "\"";
 
 		ret += "}";
@@ -290,7 +206,7 @@ public class TRToolPanel extends VerticalPanel
 		return ret;
 	}
 
-	private void performBLASTSearch()
+	private void performBLASTSearch(final String term)
 	{
 		String json = buildBLASTJson();
 
@@ -308,19 +224,19 @@ public class TRToolPanel extends VerticalPanel
 				
 				String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
 
-				if(type.equals(SEARCH_TYPE_GENE_CLUSTER))
+				if(type.equals(SEARCH_TYPE_GENE_NAME))
 				{
 					performGeneIdSearch(pnlSearchSimple.getSearchTerm());
 				}
 				else if(type.equals(SEARCH_TYPE_BLAST))
 				{
-					performBLASTSearch();
+					performBLASTSearch(pnlSearchBlast.getSearchTerms());
 				}
-				else if(type.equals(SEARCH_TYPE_GO_TERM))
+				else if(type.equals(SEARCH_TYPE_GO))
 				{
 					performGoTermSearch(pnlSearchSimple.getSearchTerm());
 				}
-				else if(type.equals(SEARCH_TYPE_GO_ACCESSION))
+				else if(type.equals(SEARCH_TYPE_FAMILY_ID))
 				{
 					performGoAccessionSearch(pnlSearchSimple.getSearchTerm());
 				}
@@ -350,176 +266,7 @@ public class TRToolPanel extends VerticalPanel
 		pnlSearchBlast = new BLASTSearchPanel();
 
 		ret.add(buildSearchTypeSelectionPanel());
-		ret.add(pnlSearchSimple);
-
-		return ret;
-	}
-
-	// build column with custom renderer
-	private ColumnConfig buildConfig(String id, String caption, int width, HorizontalAlignment alignment)
-	{
-		ColumnConfig ret = new ColumnConfig(id, caption, width);
-
-		ret.setMenuDisabled(true);
-		ret.setSortable(false);
-		ret.setAlignment(alignment);
-
-		return ret;
-	}
-
-	private ColumnModel buildColumnModel()
-	{
-		List<ColumnConfig> config = new ArrayList<ColumnConfig>();
-
-		config.add(buildConfig("name", "Name", 140, HorizontalAlignment.LEFT));
-		config.add(buildConfig("goAnnotations", "GO Annotations", 200,
-				HorizontalAlignment.LEFT));
-		config.add(buildConfig("numGenes", "# of Genes", 80, HorizontalAlignment.CENTER));
-		config
-				.add(buildConfig("numSpecies", "# of Species", 80,
-						HorizontalAlignment.CENTER));
-
-		return new ColumnModel(config);
-	}
-
-	private Grid<TRSearchResult> buildResultsGrid()
-	{
-		ListStore<TRSearchResult> store = new ListStore<TRSearchResult>();
-
-		final ColumnModel cm = buildColumnModel();
-
-		final Grid<TRSearchResult> ret = new Grid<TRSearchResult>(store, cm);
-
-		ret.setSize(500, GRID_HEIGHT_NORMAL);
-		ret.getSelectionModel().setSelectionMode(SelectionMode.MULTI);
-		ret.setAutoExpandColumn("name");
-
-		ret.getView().setEmptyText("No results to display.");
-
-		ret.getSelectionModel().addListener(Events.SelectionChange, new Listener<BaseEvent>()
-		{
-			@Override
-			public void handleEvent(BaseEvent be)
-			{
-				if(ret.getSelectionModel().getSelectedItems().size() == 0)
-				{
-					disableButton(TR_VIEW_BTN_ID);
-				}
-				else
-				{
-					enableButton(TR_VIEW_BTN_ID);
-				}
-			}
-		});
-
-		return ret;
-	}
-
-	private String getSelectedGeneInfo()
-	{
-		String ret = null; // assume failure
-
-		TRSearchResult result = gridResults.getSelectionModel().getSelectedItem();
-
-		// do we have a selection?
-		if(result != null)
-		{
-			ret = result.getName();
-		}
-
-		return ret;
-	}
-
-	private void launchViewers()
-	{
-		String name = getSelectedGeneInfo();
-
-		// do we have any genes to view
-		if(name != null)
-		{
-			cmdView.execute(name);
-		}
-	}
-
-	private void addButton(String caption, String id, AbstractImagePrototype icon,
-			SelectionListener<ButtonEvent> listener)
-	{
-		Button btn = new Button(caption, icon, listener);
-
-		btn.setId(id);
-		btn.setEnabled(false);
-		btn.setHeight(23);
-
-		buttons.add(btn);
-	}
-
-	private void addButtons()
-	{
-		buttons = new ArrayList<Button>();
-
-		addButton("View", TR_VIEW_BTN_ID, AbstractImagePrototype.create(Resources.ICONS
-				.listItems()), new SelectionListener<ButtonEvent>()
-		{
-			@Override
-			public void componentSelected(ButtonEvent ce)
-			{
-				launchViewers();
-			}
-		});
-	}
-
-	private void enableButton(String id)
-	{
-		for(Button button : buttons)
-		{
-			if(button.getId().equals(id))
-			{
-				button.enable();
-				pnlGrid.layout();
-				break;
-			}
-		}
-	}
-
-	private void disableButton(String id)
-	{
-		for(Button button : buttons)
-		{
-			if(button.getId().equals(id))
-			{
-				button.disable();
-				pnlGrid.layout();
-				break;
-			}
-		}
-	}
-
-	private ToolBar buildButtonBar()
-	{
-		ToolBar ret = new ToolBar();
-
-		ret.add(new FillToolItem());
-		addButtons();
-
-		// add all buttons to our toolbar
-		for(Button btn : buttons)
-		{
-			ret.add(btn);
-		}
-
-		return ret;
-	}
-
-	private ContentPanel buildResultsGridPanel()
-	{
-		ContentPanel ret = new ContentPanel();
-
-		ret.setHeading("Search Results");
-		ret.setBottomComponent(buildButtonBar());
-
-		gridResults = buildResultsGrid();
-
-		ret.add(gridResults);
+		ret.add(pnlSearchBlast);
 
 		return ret;
 	}
@@ -527,13 +274,11 @@ public class TRToolPanel extends VerticalPanel
 	private void compose()
 	{
 		pnlSearch = initSearchPanel();
-		pnlGrid = buildResultsGridPanel();
 	
 		ContentPanel pnlInner = new ContentPanel();
 		pnlInner.setHeading("Search");
 		
 		pnlInner.add(pnlSearch);
-		pnlInner.add(pnlGrid);
 		
 		add(pnlInner);
 	}
@@ -632,8 +377,6 @@ public class TRToolPanel extends VerticalPanel
 				public void onFailure(Throwable arg0)
 				{					
 					searchComplete();
-					clearGrid();
-					updateSearchPanelCaption(term);
 					
 					String err = "Search failed for term: " + term;
 					MessageBox.alert("Error", err, null);					
@@ -643,9 +386,7 @@ public class TRToolPanel extends VerticalPanel
 				public void onSuccess(String result)
 				{					
 					searchComplete();
-					disableButton(TR_VIEW_BTN_ID);
-					updateSearchPanelCaption(term);
-					updateSearchGrid(result);
+					showResultsWindow("Results for term " + term + ":", result);
 				}
 			};
 		}
@@ -656,12 +397,8 @@ public class TRToolPanel extends VerticalPanel
 	class BLASTSearchPanel extends VerticalPanel
 	{
 		private static final String TR_BLAST_SEARCH_AREA_ID = "idTRSearchField";
-		private static final String TR_BLAST_TYPE_SELECTION_ID = "idTRBlastTypeSelection";
-		private static final String BLAST_TYPE_GENE_PROTEIN = "protein";
-		private static final String BLAST_TYPE_NUCLEOTIDE = "nucleotide";
 
 		private SearchTextArea areaSearch;
-		private ListBox selectBlastType;
 
 		public BLASTSearchPanel()
 		{
@@ -681,29 +418,15 @@ public class TRToolPanel extends VerticalPanel
 			return ret;
 		}
 
-		private ListBox buildTypeSelection()
-		{
-			ListBox ret = new ListBox();
-
-			ret.getElement().setId(TR_BLAST_TYPE_SELECTION_ID);
-
-			ret.addItem("Protein", BLAST_TYPE_GENE_PROTEIN);
-			ret.addItem("Nucleotide", BLAST_TYPE_NUCLEOTIDE);
-
-			return ret;
-		}
-
 		private void init()
 		{			
-			selectBlastType = buildTypeSelection();
 			areaSearch = buildSearchArea();
 		}
 
 		private void compose()
 		{
 			// add type selection
-			add(new Label("BLAST Query Sequence Type:"));
-			add(selectBlastType);
+			add(new Label("Enter protein or nucleotide sequence for gene of interest below:"));
 
 			// add search components
 			HorizontalPanel panelInner = new HorizontalPanel();
@@ -714,11 +437,6 @@ public class TRToolPanel extends VerticalPanel
 			panelInner.add(buildSearchButton(), td);
 
 			add(panelInner);
-		}
-
-		public String getSearchType()
-		{
-			return selectBlastType.getValue(selectBlastType.getSelectedIndex());
 		}
 
 		public String getSearchTerms()
@@ -747,10 +465,8 @@ public class TRToolPanel extends VerticalPanel
 				public void onFailure(Throwable arg0)
 				{
 					searchComplete();
-					clearGrid();
-					updateSearchPanelCaption(getSearchType());
 					
-					String err = "Search failed for term: " + getSearchType();
+					String err = "Search failed for term: " + pnlSearchBlast.getSearchTerms();
 					MessageBox.alert("Error", err, null);					
 				}
 
@@ -758,9 +474,7 @@ public class TRToolPanel extends VerticalPanel
 				public void onSuccess(String result)
 				{
 					searchComplete();
-					disableButton(TR_VIEW_BTN_ID);
-					updateSearchPanelCaption(pnlSearchBlast.getSearchType());
-					updateSearchGrid(result);
+					showResultsWindow("Results for BLAST search for entered sequence:", result);
 				}
 			};
 		}
@@ -776,4 +490,8 @@ public class TRToolPanel extends VerticalPanel
 			}
 		}
 	}	
+	
+	private void showResultsWindow(String heading, String results) {
+		new TRSearchResultsWindow(heading, results, cmdView).show();
+	}
 }
