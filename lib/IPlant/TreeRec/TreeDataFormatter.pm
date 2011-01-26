@@ -95,8 +95,8 @@ use Readonly;
 
     # The NHX tags that we support, indexed by the corresponding field name.
     Readonly my %NHX_TAG_FOR => {
-        'edgeDependencies' => 'EDGEDUPS',
-        'nodeDependencies' => 'NODEDUPS',
+        'edgeDuplications' => 'EDGEDUPS',
+        'nodeDuplications' => 'NODEDUPS',
     };
 
     ##########################################################################
