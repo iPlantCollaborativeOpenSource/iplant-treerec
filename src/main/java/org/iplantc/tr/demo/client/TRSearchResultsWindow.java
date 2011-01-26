@@ -14,6 +14,7 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
@@ -25,10 +26,13 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.HTML;
 
 public class TRSearchResultsWindow extends Window
 {
@@ -319,10 +323,30 @@ public class TRSearchResultsWindow extends Window
 	{
 
 		@Override
-		public Object render(TRSearchResult result, String property, ColumnData config, int rowIndex,
+		public Object render(final TRSearchResult result, String property, ColumnData config, int rowIndex,
 				int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
 		{
-			return result.getNumGoTerms() + " <span class=\"de_tr_hyperlink\">(view all)</span>";
+			HTML numTerms = new HTML(result.getNumGoTerms());
+			HTML link = new HTML("<a href=\"#\">(view all)</a>");
+			link.addClickHandler(new ClickHandler()
+			{
+				@Override
+				public void onClick(ClickEvent arg0)
+				{
+					showWordCloud(result);
+				}
+			});
+			
+			HorizontalPanel panel = new HorizontalPanel();
+			panel.setLayout(new FitLayout());
+			panel.add(numTerms);
+			panel.add(link);
+			
+			return panel;
+		}
+		
+		private void showWordCloud(TRSearchResult result) {
+			new WordCloudWindow().show();
 		}
 	}
 

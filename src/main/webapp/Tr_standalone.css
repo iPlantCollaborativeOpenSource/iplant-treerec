@@ -66,3 +66,10 @@ h1 {
 	color: #0098AA;
 	text-decoration: underline;
 }
+
+.wordCloud {
+	background-image: url('./images/word_cloud.png');
+	background-repeat: no-repeat;
+	height: 100%;
+	width: 100%;
+}
