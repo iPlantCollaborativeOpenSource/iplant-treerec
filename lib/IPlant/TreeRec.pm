@@ -207,7 +207,7 @@ use Time::HiRes qw(time);
 
         # Extract the arguments.
         my ( $family_name, $species_tree_name )
-            = $self->_extract_gene_tree_args($json);
+            = $self->_extract_tree_args( $json, 'familyName' );
 
         # Fetch the tree loader.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
@@ -244,7 +244,7 @@ use Time::HiRes qw(time);
 
         # Extract the arguments.
         my ( $family_name, $species_tree_name )
-            = $self->_extract_gene_tree_args($json);
+            = $self->_extract_tree_args( $json, 'familyName' );
 
         # Fetch the tree loader and create a tree formatter.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
@@ -259,27 +259,36 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
-    # Usage      : $text = $treerec->get_species_tree_file($name);
+    # Usage      : $text = $treerec->get_species_tree_file($json);
     #
     # Purpose    : Retrieves the species tree in NHX format.
     #
     # Returns    : The species tree.
     #
-    # Parameters : $name - the name of the species tree.
+    # Parameters : speciesTreeName - the name of the species tree.
+    #              familyName      - the name of the related gene tree.
     #
     # Throws     : IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::IllegalArgumentException
     sub get_species_tree_file {
-        my ( $self, $name ) = @_;
+        my ( $self, $json ) = @_;
+
+        # Extract the arguments.
+        my ( $family_name, $species_tree_name )
+            = $self->_extract_tree_args($json);
 
         # Fetch the tree loader.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
 
         # Load the tree.
-        my $tree = $tree_loader->load_species_tree($name);
+        my $tree = $tree_loader->load_species_tree( $species_tree_name,
+            $family_name );
 
         # Determine the file name.
         my $filename
-            = defined $name ? "${name}_speciestree.nhx" : "species_tree.nhx";
+            = defined $species_tree_name
+            ? "${species_tree_name}_speciestree.nhx"
+            : "species_tree.nhx";
 
         # Format and return the tree.
         my $content_type = "application/nhx";
@@ -289,24 +298,31 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
-    # Usage      : $data_ref = $treerec->get_species_tree_data($name)
+    # Usage      : $data_ref = $treerec->get_species_tree_data($json)
     #
     # Purpose    : Retrieves species tree data in NHX format.
     #
     # Returns    : The species tree data.
     #
-    # Parameters : $name - the name of the species tree.
+    # Parameters : speciesTreeName - the name of the species tree.
+    #              familyName      - the name of the related gene tree.
     #
     # Throws     : IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::IllegalArgumentException
     sub get_species_tree_data {
-        my ( $self, $name ) = @_;
+        my ( $self, $json ) = @_;
+
+        # Extract the arguments.
+        my ( $family_name, $species_tree_name )
+            = $self->_extract_tree_args($json);
 
         # Fetch the tree loader and create a tree formatter.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
         my $formatter   = IPlant::TreeRec::TreeDataFormatter->new();
 
         # Load the tree.
-        my $tree = $tree_loader->load_species_tree($name);
+        my $tree = $tree_loader->load_species_tree( $species_tree_name,
+            $family_name );
 
         # Format and return the tree.
         return $formatter->format_tree($tree);
@@ -407,33 +423,31 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
-    # Usage      : ( $family_name, $species_tree_name ) = $treerec
-    #                  ->_extract_gene_tree_args($json);
-    #
-    # Purpose    : Extracts the arguments required to retrieve a gene tree
-    #              from the database.  The gene family name is required and an
-    #              exception will be thrown if it's not provided.  All of the
-    #              other arguments are optional.
-    #
-    # Returns    : The extracted arguments.
-    #
-    # Parameters : familyName      - the name of the gene family.
-    #              speciesTreeName - the name of the associated species tree.
-    #
-    # Throws     : IPlant::TreeRec::IllegalArgumentException
-    sub _extract_gene_tree_args {
-        my ( $self, $json ) = @_;
+   # Usage      : ( $family_name, $species_tree_name ) = $treerec
+   #                  ->_extract_tree_args( $json, $required_arg );
+   #
+   # Purpose    : Extracts the arguments required to retrieve a tree from the
+   #              database.  If the given required argument doesn't exist then
+   #              an exception will be thrown.
+   #
+   # Returns    : The extracted arguments.
+   #
+   # Parameters : $json         - the JSON string.
+   #              $required_arg - the name of the required argument.
+   #
+   # Throws     : IPlant::TreeRec::IllegalArgumentException
+    sub _extract_tree_args {
+        my ( $self, $json, $required_arg ) = @_;
 
-        # Extract the arguments.
+        # Decode the JSON string.
         my $args_ref = JSON->new->decode($json);
-        my $family_name = $args_ref->{familyName};
-        my $species_tree_name = $args_ref->{speciesTreeName};
 
-        # Validate the arguments.
+        # Verify that we have the required argument.
         IPlant::TreeRec::IllegalArgumentException->throw()
-            if !defined $family_name;
+            if defined $required_arg && !defined $args_ref->{$required_arg};
 
-        return ( $family_name, $species_tree_name );
+        # Extract and return the arguments.
+        return @{$args_ref}{qw( familyName speciesTreeName )};
     }
 
     ##########################################################################

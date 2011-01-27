@@ -72,6 +72,7 @@ use Readonly;
     #
     # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
     #              IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::ReconciliationNotFoundException
     sub load_gene_tree {
         my ( $self, $family_name, $species_tree_name ) = @_;
 
@@ -81,7 +82,7 @@ use Readonly;
         # Get the root node of the protein tree.
         my $root = $db_tree->root_node();
 
-        # Get the reconciliation ID if the species tree name was provided.
+        # Get the reconciliation if the species tree name was provided.
         my $reconciliation;
         if ( defined $species_tree_name ) {
             my $species_tree = $self->_get_species_tree($species_tree_name);
@@ -99,17 +100,23 @@ use Readonly;
     }
 
     ##########################################################################
-    # Usage      : $species_tree = $loader->load_species_tree($tree_name);
+    # Usage      : $species_tree = $loader->load_species_tree( $tree_name,
+    #                  $family_name );
     #
-    # Purpose    : Loads the species tree with the given tree name.
+    # Purpose    : Loads the species tree with the given tree name.  If a gene
+    #              family name is provided then references to related gene
+    #              tree nodes will be included in the tree.
     #
     # Returns    : The species tree.
     #
-    # Parameters : $tree_name - the name of the tree to load.
+    # Parameters : $tree_name   - the name of the tree to load.
+    #              $family_name - the name of the related gene family.
     #
-    # Throws     : IPlant::TreeRec::TreeNotFoundException
+    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::ReconciliationNotFoundException
     sub load_species_tree {
-        my ( $self, $tree_name ) = @_;
+        my ( $self, $tree_name, $family_name ) = @_;
 
         # Fetch the database handle.
         my $dbh = $dbh_of{ ident $self };
@@ -121,10 +128,19 @@ use Readonly;
             if !defined $db_tree;
         my $root = $db_tree->root_node();
 
+        # Get the reconciliation if a gene family name was provided.
+        my $reconciliation;
+        if ( defined $family_name ) {
+            my $protein_tree = $self->_get_protein_tree($family_name);
+            $reconciliation
+                = $self->_get_reconciliation( $db_tree, $protein_tree );
+        }
+
         # Build the tree.
         my $tree = Bio::Tree::Tree->new();
         $tree->id( $db_tree->species_tree_id() );
-        $tree->set_root_node( $self->_build_species_subtree($root) );
+        $tree->set_root_node(
+            $self->_build_species_subtree( $root, $reconciliation ) );
         return $tree;
     }
 
@@ -161,25 +177,29 @@ use Readonly;
     }
 
     ##########################################################################
-    # Usage      : $species_tree = $loader->_build_species_subtree($node);
+    # Usage      : $species_tree = $loader->_build_species_subtree( $node,
+    #                  $reconciliation );
     #
     # Purpose    : Builds the subtree rooted at the given node.
     #
     # Returns    : The subtree.
     #
-    # Parameters : $node - the root node of the subtree to build.
+    # Parameters : $node           - the root node of the subtree to build.
+    #              $reconciliation - the reconciliation between the species
+    #                                tree and a gene tree.
     #
     # Throws     : No exceptions.
     sub _build_species_subtree {
-        my ( $self, $node ) = @_;
+        my ( $self, $node, $reconciliation ) = @_;
 
         # Build the node that will actually go in the tree.
-        my $tree_node = $self->_build_species_tree_node($node);
+        my $tree_node
+            = $self->_build_species_tree_node( $node, $reconciliation );
 
         # Add the subtrees rooted at each child node.
         for my $child ( $node->children() ) {
             $tree_node->add_Descendent(
-                $self->_build_species_subtree($child) );
+                $self->_build_species_subtree( $child, $reconciliation ) );
         }
 
         return $tree_node;
@@ -310,10 +330,15 @@ use Readonly;
     }
 
     ##########################################################################
-    # Usage      : $node = $loader->_build_species_tree_node($database_node);
+    # Usage      : $node = $loader->_build_species_tree_node( $database_node,
+    #                  $reconciliation );
     #
     # Purpose    : Creates an instance of Bio::Tree::NodeNHX from the given
     #              instance of IPlant::DB::TreeRec::Result::SpeciesTreeNode.
+    #              If a reconciliation is also provided then references to the
+    #              related nodes in the gene tree will also be included.  If
+    #              no reconciliation is provided then the duplication counts
+    #              for all reconciliations will be included.
     #
     # Returns    : The new node.
     #
@@ -321,7 +346,7 @@ use Readonly;
     #
     # Throws     : No exceptions.
     sub _build_species_tree_node {
-        my ( $self, $database_node ) = @_;
+        my ( $self, $database_node, $reconciliation ) = @_;
 
         # Create the new node.
         my $node = Bio::Tree::NodeNHX->new();
@@ -331,11 +356,88 @@ use Readonly;
         my $node_id = $database_node->species_tree_node_id();
         $node->nhx_tag( { ID => $node_id } );
 
-        # Add the duplication counts for the node.
+        # Add the duplication counts for the node if applicable.
+        if ( !defined $reconciliation ) {
+            $self->_add_duplication_counts( $node, $node_id );
+        }
+
+        # Add the related node annotations for the node if applicable.
+        if ( defined $reconciliation ) {
+            $self->_add_gene_tree_node_ids( $node, $reconciliation );
+        }
+
+        return $node;
+    }
+
+    ##########################################################################
+    # Usage      : $treerec->_add_gene_tree_node_ids( $node, $reconciliation);
+    #
+    # Purpose    : Adds the identifiers of the nodes in the related gene tree
+    #              to the species tree node that is being built.
+    #
+    # Returns    : Nothing.
+    #
+    # Parameters : $node           - the species tree node.
+    #              $reconciliation - the reconciliation relating the trees.
+    #
+    # Throws     : No exceptions.
+    sub _add_gene_tree_node_ids {
+        my ( $self, $node, $reconciliation ) = @_;
+
+        # Fetch the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Retrieve the internal node identifier.
+        my $node_id = int scalar $node->get_tag_values('ID');
+
+        # Search for all related nodes in the reconciliation.
+        my @nodes = $dbh->resultset('ReconciliationNode')->search(
+            {   'reconciliation_id'  => $reconciliation->id(),
+                'host_child_node_id' => $node_id,
+            }
+        );
+
+        # Build the list of related edges and nodes.
+        my ( @edge_related_nodes, @node_related_nodes );
+        for my $reconciliation_node (@nodes) {
+            my $parent_id = $reconciliation_node->host_parent_node_id();
+            my $gene_tree_node_id = $reconciliation_node->node_id();
+            my $is_on_node = $reconciliation_node->is_on_node();
+            if ( $is_on_node ) {
+                push @node_related_nodes, $gene_tree_node_id;
+            }
+            elsif ( defined $parent_id ) {
+                push @edge_related_nodes, $gene_tree_node_id;
+            }
+        }
+
+        # Add the lists of related nodes.
+        $node->nhx_tag( { 'ERN', \@edge_related_nodes } );
+        $node->nhx_tag( { 'NRN', \@node_related_nodes } );
+
+        return;
+    }
+
+    ##########################################################################
+    # Usage      : $loader->_add_duplication_counts( $node, $node_id );
+    #
+    # Purpose    : Adds the duplication event counts to a node in the species
+    #              tree.
+    #
+    # Returns    : Nothing.
+    #
+    # Parameters : $node    - the species tree node that is being build.
+    #              $node_id - the node identifier from the database.
+    #
+    # Throws     : No exceptions.
+    sub _add_duplication_counts {
+        my ( $self, $node, $node_id ) = @_;
+
+        # Add the duplication counts.
         $node->nhx_tag( { EDGEDUPS => $self->_count_edge_dups($node_id) } );
         $node->nhx_tag( { NODEDUPS => $self->_count_node_dups($node_id) } );
 
-        return $node;
+        return;
     }
 
     ##########################################################################
