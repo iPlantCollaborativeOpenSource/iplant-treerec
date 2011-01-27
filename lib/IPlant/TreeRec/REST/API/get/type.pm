@@ -16,6 +16,12 @@ use IPlant::TreeRec::REST::Initializer qw(get_tree_rec);
 use List::MoreUtils qw(any);
 use Readonly;
 
+# The argument preprocessing subroutines for the various object types.
+Readonly my %PREPROCESSOR_FOR => (
+    'species-tree' => \&_encode_species_tree_args,
+    'species-data' => \&_encode_species_tree_args,
+);
+
 # The supported HTTP methods for the various object types.
 Readonly my %SUPPORTED_METHODS_FOR => (
     'species-tree' => [qw( GET POST )],
@@ -29,8 +35,8 @@ Readonly my $SPECIES_TREE => 'bowers_rosids';
 
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
-    'species-tree' => sub { $_[0]->get_species_tree_file($SPECIES_TREE) },
-    'species-data' => sub { $_[0]->get_species_tree_data($SPECIES_TREE) },
+    'species-tree' => sub { $_[0]->get_species_tree_file($_[2]) },
+    'species-data' => sub { $_[0]->get_species_tree_data($_[2]) },
     'gene-tree'    => sub { $_[0]->get_gene_tree_file($_[2]) },
     'gene-data'    => sub { $_[0]->get_gene_tree_data($_[2]) },
     'default'      => sub { $_[0]->get_file( $_[1], "" ) },
@@ -107,12 +113,19 @@ use base 'IPlant::TreeRec::REST::Handler';
         # Extract the object type.
         my $object_type = $type_of{ ident $self };
 
+        # Preprocess the argument if we're supposed to.
+        my $arg;
+        my $preprocessor_ref = $PREPROCESSOR_FOR{$object_type};
+        if ( defined $preprocessor_ref ) {
+            $arg = $preprocessor_ref->();
+        }
+
         # Get the subroutine for object retrieval.
         my $getter_ref = $GETTER_FOR{$object_type}
             || $GETTER_FOR{default};
 
         # Retrieve the object.
-        my $object = $getter_ref->( $treerec, $object_type );
+        my $object = $getter_ref->( $treerec, $object_type, $arg );
 
         # Set the output according to the object.
         if ( $self->_object_is_file($object) ) {
@@ -153,6 +166,12 @@ use base 'IPlant::TreeRec::REST::Handler';
         my $content_length = $r->headers_in()->{'Content-Length'};
         my $parameters;
         $r->read( $parameters, $content_length );
+
+        # Preprocess the parameters if we're supposed to.
+        my $preprocessor_ref = $PREPROCESSOR_FOR{$object_type};
+        if ( defined $preprocessor_ref ) {
+            $parameters = $preprocessor_ref->($parameters);
+        }
 
         # Get the subroutine for object retrieval.
         my $getter_ref = $GETTER_FOR{$object_type}
@@ -283,6 +302,26 @@ use base 'IPlant::TreeRec::REST::Handler';
         # Instantiate and return the next handler.
         return $next_package->new( $type, $qualifier );
     }
+}
+
+##########################################################################
+# Usage      : $json = _encode_specieds_tree_args($json);
+#
+# Purpose    : Encodes the JSON required by the subroutines used to fetch
+#              species tree information from the database.
+#
+# Returns    : The JSON string.
+#
+# Parameters : $json - the arguments provided in the message body.
+#
+# Throws     : No exceptions.
+sub _encode_species_tree_args {
+    my ($json) = @_;
+    my $result
+        = defined $json
+        ? $json
+        : JSON->new()->encode( { 'speciesTreeName' => $SPECIES_TREE, } );
+    return $result;
 }
 
 1;

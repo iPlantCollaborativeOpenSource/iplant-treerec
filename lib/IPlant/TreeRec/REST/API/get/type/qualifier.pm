@@ -18,13 +18,17 @@ Readonly my $SPECIES_TREE => 'bowers_rosids';
 
 # The argument preprocessing subroutines for the various object types.
 Readonly my %PREPROCESSOR_FOR => (
-    'gene-tree' => \&_encode_gene_tree_args,
-    'gene-data' => \&_encode_gene_tree_args,
+    'species-tree' => \&_encode_tree_args,
+    'species-data' => \&_encode_tree_args,
+    'gene-tree'    => \&_encode_tree_args,
+    'gene-data'    => \&_encode_tree_args,
 );
 
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
     'gene-family-details' => sub { $_[0]->get_gene_family_details( $_[2] ) },
+    'species-tree'        => sub { $_[0]->get_species_tree_file( $_[2] ) },
+    'species-data'        => sub { $_[0]->get_species_tree_data( $_[2] ) },
     'gene-tree'           => sub { $_[0]->get_gene_tree_file( $_[2] ) },
     'gene-data'           => sub { $_[0]->get_gene_tree_data( $_[2] ) },
     'default'             => sub { $_[0]->get_file( $_[1], $_[2] ) },
@@ -195,17 +199,17 @@ use base 'IPlant::TreeRec::REST::Handler';
 }
 
 ##########################################################################
-# Usage      : $json = _encode_gene_tree_args($family_name);
+# Usage      : $json = _encode_tree_args($family_name);
 #
 # Purpose    : Encodes the JSON required by the subroutines used to fetch
-#              gene tree information from the database.
+#              tree information from the database.
 #
 # Returns    : The JSON string.
 #
 # Parameters : $family_name - the gene family name.
 #
 # Throws     : No exceptions.
-sub _encode_gene_tree_args {
+sub _encode_tree_args {
     my ($family_name) = @_;
     return JSON->new()->encode(
         {   'familyName'      => $family_name,
