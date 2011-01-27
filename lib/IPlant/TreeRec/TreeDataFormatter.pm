@@ -89,8 +89,11 @@ use Readonly;
 
         # Add the related tree node if there is one.
         my @related_tree_nodes = $node->get_tag_values('RTN');
-        if ( scalar @related_tree_nodes > 0 ) {
-            $formatted_node->{relatedTreeNodes} = join ',',
+        if ( scalar @related_tree_nodes == 1 ) {
+            $formatted_node->{relatedTreeNode} = $related_tree_nodes[0];
+        }
+        elsif ( scalar @related_tree_nodes > 1 ) {
+            $formatted_node->{relatedTreeEdge} = join '-',
                 @related_tree_nodes;
         }
 
