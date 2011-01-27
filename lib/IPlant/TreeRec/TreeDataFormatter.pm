@@ -87,6 +87,13 @@ use Readonly;
             $formatted_node->{name} = $name;
         }
 
+        # Add the related tree node if there is one.
+        my @related_tree_nodes = $node->get_tag_values('RTN');
+        if ( scalar @related_tree_nodes > 0 ) {
+            $formatted_node->{relatedTreeNodes} = join ',',
+                @related_tree_nodes;
+        }
+
         # Add the values of any NHX tags that we support.
         $self->_add_supported_tags( $node, $formatted_node );
 
@@ -115,7 +122,7 @@ use Readonly;
 
         # Add any NHX tags that we support.
         for my $field_name ( keys %NHX_TAG_FOR ) {
-            my $tag_name = $NHX_TAG_FOR{$field_name};
+            my $tag_name    = $NHX_TAG_FOR{$field_name};
             my $field_value = scalar $node->get_tag_values($tag_name);
             if ( defined $field_value ) {
                 $formatted_node->{$field_name} = $field_value;

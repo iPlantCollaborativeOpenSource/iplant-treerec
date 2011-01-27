@@ -13,7 +13,16 @@ use Exception::Class;
 use IPlant::TreeRec::REST::Handler;
 use IPlant::TreeRec::REST::API::get::type::qualifier;
 use IPlant::TreeRec::REST::Initializer qw(get_tree_rec);
+use List::MoreUtils qw(any);
 use Readonly;
+
+# The supported HTTP methods for the various object types.
+Readonly my %SUPPORTED_METHODS_FOR => (
+    'species-tree' => [qw( GET POST )],
+    'species-data' => [qw( GET POST )],
+    'gene-tree'    => [qw( GET POST )],
+    'gene-data'    => [qw( GET POST )],
+);
 
 # The name of the default species tree.
 Readonly my $SPECIES_TREE => 'bowers_rosids';
@@ -22,6 +31,8 @@ Readonly my $SPECIES_TREE => 'bowers_rosids';
 Readonly my %GETTER_FOR => (
     'species-tree' => sub { $_[0]->get_species_tree_file($SPECIES_TREE) },
     'species-data' => sub { $_[0]->get_species_tree_data($SPECIES_TREE) },
+    'gene-tree'    => sub { $_[0]->get_gene_tree_file($_[2]) },
+    'gene-data'    => sub { $_[0]->get_gene_tree_data($_[2]) },
     'default'      => sub { $_[0]->get_file( $_[1], "" ) },
 );
 
@@ -112,6 +123,76 @@ use base 'IPlant::TreeRec::REST::Handler';
         }
 
         return Apache2::Const::HTTP_OK;
+    }
+
+    ##########################################################################
+    # Usage      : $handler->POST( $request, $response );
+    #
+    # Purpose    : Handles a POST request.
+    #
+    # Returns    : An HTTP OK staus code.
+    #
+    # Parameters : $request  - the request.
+    #              $response - the response.
+    #
+    # Throws     : No exceptions.
+    sub POST {
+        my ( $self, $request, $response ) = @_;
+
+        # The results should be in JSON format.
+        $request->requestedFormat('json');
+
+        # Get the tree reconciliation object.
+        my $treerec = get_tree_rec($request);
+
+        # Extract the object type.
+        my $object_type = $type_of{ ident $self };
+
+        # Extract the parameters.
+        my $r              = Apache2::RequestUtil->request();
+        my $content_length = $r->headers_in()->{'Content-Length'};
+        my $parameters;
+        $r->read( $parameters, $content_length );
+
+        # Get the subroutine for object retrieval.
+        my $getter_ref = $GETTER_FOR{$object_type}
+            || $GETTER_FOR{default};
+
+        # Retrieve the object.
+        my $object = $getter_ref->( $treerec, $object_type, $parameters );
+
+        # Set the output according to the object.
+        if ( $self->_object_is_file($object) ) {
+            $self->_create_file_response( $request, $response, $object );
+        }
+        else {
+            $self->_create_json_response( $request, $response, $object );
+        }
+
+        return Apache2::Const::HTTP_OK;
+    }
+
+    ##########################################################################
+    # Usage      : $handler->isAuth( $method, $request );
+    #
+    # Purpose    : Determines whether or not a request is authorized.  This
+    #              handler supports GET and POST requests.
+    #
+    # Returns    : True if the request is authorized.
+    #
+    # Parameters : $method  - the HTTP methods (e.g. GET or POST).
+    #              $request - the request.
+    #
+    # Throws     : No exceptions.
+    sub isAuth {
+        my ( $self, $method, $request ) = @_;
+
+        # Get the list of supported methods.
+        my $type = $type_of{ ident $self };
+        my $supported_methods_ref = $SUPPORTED_METHODS_FOR{$type} || [];
+
+        # Determine if the method that was used is supported.
+        return any { $method eq $_ } @{$supported_methods_ref};
     }
 
     ##########################################################################

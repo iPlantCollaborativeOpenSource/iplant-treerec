@@ -26,7 +26,7 @@ use base 'IPlant::TreeRec::REST::Handler';
 # Throws     : No exceptions.
 sub isAuth {
     my ( $self, $method, $request ) = @_;
-    return any { $method eq $_ } qw(GET);
+    return any { $method eq $_ } qw( GET POST );
 }
 
 ##########################################################################

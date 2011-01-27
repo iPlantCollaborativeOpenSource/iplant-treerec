@@ -41,6 +41,11 @@ use Exception::Class (
     'IPlant::TreeRec::GeneFamilyNotFoundException' => {
         'isa' => 'IPlant::TreeRec::Exception',
     },
+
+    # Thrown when a reconciliation can't be located.
+    'IPlant::TreeRec::ReconciliationNotFoundException' => {
+        'isa' => 'IPlant::TreeRec::Exception',
+    },
 );
 
 1;
@@ -79,6 +84,10 @@ This documentation refers to IPlant::TreeRec::X version 0.0.1.
     # An exception that is thrown when a gene family can't be located.
     IPlant::TreeRec::GeneFamilyNotFoundException->throw( error => $message );
 
+    # An exception that is thrown when a reconciliation can't be located.
+    IPlant::TreeRec::ReconciliationNotFoundException->throw(
+        error => $message );
+
 =head1 DESCRIPTION
 
 Exceptions for iPlant tree reconciliation classes.
@@ -111,6 +120,11 @@ Thrown when either a gene tree or a species tree can't be found.
 =head2 IPlant::TreeRec::GeneFamilyNotFoundException
 
 Thrown when a gene family can't be found.
+
+=head2 IPlant::TreeRec::ReconciliationNotFoundException
+
+Thrown when a reconciliation can't be found for a specified gene tree and
+species tree.
 
 =head1 DEPENDENCIES
 
