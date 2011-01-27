@@ -28,9 +28,6 @@ import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.HTML;
 
@@ -39,20 +36,21 @@ public class TRSearchResultsWindow extends Window
 	private static final String TR_VIEW_BTN_ID = "idTRDataViewBtn";
 	private Grid<TRSearchResult> gridResults;
 	private boolean showBlastColumns;
-	private ClientCommand cmdView;
+	private ClientCommand cmdViewFamily;
 	private ArrayList<Button> buttons;
 	private ContentPanel pnlGrid;
 
 	public TRSearchResultsWindow(String searchTerms, String results, boolean showBlastColumns,
-			ClientCommand cmdView)
+			ClientCommand cmdViewFamily)
 	{
 		init(searchTerms, results);
 		this.showBlastColumns = showBlastColumns;
-		this.cmdView = cmdView;
+		this.cmdViewFamily = cmdViewFamily;
 	}
 
 	private void init(String heading, String results)
 	{
+		buttons = new ArrayList<Button>();
 		setHeading("Tree Reconciliation Search Results");
 		gridResults = buildGrid(results);
 		setLayout(new FitLayout());
@@ -69,60 +67,17 @@ public class TRSearchResultsWindow extends Window
 		add(pnlGrid);
 	}
 
-	private boolean isEmpty(JSONValue in)
-	{
-		boolean ret = true; // assume we have an empty value
-
-		if(in != null)
-		{
-			String test = in.toString();
-
-			if(test.length() > 0 && !test.equals("[]"))
-			{
-				ret = false;
-			}
-		}
-
-		return ret;
-	}
-
-	private JSONValue parseFamilies(JSONObject jsonObj)
-	{
-		JSONValue ret = null;
-
-		// drill down to families array
-		JSONValue val = jsonObj.get("data");
-
-		if(val != null)
-		{
-			val = ((JSONObject)val).get("item");
-
-			if(val != null)
-			{
-				ret = ((JSONObject)val).get("families");
-			}
-		}
-
-		return ret;
-	}
-
 	private Grid<TRSearchResult> buildGrid(String json)
 	{
 		ListStore<TRSearchResult> store = new ListStore<TRSearchResult>();
-		if(json != null)
+		JsArray<JsTRSearchResult> arr = TRUtil.parseFamilies(json);
+
+		if(arr != null)
 		{
-			JSONObject jsonObj = (JSONObject)JSONParser.parse(json);
-			JSONValue valItems = parseFamilies(jsonObj);
-
-			if(!isEmpty(valItems))
+			for(int i = 0,len = arr.length();i < len;i++)
 			{
-				JsArray<JsTRSearchResult> arr = JsonUtil.asArrayOf(valItems.toString());
-
-				for(int i = 0,len = arr.length();i < len;i++)
-				{
-					TRSearchResult item = new TRSearchResult(arr.get(i));
-					store.add(item);
-				}
+				TRSearchResult item = new TRSearchResult(arr.get(i));
+				store.add(item);
 			}
 		}
 
@@ -221,7 +176,7 @@ public class TRSearchResultsWindow extends Window
 		// do we have any genes to view
 		if(name != null)
 		{
-			cmdView.execute(name);
+			cmdViewFamily.execute(name);
 		}
 	}
 
@@ -309,10 +264,19 @@ public class TRSearchResultsWindow extends Window
 	{
 
 		@Override
-		public Object render(TRSearchResult result, String property, ColumnData config, int rowIndex,
+		public Object render(final TRSearchResult result, String property, ColumnData config, int rowIndex,
 				int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
 		{
-			return "<span class=\"de_tr_hyperlink\">" + result.getName() + "</span>";
+			HTML link =  new HTML("<a href=\"#\">" + result.getName() + "</a>");
+			link.addClickHandler(new ClickHandler()
+			{
+				@Override
+				public void onClick(ClickEvent arg0)
+				{
+					cmdViewFamily.execute(result.getName());
+				}
+			});
+			return link;
 		}
 	}
 

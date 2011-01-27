@@ -11,7 +11,6 @@ import com.google.gwt.user.client.Element;
 public class TRPanel extends ContentPanel
 {
 	private VerticalPanel pnlInner;
-	private TRViewerPanel pnlViewer;
 	private TableData tableData;
 	
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
@@ -46,16 +45,7 @@ public class TRPanel extends ContentPanel
 	{
 		if(params != null)
 		{
-			if(pnlViewer != null)
-			{
-				pnlInner.remove(pnlViewer);	
-			}
-			
-			pnlViewer = new TRViewerPanel(searchService, params);
-			
-			pnlInner.add(pnlViewer, tableData);
-			
-			layout();
+			new TRViewerWindow(searchService, params).show();
 		}
 	}
 	

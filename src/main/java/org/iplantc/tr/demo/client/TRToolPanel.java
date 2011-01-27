@@ -19,6 +19,7 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.extjs.gxt.ui.client.widget.layout.TableData;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -380,7 +381,14 @@ public class TRToolPanel extends VerticalPanel
 					// show results unless the search has been cancelled
 					if (cancelButton.isEnabled()) {
 						searchComplete();
-						showSimpleResultsWindow("Results for term " + term + ":", result);
+						String value = selectSearchType.getValue(selectSearchType.getSelectedIndex());
+						searchComplete();
+						if(value.equals(SEARCH_TYPE_FAMILY_ID)) {
+							showTreeViewer(result);
+						}
+						else {
+							showSimpleResultsWindow("Results for term " + term + ":", result);
+						}
 					}
 				}
 			};
@@ -542,5 +550,12 @@ public class TRToolPanel extends VerticalPanel
 	
 	private void showBlastResultsWindow(String heading, String results) {
 		new TRSearchResultsWindow(heading, results, true, cmdView).show();
+	}
+	
+	private void showTreeViewer(String result) {
+		JsArray<JsTRSearchResult> arr = TRUtil.parseFamilies(result);
+		if (arr!=null && arr.length()>0)
+			cmdView.execute(arr.get(0).getName());
+		System.out.println("fam id search result = "+result);
 	}
 }
