@@ -21,6 +21,15 @@
 	vertical-align: middle;
 }
 
+.de_hyperlink {
+	cursor: pointer;
+	color: #0098AA;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 12px;
+	height: 30px;
+}
+
 h1 {
   font-size: 2em;
   font-weight: bold;

@@ -15,7 +15,24 @@
     <servlet-name>searchServlet</servlet-name>
     <url-pattern>/tr_standalone/search</url-pattern>
   </servlet-mapping>
-  
+  	<servlet>
+		<servlet-name>deServiceDispatcher</servlet-name>
+		<servlet-class>org.iplantc.tr.demo.server.UnsecuredDEServiceDispatcher</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>deServiceDispatcher</servlet-name>
+		<url-pattern>/tr_standalone/deservice</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>layoutService</servlet-name>
+		<servlet-class>org.iplantc.tr.demo.server.LayoutServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>layoutService</servlet-name>
+		<url-pattern>/tr_standalone/layout</url-pattern>
+	</servlet-mapping>
+	
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>

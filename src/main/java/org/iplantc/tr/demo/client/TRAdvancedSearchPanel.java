@@ -8,14 +8,14 @@ import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
 
-public class TRPanel extends ContentPanel
+public class TRAdvancedSearchPanel extends ContentPanel
 {
 	private VerticalPanel pnlInner;
 	private TableData tableData;
 	
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
 	
-	public TRPanel()
+	public TRAdvancedSearchPanel()
 	{
 		init();
 	}

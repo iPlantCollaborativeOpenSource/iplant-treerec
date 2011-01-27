@@ -13,6 +13,11 @@
   <!-- Other module inherits                                      -->
   <inherits name='com.extjs.gxt.ui.GXT'/>
   
+  <inherits name='org.iplantc.phyloviewer.common'/>
+  <inherits name='org.iplantc.phyloviewer.client'/>
+     <!-- Common Service Interfaces -->
+  <inherits name='org.iplantc.de.DiscoveryEnvironmentCommon' />
+	  
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.iplantc.tr.demo.client.TRDemo'/>
 
