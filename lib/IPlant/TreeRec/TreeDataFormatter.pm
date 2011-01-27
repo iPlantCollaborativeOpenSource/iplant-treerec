@@ -87,15 +87,8 @@ use Readonly;
             $formatted_node->{name} = $name;
         }
 
-        # Add the related tree node if there is one.
-        my @related_tree_nodes = $node->get_tag_values('RTN');
-        if ( scalar @related_tree_nodes == 1 ) {
-            $formatted_node->{relatedTreeNode} = $related_tree_nodes[0];
-        }
-        elsif ( scalar @related_tree_nodes > 1 ) {
-            $formatted_node->{relatedTreeEdge} = join '-',
-                @related_tree_nodes;
-        }
+        # Add references to related tree nodes and edges.
+        $self->_add_tree_references( $node, $formatted_node );
 
         # Add the values of any NHX tags that we support.
         $self->_add_supported_tags( $node, $formatted_node );
@@ -105,9 +98,37 @@ use Readonly;
 
     # The NHX tags that we support, indexed by the corresponding field name.
     Readonly my %NHX_TAG_FOR => {
-        'edgeDuplications' => 'EDGEDUPS',
-        'nodeDuplications' => 'NODEDUPS',
+        'edgeDuplications' => [ 'EDGEDUPS', 'scalar' ],
+        'nodeDuplications' => [ 'NODEDUPS', 'scalar' ],
+        'edgeRelatedNodes' => [ 'ERN',      'array' ],
+        'nodeRelatedNodes' => [ 'NRN',      'array' ],
     };
+
+    ##########################################################################
+    # Usage      : $formatted->add_tree_references( $node, $formatted_node );
+    #
+    # Purpose    : Adds references to related trees to the node that we're
+    #              currently formatting.
+    #
+    # Returns    : Nothing.
+    #
+    # Parameters : $node           - the node from the actual tree.
+    #              $formatted_node - the formatted node.
+    #
+    # Throws     : No exceptions.
+    sub _add_tree_references {
+        my ( $self, $node, $formatted_node ) = @_;
+
+        # References to the gene tree from the species tree.
+        my @related_tree_nodes = $node->get_tag_values('RTN');
+        if ( scalar @related_tree_nodes == 1 ) {
+            $formatted_node->{relatedTreeNode} = $related_tree_nodes[0];
+        }
+        elsif ( scalar @related_tree_nodes > 1 ) {
+            $formatted_node->{relatedTreeEdge} = join '-',
+                @related_tree_nodes;
+        }
+    }
 
     ##########################################################################
     # Usage      : $formatter->_add_supported_tags( $node, $formatted_node );
@@ -125,14 +146,55 @@ use Readonly;
 
         # Add any NHX tags that we support.
         for my $field_name ( keys %NHX_TAG_FOR ) {
-            my $tag_name    = $NHX_TAG_FOR{$field_name};
-            my $field_value = scalar $node->get_tag_values($tag_name);
+            my ( $tag_name, $tag_type ) = @{ $NHX_TAG_FOR{$field_name} };
+            my $field_value
+                = $tag_type eq 'scalar'
+                ? $self->_get_scalar_tag_value( $node, $tag_name )
+                : $self->_get_array_tag_value( $node, $tag_name );
             if ( defined $field_value ) {
                 $formatted_node->{$field_name} = $field_value;
             }
         }
 
         return;
+    }
+
+    ##########################################################################
+    # Usage      : $value = $formatter->_get_scalar_tag_value( $node,
+    #                  $tag_name );
+    #
+    # Purpose    : Extracts the value of a tag for which a scalar value is
+    #              expected.
+    #
+    # Returns    : The tag value or undef if the tag isn't defined.
+    #
+    # Parameters : $node     - the node to get the tag value from.
+    #              $tag_name - the name of the tag.
+    #
+    # Throws     : No exceptions.
+    sub _get_scalar_tag_value {
+        my ( $self, $node, $tag_name ) = @_;
+        return scalar $node->get_tag_values($tag_name);
+    }
+
+    ##########################################################################
+    # Usage      : $array_ref = $formatter->_get_scalar_tag_value( $node,
+    #                  $tag_name );
+    #
+    # Purpose    : Extracts the value of a tag for which an array value is
+    #              expected.
+    #
+    # Returns    : A reference to an array containing the values or undef if
+    #              the tag isn't defined.
+    #
+    # Parameters : $node     - the node to get the tag value from.
+    #              $tag_name - the name of the tag.
+    #
+    # Throws     : No exceptions.
+    sub _get_array_tag_value {
+        my ( $self, $node, $tag_name ) = @_;
+        my @values = $node->get_tag_values($tag_name);
+        return scalar @values > 0 ? \@values : undef;
     }
 }
 
