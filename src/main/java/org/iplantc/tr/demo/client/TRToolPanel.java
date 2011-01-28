@@ -203,7 +203,7 @@ public class TRToolPanel extends VerticalPanel
 
 	private Button buildSearchButton()
 	{
-		return PanelHelper.buildButton("idTRSearchBtn", "Search", new SelectionListener<ButtonEvent>()
+		Button btn = PanelHelper.buildButton("idTRSearchBtn", "Search", new SelectionListener<ButtonEvent>()
 		{
 			@Override
 			public void componentSelected(ButtonEvent ce)
@@ -228,6 +228,8 @@ public class TRToolPanel extends VerticalPanel
 				}
 			}
 		});
+		btn.setEnabled(false);
+		return btn;
 	}
 
 	private TableData buildSearchTable()
@@ -295,7 +297,6 @@ public class TRToolPanel extends VerticalPanel
 			entrySearch = buildSearchEntry();
 			searchButton = buildSearchButton();
 			cancelButton = buildCancelButton();
-			cancelButton.disable();
 			waitIcon = new Status();
 		}
 
@@ -313,7 +314,7 @@ public class TRToolPanel extends VerticalPanel
 		}
 
 		private Button buildCancelButton() {
-			return PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
+			Button btn = PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
 					{
 						@Override
 						public void componentSelected(ButtonEvent ce)
@@ -321,6 +322,8 @@ public class TRToolPanel extends VerticalPanel
 							searchComplete();
 						}
 					});
+			btn.disable();
+			return btn;
 		}
 		
 		private TextField<String> buildSearchEntry()
@@ -334,10 +337,12 @@ public class TRToolPanel extends VerticalPanel
 			{
 				public void componentKeyUp(ComponentEvent event)
 				{
+					String text = ret.getValue();
 					if(event.getKeyCode() == KeyCodes.KEY_ENTER)
 					{
-						performGeneIdSearch(ret.getValue());
+						performGeneIdSearch(text);
 					}
+					searchButton.setEnabled(text!=null && !text.isEmpty());
 				}
 			});
 
@@ -432,6 +437,14 @@ public class TRToolPanel extends VerticalPanel
 			ret.setSize(380, 99);
 			ret.setSelectOnFocus(true);
 			ret.setId(TR_BLAST_SEARCH_AREA_ID);
+			ret.addKeyListener(new KeyListener()
+			{
+				public void componentKeyUp(ComponentEvent event)
+				{
+					String text = ret.getValue();
+					searchButton.setEnabled(text!=null && !text.isEmpty());
+				}
+			});
 
 			return ret;
 		}
@@ -467,7 +480,7 @@ public class TRToolPanel extends VerticalPanel
 		}
 
 		private Button buildCancelButton() {
-			return PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
+			Button btn = PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
 					{
 						@Override
 						public void componentSelected(ButtonEvent ce)
@@ -475,6 +488,8 @@ public class TRToolPanel extends VerticalPanel
 							searchComplete();
 						}
 					});
+			btn.disable();
+			return btn;
 		}
 		
 		public String getSearchTerms()
