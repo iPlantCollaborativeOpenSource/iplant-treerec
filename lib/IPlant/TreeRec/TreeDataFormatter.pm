@@ -87,9 +87,6 @@ use Readonly;
             $formatted_node->{name} = $name;
         }
 
-        # Add references to related tree nodes and edges.
-        $self->_add_tree_references( $node, $formatted_node );
-
         # Add the values of any NHX tags that we support.
         $self->_add_supported_tags( $node, $formatted_node );
 
@@ -102,33 +99,8 @@ use Readonly;
         'nodeDuplications' => [ 'NODEDUPS', 'scalar' ],
         'edgeRelatedNodes' => [ 'ERN',      'array' ],
         'nodeRelatedNodes' => [ 'NRN',      'array' ],
+        'nodeRelatedEdges' => [ 'NRE',      'array' ],
     };
-
-    ##########################################################################
-    # Usage      : $formatted->add_tree_references( $node, $formatted_node );
-    #
-    # Purpose    : Adds references to related trees to the node that we're
-    #              currently formatting.
-    #
-    # Returns    : Nothing.
-    #
-    # Parameters : $node           - the node from the actual tree.
-    #              $formatted_node - the formatted node.
-    #
-    # Throws     : No exceptions.
-    sub _add_tree_references {
-        my ( $self, $node, $formatted_node ) = @_;
-
-        # References to the gene tree from the species tree.
-        my @related_tree_nodes = $node->get_tag_values('RTN');
-        if ( scalar @related_tree_nodes == 1 ) {
-            $formatted_node->{relatedTreeNode} = $related_tree_nodes[0];
-        }
-        elsif ( scalar @related_tree_nodes > 1 ) {
-            $formatted_node->{relatedTreeEdge} = join '-',
-                @related_tree_nodes;
-        }
-    }
 
     ##########################################################################
     # Usage      : $formatter->_add_supported_tags( $node, $formatted_node );

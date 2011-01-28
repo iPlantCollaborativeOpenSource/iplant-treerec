@@ -287,9 +287,8 @@ use Readonly;
         return if !defined $child_id;
 
         # Add the tag to the node
-        my $related_nodes_ref
-            = $is_on_node ? [$child_id] : [ $parent_id, $child_id ];
-        $node->nhx_tag( { 'RTN' => $related_nodes_ref } );
+        my $tag_name = $is_on_node ? 'NRN' : 'NRE';
+        $node->nhx_tag( { $tag_name => $child_id } );
 
         return;
     }
