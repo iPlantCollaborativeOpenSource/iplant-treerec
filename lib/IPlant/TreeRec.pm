@@ -377,6 +377,15 @@ use Time::HiRes qw(time);
         my @families
             = $finder->find_duplication_events( $node_id, $edge_selected );
 
+        # Extract the columns from each of the matching results.
+        @families = map {
+            { $_->get_columns() }
+        } @families;
+        $self->_load_gene_family_summaries( \@families );
+
+        # Convert the hash keys to camel-case.
+        @families = map { camel_case_keys($_) } @families;
+
         return { 'families' => \@families };
     }
 

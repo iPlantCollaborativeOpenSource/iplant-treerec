@@ -58,7 +58,7 @@ use English qw( -no_match_vars );
         my $dbh = $dbh_of{ ident $self };
         my @family_names = $dbh->resultset('DuplicationSearch')
             ->search( {}, { 'bind' => [ $node_id, !$edge_selected ] } );
-        return map { $_->name() } @family_names;
+        return @family_names;
     }
 }
 
