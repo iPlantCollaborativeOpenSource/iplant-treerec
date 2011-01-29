@@ -40,6 +40,7 @@ lib/IPlant/TreeRec/DuplicationEventFinder.pm
 lib/IPlant/TreeRec/FileRetriever.pm
 lib/IPlant/TreeRec/FileTreeLoader.pm
 lib/IPlant/TreeRec/GeneFamilyInfo.pm
+lib/IPlant/TreeRec/ReconciliationLoader.pm
 lib/IPlant/TreeRec/ReconciliationResolver.pm
 lib/IPlant/TreeRec/REST.pm
 lib/IPlant/TreeRec/REST/API.pm

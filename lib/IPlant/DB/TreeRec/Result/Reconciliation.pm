@@ -59,6 +59,10 @@ __PACKAGE__->set_primary_key("reconciliation_id");
 # Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-10-25 09:42:48
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YyKzyam+ePcAzF8KaWku2g
 
+__PACKAGE__->has_many(
+    nodes => "IPlant::DB::TreeRec::Result::ReconciliationNode",
+    { "foreign.reconciliation_id" => "self.reconciliation_id" }
+);
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

@@ -17,6 +17,7 @@ use IO::Scalar;
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastArgs;
 use IPlant::TreeRec::DuplicationEventFinder;
+use IPlant::TreeRec::ReconciliationLoader;
 use IPlant::TreeRec::TreeDataFormatter;
 use IPlant::TreeRec::Utils qw(camel_case_keys);
 use IPlant::TreeRec::X;
@@ -246,16 +247,30 @@ use Time::HiRes qw(time);
         my ( $family_name, $species_tree_name )
             = $self->_extract_tree_args( $json, 'familyName' );
 
-        # Fetch the tree loader and create a tree formatter.
+        # Get the objects we need.
+        my $dbh         = $dbh_of{ ident $self };
         my $tree_loader = $gene_tree_loader_of{ ident $self };
         my $formatter   = IPlant::TreeRec::TreeDataFormatter->new();
+        my $rec_loader  = IPlant::TreeRec::ReconciliationLoader->new($dbh);
 
         # Load the tree.
         my $tree = $tree_loader->load_gene_tree( $family_name,
             $species_tree_name );
 
-        # Format and return the tree.
-        return $formatter->format_tree($tree);
+        # Load the reconciliation if we're supposed to.
+        my $reconciliation;
+        if ( defined $species_tree_name ) {
+            $reconciliation
+                = $rec_loader->load( $species_tree_name, $family_name );
+        }
+
+        # Format the result.
+        my %result = ( 'gene-tree' => $formatter->format_tree($tree) );
+        if ( defined $reconciliation ) {
+            $result{'reconciliation'} = $reconciliation;
+        }
+
+        return \%result;
     }
 
     ##########################################################################

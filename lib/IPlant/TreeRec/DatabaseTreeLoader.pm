@@ -9,6 +9,7 @@ our $VERSION = '0.0.1';
 
 use Carp;
 use Class::Std::Utils;
+use IPlant::TreeRec::X;
 use Readonly;
 
 {
@@ -297,6 +298,9 @@ use Readonly;
     Readonly my %ATTRIBUTE_TRANSLATOR_FOR =>
         ( D => sub { $_[0] ? 'Y' : 'N' }, );
 
+    # Used to translate attribute names.
+    Readonly my %ATTRIBUTE_NAME_MAP => ( ID => 'SOURCEID' );
+
     ##########################################################################
     # Usage      : $loader->_add_gene_tree_node_attributes( $node,
     #                  $database_node );
@@ -312,16 +316,31 @@ use Readonly;
     sub _add_gene_tree_node_attributes {
         my ( $self, $node, $database_node ) = @_;
 
+        # Copy the attributes.
         ATTR:
         for my $attr ( $database_node->attributes() ) {
+
+            # Get the attribute name.
             my $attr_name = $attr->get_name();
-            next ATTR if !defined $attr_name || $attr_name eq 'ID';
+            next ATTR if !defined $attr_name;
+
+            # Get the attribute value.
             my $attr_value = $attr->value();
             next ATTR if !defined $attr_value;
+
+            # Translate the attribute value.
             my $translator_ref = $ATTRIBUTE_TRANSLATOR_FOR{$attr_name};
             if ( defined $translator_ref ) {
                 $attr_value = $translator_ref->($attr_value);
             }
+
+            # Translate the attribute name.
+            my $new_attr_name = $ATTRIBUTE_NAME_MAP{$attr_name};
+            if ( defined $new_attr_name ) {
+                $attr_name = $new_attr_name;
+            }
+
+            # Add the attribute to the node.
             $node->nhx_tag( { $attr_name => $attr_value } );
         }
 

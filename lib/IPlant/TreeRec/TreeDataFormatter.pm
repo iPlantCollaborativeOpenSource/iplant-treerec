@@ -100,6 +100,7 @@ use Readonly;
         'edgeRelatedNodes' => [ 'ERN',      'array' ],
         'nodeRelatedNodes' => [ 'NRN',      'array' ],
         'nodeRelatedEdges' => [ 'NRE',      'array' ],
+        'sourceIdentifier' => [ 'SOURCEID', 'scalar' ],
     };
 
     ##########################################################################

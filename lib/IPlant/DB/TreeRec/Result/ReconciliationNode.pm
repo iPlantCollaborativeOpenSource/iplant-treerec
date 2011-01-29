@@ -74,6 +74,10 @@ __PACKAGE__->set_primary_key("reconciliation_node_id");
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6Jb05C5diSD64K0gOFy8Uw
 
 __PACKAGE__->belongs_to(
+    reconciliation => "IPlant::DB::TreeRec::Result::Reconciliation",
+    { "foreign.reconciliation_id" => "self.reconciliation_id" }
+);
+__PACKAGE__->belongs_to(
     tree_node => "IPlant::DB::TreeRec::Result::ProteinTreeNode",
     { "foreign.node_id" => "self.node_id" }
 );

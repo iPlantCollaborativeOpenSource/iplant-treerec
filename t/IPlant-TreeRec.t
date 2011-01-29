@@ -5,7 +5,7 @@ use strict;
 
 #########################
 
-use Test::More tests => 57;
+use Test::More tests => 58;
 BEGIN { use_ok('IPlant::DB::TreeRec') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cv') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvterm') };
@@ -60,6 +60,7 @@ BEGIN { use_ok('IPlant::TreeRec::REST::API::search::type') };
 BEGIN { use_ok('IPlant::TreeRec::REST::API::search::type::parameters') };
 BEGIN { use_ok('IPlant::TreeRec::REST::Handler') };
 BEGIN { use_ok('IPlant::TreeRec::REST::Initializer') };
+BEGIN { use_ok('IPlant::TreeRec::ReconciliationLoader') };
 BEGIN { use_ok('IPlant::TreeRec::ReconciliationResolver') };
 BEGIN { use_ok('IPlant::TreeRec::Utils') };
 BEGIN { use_ok('IPlant::TreeRec::X') };
