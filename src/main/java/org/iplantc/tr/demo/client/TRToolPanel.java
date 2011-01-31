@@ -44,7 +44,9 @@ public class TRToolPanel extends VerticalPanel
 
 	private VerticalPanel pnlSearch;
 
-	private SimpleSearchPanel pnlSearchSimple;
+	private SimpleSearchPanel pnlSearchGeneName;
+	private SimpleSearchPanel pnlSearchGO;
+	private SimpleSearchPanel pnlSearchFamilyId;
 
 	private BLASTSearchPanel pnlSearchBlast;
 
@@ -71,13 +73,13 @@ public class TRToolPanel extends VerticalPanel
 		setSpacing(5);		
 	}
 
-	private void removeWidgetFromLayoutContainer(LayoutContainer pnl, Component component)
+	private void removeSearchPanelFromLayoutContainer(LayoutContainer pnl)
 	{
 		List<Component> components = pnl.getItems();
 
-		for(Component test : components)
+		for(Component component : components)
 		{
-			if(test == component)
+			if(component instanceof SearchPanel)
 			{
 				pnl.remove(component);
 				break;
@@ -87,16 +89,42 @@ public class TRToolPanel extends VerticalPanel
 
 	private void showTextFieldSearchInput()
 	{
-		removeWidgetFromLayoutContainer(pnlSearch, pnlSearchBlast);
-		pnlSearch.add(pnlSearchSimple);
+		removeSearchPanelFromLayoutContainer(pnlSearch);
+		SearchPanel searchPanel = getCurrentSearchPanel();
+		pnlSearch.add(searchPanel);
 		pnlSearch.layout();
 
-		pnlSearchSimple.setFocusWidget();
+		searchPanel.setFocusWidget();
 	}
 
+	private SearchPanel getCurrentSearchPanel() {
+		String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
+
+		if(type.equals(SEARCH_TYPE_GENE_NAME))
+		{
+			return pnlSearchGeneName;
+		}
+		else if(type.equals(SEARCH_TYPE_BLAST))
+		{
+			return pnlSearchBlast;
+		}
+		else if(type.equals(SEARCH_TYPE_GO))
+		{
+			return pnlSearchGO;
+		}
+		else if(type.equals(SEARCH_TYPE_FAMILY_ID))
+		{
+			return pnlSearchFamilyId;
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
 	private void showTextAreaSearchInput()
 	{
-		removeWidgetFromLayoutContainer(pnlSearch, pnlSearchSimple);
+		removeSearchPanelFromLayoutContainer(pnlSearch);
 		pnlSearch.add(pnlSearchBlast);
 		pnlSearch.layout();
 
@@ -147,7 +175,7 @@ public class TRToolPanel extends VerticalPanel
 
 		selectSearchType = initSearchTypeSelection();
 
-		ret.add(new Label("Search Type:"));
+		ret.add(new Label("Select appropriate search type:"));
 		ret.add(selectSearchType);
 
 		return ret;
@@ -157,8 +185,8 @@ public class TRToolPanel extends VerticalPanel
 	{
 		if(searchService != null && term != null)
 		{
-			pnlSearchSimple.searchBegin();
-			searchService.doGeneIdSearch(term, pnlSearchSimple.getSearchCallback(term));
+			pnlSearchGeneName.searchBegin();
+			searchService.doGeneIdSearch(term, pnlSearchGeneName.getSearchCallback(term));
 		}
 	}
 
@@ -166,8 +194,8 @@ public class TRToolPanel extends VerticalPanel
 	{
 		if(term != null)
 		{
-			pnlSearchSimple.searchBegin();
-			searchService.doGoTermSearch(term, pnlSearchSimple.getSearchCallback(term));
+			pnlSearchGO.searchBegin();
+			searchService.doGoTermSearch(term, pnlSearchGO.getSearchCallback(term));
 		}
 	}
 
@@ -175,8 +203,8 @@ public class TRToolPanel extends VerticalPanel
 	{
 		if(term != null)
 		{
-			pnlSearchSimple.searchBegin();
-			searchService.getDetails(term, pnlSearchSimple.getSearchCallback(term));
+			pnlSearchFamilyId.searchBegin();
+			searchService.getDetails(term, pnlSearchFamilyId.getSearchCallback(term));
 		}
 	}
 
@@ -213,7 +241,7 @@ public class TRToolPanel extends VerticalPanel
 
 				if(type.equals(SEARCH_TYPE_GENE_NAME))
 				{
-					performGeneIdSearch(pnlSearchSimple.getSearchTerm());
+					performGeneIdSearch(pnlSearchGeneName.getSearchTerm());
 				}
 				else if(type.equals(SEARCH_TYPE_BLAST))
 				{
@@ -221,11 +249,11 @@ public class TRToolPanel extends VerticalPanel
 				}
 				else if(type.equals(SEARCH_TYPE_GO))
 				{
-					performGoTermSearch(pnlSearchSimple.getSearchTerm());
+					performGoTermSearch(pnlSearchGO.getSearchTerm());
 				}
 				else if(type.equals(SEARCH_TYPE_FAMILY_ID))
 				{
-					performGoAccessionSearch(pnlSearchSimple.getSearchTerm());
+					performGoAccessionSearch(pnlSearchFamilyId.getSearchTerm());
 				}
 			}
 		});
@@ -233,12 +261,12 @@ public class TRToolPanel extends VerticalPanel
 		return btn;
 	}
 
-	private TableData buildSearchTable()
+	private TableData buildTableLayoutData(HorizontalAlignment horizAlign)
 	{
 		TableData ret = new TableData();
 
 		ret.setPadding(3);
-		ret.setHorizontalAlign(HorizontalAlignment.RIGHT);
+		ret.setHorizontalAlign(horizAlign);
 
 		return ret;
 	}
@@ -250,7 +278,9 @@ public class TRToolPanel extends VerticalPanel
 		ret.setSpacing(5);
 		ret.setStyleAttribute("background-color", "#EDEDED");
 		
-		pnlSearchSimple = new SimpleSearchPanel();
+		pnlSearchGeneName = new SimpleSearchPanel("Enter the name of the gene of interest:");
+		pnlSearchGO = new SimpleSearchPanel("Enter GO term to query (can be accession number or one or multiple terms):");
+		pnlSearchFamilyId = new SimpleSearchPanel("Enter Gene Family ID (internal identifier):");
 		pnlSearchBlast = new BLASTSearchPanel();
 
 		ret.add(buildSearchTypeSelectionPanel());
@@ -274,11 +304,18 @@ public class TRToolPanel extends VerticalPanel
 
 	public Widget getFocusWidget()
 	{
-		return pnlSearchSimple.getFocusWidget();
+		return getCurrentSearchPanel().getFocusWidget();
 	}
 
+	abstract class SearchPanel extends VerticalPanel {
+		
+		abstract public void setFocusWidget();
+		
+		abstract public Widget getFocusWidget();
+	}
+	
 	// simple search panel - contains text field and search button
-	class SimpleSearchPanel extends VerticalPanel
+	class SimpleSearchPanel extends SearchPanel
 	{
 		private static final String TR_SEARCH_FIELD_ID = "idTRSearchField";
 
@@ -286,15 +323,17 @@ public class TRToolPanel extends VerticalPanel
 		private Button searchButton;
 		private Button cancelButton;
 		private Status waitIcon;
+		private String searchLabel;
 
-		public SimpleSearchPanel()
+		public SimpleSearchPanel(String searchLabel)
 		{
-			init();
+			init(searchLabel);
 			compose();
 		}
 
-		private void init()
+		private void init(String searchLabel)
 		{			
+			this.searchLabel = searchLabel;
 			entrySearch = buildSearchEntry();
 			searchButton = buildSearchButton();
 			cancelButton = buildCancelButton();
@@ -303,15 +342,20 @@ public class TRToolPanel extends VerticalPanel
 
 		private void compose()
 		{
-			TableData td = buildSearchTable();
+			VerticalPanel panelInner = new VerticalPanel();
+			panelInner.add(new Label(searchLabel));
 			
-			add(entrySearch, td);
+			TableData searchLayout = buildTableLayoutData(HorizontalAlignment.LEFT);
+			panelInner.add(entrySearch, searchLayout);
 
 			HorizontalPanel panelBottom = new HorizontalPanel();
 			panelBottom.add(waitIcon);
 			panelBottom.add(cancelButton);
 			panelBottom.add(searchButton);
-			add(panelBottom, td);
+			TableData bottomLayout = buildTableLayoutData(HorizontalAlignment.RIGHT);
+			panelInner.add(panelBottom, bottomLayout);
+			
+			add(panelInner);
 		}
 
 		private Button buildCancelButton() {
@@ -415,7 +459,7 @@ public class TRToolPanel extends VerticalPanel
 
 	// BLAST search panel - contains text area, search button and fields for supported
 	// BLAST search params
-	class BLASTSearchPanel extends VerticalPanel
+	class BLASTSearchPanel extends SearchPanel
 	{
 		private static final String TR_BLAST_SEARCH_AREA_ID = "idTRSearchField";
 
@@ -467,15 +511,15 @@ public class TRToolPanel extends VerticalPanel
 			// add search components
 			VerticalPanel panelInner = new VerticalPanel();
 
-			TableData td = buildSearchTable();
-
-			panelInner.add(areaSearch, td);
+			TableData searchLayout = buildTableLayoutData(HorizontalAlignment.LEFT);
+			panelInner.add(areaSearch, searchLayout);
 			
 			HorizontalPanel panelBottom = new HorizontalPanel();
 			panelBottom.add(waitIcon);
 			panelBottom.add(cancelButton);
 			panelBottom.add(searchButton);
-			panelInner.add(panelBottom, td);
+			TableData bottomLayout = buildTableLayoutData(HorizontalAlignment.RIGHT);
+			panelInner.add(panelBottom, bottomLayout);
 
 			add(panelInner);
 		}
