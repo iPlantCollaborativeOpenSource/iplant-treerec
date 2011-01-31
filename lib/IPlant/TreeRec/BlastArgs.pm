@@ -30,12 +30,16 @@ Readonly my %TYPE_INFO_FOR => (
     my %executable_of;
     my %sequence_of;
     my %database_of;
-    
+    my %evalue_of;
+    my %max_num_seqs_of;
+
     ##########################################################################
     # Usage      : $blast_args = IPlant::TreeRec::BlastArgs->_new(
-    #                  {   executable => $executable_path,
-    #                      sequence   => $sequence,
-    #                      database   => $database_file_name,
+    #                  {   executable    => $executable_path,
+    #                      sequence      => $sequence,
+    #                      database      => $database_file_name,
+    #                      evalue        => $evalue,
+    #                      max_num_seqs  => $max_num_seqs,
     #                  }
     #              );
     # 
@@ -43,18 +47,22 @@ Readonly my %TYPE_INFO_FOR => (
     #
     # Returns    : The new set of blast arguments.
     #
-    # Parameters : executable - the name of the executable file.
-    #              sequence   - the query sequence.
-    #              database   - the name of the database file.
+    # Parameters : executable    - the name of the executable file.
+    #              sequence      - the query sequence.
+    #              database      - the name of the database file.
+    #              evalue        - the evalue threshold.
+    #              max_num_seqs  - maximum number of sequences to return.
     #
     # Throws     : No exceptions.
     sub _new {
         my ( $class, $args_ref ) = @_;
 
         # Extract the arguments.
-        my $executable = $args_ref->{executable};
-        my $sequence   = $args_ref->{sequence};
-        my $database   = $args_ref->{database};
+        my $executable    = $args_ref->{executable};
+        my $sequence      = $args_ref->{sequence};
+        my $database      = $args_ref->{database};
+	my $evalue        = $args_ref->{evalue};
+	my $max_num_seqs  = $args_ref->{max_num_seqs};
 
         # Create the new object.
         my $self = bless anon_scalar(), $class;
@@ -63,6 +71,8 @@ Readonly my %TYPE_INFO_FOR => (
         $executable_of{ ident $self } = $executable;
         $sequence_of{ ident $self } = $sequence;
         $database_of{ ident $self } = $database;
+        $evalue_of{ ident $self } = $evalue;
+        $max_num_seqs_of{ ident $self } =  $max_num_seqs;
 
         return $self;
     }
@@ -75,10 +85,20 @@ Readonly my %TYPE_INFO_FOR => (
     #
     #              {   "sequence":     <sequence>,
     #                  "sequenceType": <sequenceType>,
+    #                  "evalue":       <evalue>,
+    #                  "maxNumSeqs":   <maxNumSeqs>,
     #              }
     #
     #              Available sequence types are "nucleotide" and "protein".
-    #
+    #              The type of sequence will be guessed at when not provided.
+    #              The evalue is float (ie. 0.00001) or sci notation (ie. 1E-5)
+    #              that represents the maximum threshold e-value for reporting
+    #              matches in the BLAST database. The evalue defaults to 
+    #              0.01 if not defined.
+    #              The maxNumSeqs is an integer representing the maximum number
+    #              of sequences to return from the BLAST search. The default 
+    #              value of maxNumSeqs is 200.
+    #              
     # Returns    : The new BLAST arguments object.
     #
     # Parameters : $json - the JSON string.
@@ -91,24 +111,51 @@ Readonly my %TYPE_INFO_FOR => (
         my $json_ref      = JSON->new->decode($json);
         my $sequence_type = $json_ref->{'sequenceType'};
         my $sequence      = $json_ref->{'sequence'};
+        my $evalue        = $json_ref->{'evalue'};
+        my $max_num_seqs  = $json_ref->{'maxNumSeqs'};
 
-        # Both the sequence type and sequence are required.
+        # The sequence is required
         IPlant::TreeRec::IllegalArgumentException->throw()
-            if !defined $sequence_type || !defined $sequence;
+            if !defined $sequence;
+
+	# Determine the type of sequence if not defined.
+	if (!defined $sequence_type) {
+	    my $seq_test = $sequence;
+	    
+	    # Remove FASTA headers
+	    $seq_test =~ s/^>*.+\n//xsg; 
+
+	    # Check for diagnostic amino acid residues
+	    if ($seq_test =~ m/(E|F|I|L|P|Q|e|f|i|l|p|q)/xms) {
+		$sequence_type = 'protein';
+	    }
+	    else {
+		$sequence_type = 'nucleotide';
+	    }
+    
+	}
+
+	# Set default values for evalue and maxNumSeqs.
+	$max_num_seqs = '200' if !defined $max_num_seqs;
+        $evalue = '0.01' if !defined $evalue;
 
         # Get the information we need to create the object.
+	# Get the sequence type if not define
         my $type_info_ref = $TYPE_INFO_FOR{$sequence_type};
         IPlant::TreeRec::IllegalArgumentException->throw()
             if !defined $type_info_ref;
 
         # Create the BLAST arguments object.
         return $class->_new(
-            {   'executable' => $type_info_ref->{executable},
-                'database'   => $type_info_ref->{database},
-                'sequence'   => $sequence,
+            {   'executable'   => $type_info_ref->{executable},
+                'database'     => $type_info_ref->{database},
+                'sequence'     => $sequence,
+                'evalue'       => $evalue,
+                'max_num_seqs' => $max_num_seqs,
             }
         );
     }
+
 
     ##########################################################################
     # Usage      : $sequence = $blast_args->get_sequence();
@@ -140,16 +187,23 @@ Readonly my %TYPE_INFO_FOR => (
     sub build_command {
         my ( $self, $exe_dir, $db_dir ) = @_;
 
-        # Extract the names of the executable and database.
+        # Extract the names of the executable and database
+     	# and evalue.
         my $exe_name = $executable_of{ ident $self };
         my $db_name  = $database_of{ ident $self };
+	my $evalue   = $evalue_of{ident $self };
+	my $max_num_seqs = $max_num_seqs_of{ident $self };
+
+	# Evalue and max number of seqs will have default values.
 
         # Build the paths to the executable and database.
         my $exe_path = File::Spec->catfile( $exe_dir, $exe_name );
         my $db_path  = File::Spec->catfile( $db_dir, $db_name );
 
         # Build and return the command.
-        return ( $exe_path, '-db', $db_path, '-outfmt', 6 );
+        return ( $exe_path, '-db', $db_path, '-evalue', $evalue,
+		 '-max_target_seqs', $max_num_seqs,
+		 '-outfmt', "6 qseqid sseqid evalue qstart qend" );
     }
 }
 

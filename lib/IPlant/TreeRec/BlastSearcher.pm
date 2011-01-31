@@ -82,7 +82,13 @@ use Readonly;
     #
     # Purpose    : Performs a BLAST search.
     #
-    # Returns    : The list of matching gene identifiers.
+    # Returns    : Array of hashes corresponding to BLAST HSPs:
+    #              query_id     - ID of the query sequence
+    #              gene_id      - Gene ID of the matching sequence
+    #              evalue       - Evalue of the match
+    #              query_start  - Start of the match on the query sequence
+    #              query_end    - End of the match on the query sequence
+    #              length       - length of the HSP match
     #
     # Parameters : $blast_args - the blast arguments.
     #
@@ -101,9 +107,22 @@ use Readonly;
         run \@cmd, \$sequence, \$out, \$err
             or IPlant::TreeRec::IOException->throw( error => $ERRNO );
 
-        # Extract the matching gene IDs from the output.
-        my @output = split m/ [\r] [\n]? | [\n] /xms, $out;
-        return uniq map { ( split ' ' )[1] } @output;
+        # Extract the BLAST results to an array of hashes
+        my @rows = split m/ [\r] [\n]? | [\n] /xms, $out;
+	my @output;
+	for my $row (@rows) {
+	    my $blast_result = {};
+	    my @cols = split (/\t/,$row);
+	    $blast_result->{'query_id'} = $cols[0];
+	    $blast_result->{'gene_id'} = $cols[1];
+	    $blast_result->{'evalue'} = $cols[2];
+	    $blast_result->{'query_start'} = $cols[3];
+	    $blast_result->{'query_end'} = $cols[4];
+	    $blast_result->{'length'} = int($cols[4]) - int($cols[3]) + 1;
+	    push @output, $blast_result;
+	}
+	return @output;
+
     }
 }
 
