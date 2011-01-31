@@ -18,6 +18,7 @@ import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
+import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -175,7 +176,7 @@ public class TRToolPanel extends VerticalPanel
 		if(term != null)
 		{
 			pnlSearchSimple.searchBegin();
-			searchService.doGoAccessionSearch(term, pnlSearchSimple.getSearchCallback(term));
+			searchService.getDetails(term, pnlSearchSimple.getSearchCallback(term));
 		}
 	}
 
@@ -247,7 +248,6 @@ public class TRToolPanel extends VerticalPanel
 		VerticalPanel ret = new VerticalPanel();
 
 		ret.setSpacing(5);
-		ret.setBorders(true);
 		ret.setStyleAttribute("background-color", "#EDEDED");
 		
 		pnlSearchSimple = new SimpleSearchPanel();
@@ -264,7 +264,8 @@ public class TRToolPanel extends VerticalPanel
 		pnlSearch = initSearchPanel();
 	
 		ContentPanel pnlInner = new ContentPanel();
-		pnlInner.setHeading("Search");
+		pnlInner.setLayout(new FitLayout());
+		pnlInner.setHeaderVisible(false);
 		
 		pnlInner.add(pnlSearch);
 		
