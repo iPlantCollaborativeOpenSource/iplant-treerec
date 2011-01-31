@@ -27,6 +27,7 @@ Readonly my %PREPROCESSOR_FOR => (
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
     'gene-family-details' => sub { $_[0]->get_gene_family_details( $_[2] ) },
+    'gene-family-summary' => sub { $_[0]->get_gene_family_summary( $_[2] ) },
     'species-tree'        => sub { $_[0]->get_species_tree_file( $_[2] ) },
     'species-data'        => sub { $_[0]->get_species_tree_data( $_[2] ) },
     'gene-tree'           => sub { $_[0]->get_gene_tree_file( $_[2] ) },

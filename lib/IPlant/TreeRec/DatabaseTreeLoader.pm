@@ -545,7 +545,7 @@ use Readonly;
         my $dbh    = $dbh_of{ ident $self };
         my $family = $dbh->resultset('Family')
             ->find( { 'stable_id' => $family_name } );
-        IPlant::TreeRec::GeneFamilyNotFound->throw()
+        IPlant::TreeRec::GeneFamilyNotFoundException->throw()
             if !defined $family;
 
         # Get the protein tree from the database.

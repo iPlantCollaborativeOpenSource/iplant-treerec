@@ -153,6 +153,39 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
+    # Usage      : $results_ref = $treerec->get_gene_family_summary(
+    #                  $family_name );
+    #
+    # Purpose    : Gets the summary information for the given gene family
+    #              name.  The results of this method are returned as a single-
+    #              element array reference in order to match the results of
+    #              the search methods.
+    #
+    # Returns    : A reference to a list containing the single gene family
+    #              summary or a reference to an empty list of the gene family
+    #              doesn't exist.
+    #
+    # Parameters : $family_name - the name of the gene family.
+    #
+    # Throws     : No exceptions.
+    sub get_gene_family_summary {
+        my ( $self, $family_name ) = @_;
+
+        # Fetch the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Load the results.
+        my @families = ( { name => $family_name } );
+        eval { $self->_load_gene_family_summaries(\@families) };
+        if ( my $e = IPlant::TreeRec::GeneFamilyNotFoundException->caught() )
+        {
+            @families = ();
+        }
+
+        return \@families;
+    }
+
+    ##########################################################################
     # Usage      : $results_ref
     #                  = $treerec->get_gene_family_details($family_name);
     #
