@@ -10,6 +10,7 @@ our $VERSION = '0.0.1';
 use Carp;
 use Class::Std::Utils;
 use IPlant::TreeRec::X;
+use JSON;
 
 {
     my %dbh_of;
@@ -96,11 +97,11 @@ use IPlant::TreeRec::X;
         my ( $self, $args_ref ) = @_;
 
         # Extract the arguments.
-        my $species_tree_name    = $args_ref->{speciesTreeName};
-        my $family_name          = $args_ref->{familyName};
-        my $species_node_id = $args_ref->{speciesTreeNode};
-        my $gene_node_id    = $args_ref->{geneTreeNode};
-        my $edge_selected        = $args_ref->{edgeSelected};
+        my $species_tree_name = $args_ref->{speciesTreeName};
+        my $family_name       = $args_ref->{familyName};
+        my $species_node_id   = $args_ref->{speciesTreeNode};
+        my $gene_node_id      = $args_ref->{geneTreeNode};
+        my $edge_selected     = $args_ref->{edgeSelected};
 
         # Validate the arguments.
         IPlant::TreeRec::IllegalArgumentException->throw()
@@ -108,7 +109,7 @@ use IPlant::TreeRec::X;
         IPlant::TreeRec::IllegalArgumentException->throw()
             if !defined $species_node_id && !defined $gene_node_id;
         IPlant::TreeRec::IllegalArgumentException->throw()
-            if defined $species_tree_name && defined $family_name;
+            if defined $species_node_id && defined $gene_node_id;
         IPlant::TreeRec::IllegalArgumentException->throw()
             if defined $species_node_id && !defined $edge_selected;
 
@@ -141,7 +142,22 @@ use IPlant::TreeRec::X;
     sub _resolve_species_node {
         my ( $self, $reconciliation, $search_params_ref ) = @_;
 
-        # TODO: implement me.
+        # Extract the search parameters.
+        my $species_node_id = $search_params_ref->{speciesTreeNode};
+        my $edge_selected   = $search_params_ref->{edgeSelected};
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Look up the matching reconciliation nodes.
+        my @nodes = $dbh->resultset('ReconciliationNode')->search(
+            {   'reconciliation_id'  => $reconciliation->id(),
+                'host_child_node_id' => $species_node_id,
+                'is_on_node'         => !$edge_selected,
+            }
+        );
+
+        return $self->_format_results( $search_params_ref, @nodes );
     }
 
     ##########################################################################
@@ -160,7 +176,56 @@ use IPlant::TreeRec::X;
     sub _resolve_gene_node {
         my ( $self, $reconciliation, $search_params_ref ) = @_;
 
-        # TODO: implement me.
+        # Extract the search parameters.
+        my $gene_node_id = $search_params_ref->{geneTreeNode};
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Look up the matching reconciliation nodes.
+        my @nodes = $dbh->resultset('ReconciliationNode')
+            ->search( { 'reconciliation_id' => $reconciliation->id(), 'node_id' => $gene_node_id, } );
+
+        return $self->_format_results( $search_params_ref, @nodes );
+    }
+
+    ##########################################################################
+    # Usage      : $results_ref = $resolver->_format_results(
+    #                  $search_params_ref, @nodes );
+    #
+    # Purpose    : Formats the results of a resolution.
+    #
+    # Returns    : The results as a reference to an array of hashes.  Each
+    #              hash is in the same format as the search parameters that
+    #              were passed to $resolver->resolve().
+    #
+    # Parameters : $search_params_ref - a reference to the search parameters.
+    #              @nodes             - a list of reconciliation nodes.
+    #
+    # Throws     : No exceptions.
+    sub _format_results {
+        my ( $self, $search_params_ref, @nodes ) = @_;
+
+        # Extract the search parameters we need.
+        my $species_tree_name = $search_params_ref->{speciesTreeName};
+        my $family_name       = $search_params_ref->{familyName};
+
+        # Format the results.
+        my @results;
+        for my $node (@nodes) {
+            my $edge_selected
+                = $node->is_on_node() ? JSON::false : JSON::true;
+            my $result_ref = {
+                'speciesTreeName' => $species_tree_name,
+                'familyName'      => $family_name,
+                'speciesTreeNode' => $node->host_child_node_id(),
+                'geneTreeNode'    => $node->node_id(),
+                'edgeSelected'    => $edge_selected,
+            };
+            push @results, $result_ref;
+        }
+
+        return \@results;
     }
 
     ##########################################################################

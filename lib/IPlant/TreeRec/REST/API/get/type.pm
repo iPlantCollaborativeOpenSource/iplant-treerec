@@ -18,16 +18,18 @@ use Readonly;
 
 # The argument preprocessing subroutines for the various object types.
 Readonly my %PREPROCESSOR_FOR => (
-    'species-tree' => \&_encode_species_tree_args,
-    'species-data' => \&_encode_species_tree_args,
+    'related-nodes' => \&_preprocess_reconciliation_args,
+    'species-tree'  => \&_encode_species_tree_args,
+    'species-data'  => \&_encode_species_tree_args,
 );
 
 # The supported HTTP methods for the various object types.
 Readonly my %SUPPORTED_METHODS_FOR => (
-    'species-tree' => [qw( GET POST )],
-    'species-data' => [qw( GET POST )],
-    'gene-tree'    => [qw( GET POST )],
-    'gene-data'    => [qw( GET POST )],
+    'related-nodes' => [qw( POST )],
+    'species-tree'  => [qw( GET POST )],
+    'species-data'  => [qw( GET POST )],
+    'gene-tree'     => [qw( GET POST )],
+    'gene-data'     => [qw( GET POST )],
 );
 
 # The name of the default species tree.
@@ -35,11 +37,12 @@ Readonly my $SPECIES_TREE => 'bowers_rosids';
 
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
-    'species-tree' => sub { $_[0]->get_species_tree_file($_[2]) },
-    'species-data' => sub { $_[0]->get_species_tree_data($_[2]) },
-    'gene-tree'    => sub { $_[0]->get_gene_tree_file($_[2]) },
-    'gene-data'    => sub { $_[0]->get_gene_tree_data($_[2]) },
-    'default'      => sub { $_[0]->get_file( $_[1], "" ) },
+    'related-nodes' => sub { $_[0]->resolve_reconciliations( $_[2] ) },
+    'species-tree'  => sub { $_[0]->get_species_tree_file( $_[2] ) },
+    'species-data'  => sub { $_[0]->get_species_tree_data( $_[2] ) },
+    'gene-tree'     => sub { $_[0]->get_gene_tree_file( $_[2] ) },
+    'gene-data'     => sub { $_[0]->get_gene_tree_data( $_[2] ) },
+    'default'       => sub { $_[0]->get_file( $_[1], "" ) },
 );
 
 use base 'IPlant::TreeRec::REST::Handler';
@@ -305,7 +308,7 @@ use base 'IPlant::TreeRec::REST::Handler';
 }
 
 ##########################################################################
-# Usage      : $json = _encode_specieds_tree_args($json);
+# Usage      : $json = _encode_species_tree_args($json);
 #
 # Purpose    : Encodes the JSON required by the subroutines used to fetch
 #              species tree information from the database.
@@ -322,6 +325,26 @@ sub _encode_species_tree_args {
         ? $json
         : JSON->new()->encode( { 'speciesTreeName' => $SPECIES_TREE, } );
     return $result;
+}
+
+##########################################################################
+# Usage      : $json = _preprocess_reconciliation_args($json);
+#
+# Purpose    : Preprocesses the arguments for reconciliation resolution.
+#
+# Returns    : The updated JSON string.
+#
+# Parameters : $json - the arguments provided in the message body.
+#
+# Throws     : No exceptions.
+sub _preprocess_reconciliation_args {
+    my ($orig) = @_;
+    my $json = JSON->new();
+    my $args_ref = $json->decode($orig);
+    if ( !defined $args_ref->{speciesTreeName} ) {
+        $args_ref->{speciesTreeName} = $SPECIES_TREE;
+    }
+    return $json->encode($args_ref);
 }
 
 1;

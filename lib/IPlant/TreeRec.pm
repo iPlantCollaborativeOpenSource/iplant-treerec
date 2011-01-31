@@ -18,6 +18,7 @@ use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastArgs;
 use IPlant::TreeRec::DuplicationEventFinder;
 use IPlant::TreeRec::ReconciliationLoader;
+use IPlant::TreeRec::ReconciliationResolver;
 use IPlant::TreeRec::TreeDataFormatter;
 use IPlant::TreeRec::Utils qw(camel_case_keys);
 use IPlant::TreeRec::X;
@@ -447,19 +448,57 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
-   # Usage      : ( $family_name, $species_tree_name ) = $treerec
-   #                  ->_extract_tree_args( $json, $required_arg );
-   #
-   # Purpose    : Extracts the arguments required to retrieve a tree from the
-   #              database.  If the given required argument doesn't exist then
-   #              an exception will be thrown.
-   #
-   # Returns    : The extracted arguments.
-   #
-   # Parameters : $json         - the JSON string.
-   #              $required_arg - the name of the required argument.
-   #
-   # Throws     : IPlant::TreeRec::IllegalArgumentException
+    # Usage      : $results_ref = $treerec->resolve_reconciliations($json);
+    #
+    # Purpose    : Searches for reconciliation nodes matching the given search
+    #              parameters.  The species tree name and family name are
+    #              always required.  The species tree node and edge-selected
+    #              flag are required to find gene tree nodes corresponding to
+    #              a species tree node.  The gene tree node is required to
+    #              find species tree nodes corresponding to a gene tree node.
+    #
+    # Returns    : A reference to an array of matching reconciliation node
+    #              information.  Eadch element in the result array is a fully
+    #              populated version of the search parameters hash.
+    #
+    # Parameters : speciesTreeName - the name of the species tree.
+    #              familyName      - the name of the gene family.
+    #              speciesTreeNode - the species tree node ID.
+    #              geneTreeNode    - the gene tree node ID.
+    #              edgeSelected    - true if the leading edge is selected.
+    #
+    # Throws     : IPlant::TreeRec::IllegalArgumentException
+    #              IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::ReconciliationNotFoundException
+    sub resolve_reconciliations {
+        my ( $self, $json ) = @_;
+
+        # Parse the JSON that was provided to us.
+        my $search_params_ref = JSON->new()->decode($json);
+
+        # Create a new reconciliation resolver.
+        my $dbh      = $dbh_of{ ident $self };
+        my $resolver = IPlant::TreeRec::ReconciliationResolver->new($dbh);
+
+        # Resolve the nodes.
+        return $resolver->resolve($search_params_ref);
+    }
+
+    ##########################################################################
+    # Usage      : ( $family_name, $species_tree_name ) = $treerec
+    #                  ->_extract_tree_args( $json, $required_arg );
+    #
+    # Purpose    : Extracts the arguments required to retrieve a tree from the
+    #              database.  If the given required argument doesn't exist
+    #              then an exception will be thrown.
+    #
+    # Returns    : The extracted arguments.
+    #
+    # Parameters : $json         - the JSON string.
+    #              $required_arg - the name of the required argument.
+    #
+    # Throws     : IPlant::TreeRec::IllegalArgumentException
     sub _extract_tree_args {
         my ( $self, $json, $required_arg ) = @_;
 
