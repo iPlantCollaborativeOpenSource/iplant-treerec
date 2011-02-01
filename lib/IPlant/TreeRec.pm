@@ -24,6 +24,10 @@ use IPlant::TreeRec::Utils qw(camel_case_keys);
 use IPlant::TreeRec::X;
 use List::MoreUtils qw(uniq);
 use Time::HiRes qw(time);
+use Readonly;
+
+# The default default species tree.
+Readonly my $DEFAULT_DEFAULT_SPECIES_TREE = 'bowers_rosids';
 
 {
     my %dbh_of;
@@ -31,14 +35,16 @@ use Time::HiRes qw(time);
     my %gene_family_info_of;
     my %file_retriever_of;
     my %blast_searcher_of;
+    my %default_species_tree_of;
 
     ##########################################################################
     # Usage      : $treerec = IPlant::TreeRec->new(
-    #                  {   dbh              => $dbh,
-    #                      gene_tree_loader => $tree_loader,
-    #                      gene_family_info => $info,
-    #                      file_retreiver   => $file_retriever,
-    #                      blast_searcher   => $blast_searcher,
+    #                  {   dbh                  => $dbh,
+    #                      gene_tree_loader     => $tree_loader,
+    #                      gene_family_info     => $info,
+    #                      file_retreiver       => $file_retriever,
+    #                      blast_searcher       => $blast_searcher,
+    #                      default_species_tree => $species_tree_name,
     #                  }
     #              );
     #
@@ -47,32 +53,40 @@ use Time::HiRes qw(time);
     #
     # Returns    : The new object.
     #
-    # Parameters : dbh              - the database handle.
-    #              gene_tree_loader - used to load gene trees.
-    #              gene_family_info - used to get gene family summaries.
-    #              file_retriever   - used to retrieve data files.
-    #              blast_searcher   - used to perform BLAST searches.
+    # Parameters : dbh                  - the database handle.
+    #              gene_tree_loader     - used to load gene trees.
+    #              gene_family_info     - used to get gene family summaries.
+    #              file_retriever       - used to retrieve data files.
+    #              blast_searcher       - used to perform BLAST searches.
+    #              default_species_tree - the default species tree.
     #
     # Throws     : IPlant::TreeRec::DatabaseException
     sub new {
         my ( $class, $args_ref ) = @_;
 
         # Extract the arguments.
-        my $dbh              = $args_ref->{dbh};
-        my $gene_tree_loader = $args_ref->{gene_tree_loader};
-        my $gene_family_info = $args_ref->{gene_family_info};
-        my $file_retriever   = $args_ref->{file_retriever};
-        my $blast_searcher   = $args_ref->{blast_searcher};
+        my $dbh                  = $args_ref->{dbh};
+        my $gene_tree_loader     = $args_ref->{gene_tree_loader};
+        my $gene_family_info     = $args_ref->{gene_family_info};
+        my $file_retriever       = $args_ref->{file_retriever};
+        my $blast_searcher       = $args_ref->{blast_searcher};
+        my $default_species_tree = $args_ref->{default_species_tree};
+
+        # Use the default default species tree if one wasn't provided.
+        if ( !defined $default_species_tree ) {
+            $default_species_tree = $DEFAULT_DEFAULT_SPECIES_TREE;
+        }
 
         # Create the new object.
         my $self = bless anon_scalar, $class;
 
         # Initialize the properties.
-        $dbh_of{ ident $self }              = $dbh;
-        $gene_tree_loader_of{ ident $self } = $gene_tree_loader;
-        $gene_family_info_of{ ident $self } = $gene_family_info;
-        $file_retriever_of{ ident $self }   = $file_retriever;
-        $blast_searcher_of{ ident $self }   = $blast_searcher;
+        $dbh_of{ ident $self }                  = $dbh;
+        $gene_tree_loader_of{ ident $self }     = $gene_tree_loader;
+        $gene_family_info_of{ ident $self }     = $gene_family_info;
+        $file_retriever_of{ ident $self }       = $file_retriever;
+        $blast_searcher_of{ ident $self }       = $blast_searcher;
+        $default_species_tree_of{ ident $self } = $default_species_treee;
 
         return $self;
     }
@@ -97,6 +111,7 @@ use Time::HiRes qw(time);
         delete $gene_family_info_of{ ident $self };
         delete $file_retriever_of{ ident $self };
         delete $blast_searcher_of{ ident $self };
+        delete $default_species_tree_of{ ident $self };
 
         return;
     }
@@ -186,20 +201,26 @@ use Time::HiRes qw(time);
     }
 
     ##########################################################################
-    # Usage      : $results_ref
-    #                  = $treerec->get_gene_family_details($family_name);
+    # Usage      : $results_ref = $treerec->get_gene_family_details(
+    #                  $family_name, $species_tree_name );
     #
     # Purpose    : Retrieves the gene family details for the given gene family
     #              name.
     #
     # Returns    : Detailed information about the gene family.
     #
-    # Parameters : $family_name - the gene family name.
+    # Parameters : $family_name       - the gene family name.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
     #              IPlant::TreeRec::TreeNotFoundException
     sub get_gene_family_details {
-        my ( $self, $family_name ) = @_;
+        my ( $self, $family_name, $species_tree_name ) = @_;
+
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
 
         # Fetch the tree loader and family info retreiver.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
