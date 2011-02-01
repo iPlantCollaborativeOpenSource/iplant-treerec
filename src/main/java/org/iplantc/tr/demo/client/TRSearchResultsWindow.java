@@ -48,9 +48,9 @@ public class TRSearchResultsWindow extends Window
 	public TRSearchResultsWindow(String searchTerms, String results, boolean showBlastColumns,
 			ClientCommand cmdViewFamily)
 	{
-		init(searchTerms, results);
 		this.showBlastColumns = showBlastColumns;
 		this.cmdViewFamily = cmdViewFamily;
+		init(searchTerms, results);
 	}
 
 	private void init(String heading, String results)
