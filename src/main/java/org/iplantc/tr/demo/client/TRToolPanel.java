@@ -18,9 +18,15 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.dev.json.JsonArray;
+import com.google.gwt.dev.json.JsonString;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -213,7 +219,7 @@ public class TRToolPanel extends VerticalPanel
 		if(term != null)
 		{
 			pnlSearchFamilyId.searchBegin();
-			searchService.getDetails(term, pnlSearchFamilyId.getSearchCallback(term));
+			searchService.getSummary(term, pnlSearchFamilyId.getSearchCallback(term));
 		}
 	}
 
@@ -455,7 +461,7 @@ public class TRToolPanel extends VerticalPanel
 						searchComplete();
 						if(value.equals(SEARCH_TYPE_FAMILY_ID))
 						{
-							showTreeViewer(result);
+							showFamilyIdResult(result);
 						}
 						else
 						{
@@ -581,11 +587,20 @@ public class TRToolPanel extends VerticalPanel
 		new TRSearchResultsWindow(heading, results, true, cmdView).show();
 	}
 
-	private void showTreeViewer(String result)
+	private void showFamilyIdResult(String result)
 	{
-		JsArray<JsTRSearchResult> arr = TRUtil.parseFamilies(result);
-		if(arr != null && arr.length() > 0)
-			cmdView.execute(arr.get(0).getName());
-		System.out.println("fam id search result = " + result);
+		JSONArray arr = TRUtil.parseItem(result).isArray();
+		if (arr != null && arr.size()>0)
+		{
+			JSONObject val = arr.get(0).isObject();
+			if(val != null) {
+				JSONString name = val.get("name").isString();
+				if (name!=null && !name.stringValue().isEmpty()) {
+					cmdView.execute(name.stringValue());
+					return;
+				}
+			}
+		}
+		MessageBox.alert("Not Found", "The gene family ID was not found.", null);
 	}
 }

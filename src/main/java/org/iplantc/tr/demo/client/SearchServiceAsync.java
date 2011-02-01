@@ -12,4 +12,5 @@ public interface SearchServiceAsync
 	void doGoTermSearch(String term, AsyncCallback<String> callback) throws IllegalArgumentException;
 	void doGoAccessionSearch(String term, AsyncCallback<String> callback) throws IllegalArgumentException;
 	void getDetails(String idGeneFamily, AsyncCallback<String> callback) throws IllegalArgumentException;
+	void getSummary(String idGeneFamily, AsyncCallback<String> callback) throws IllegalArgumentException;
 }

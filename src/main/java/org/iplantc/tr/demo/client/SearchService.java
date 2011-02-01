@@ -14,4 +14,5 @@ public interface SearchService extends RemoteService
 	String doGoTermSearch(String term) throws IllegalArgumentException;
 	String doGoAccessionSearch(String term) throws IllegalArgumentException;
 	String getDetails(String idGeneFamily) throws IllegalArgumentException;
+	String getSummary(String idGeneFamily) throws IllegalArgumentException;
 }
