@@ -67,6 +67,10 @@ __PACKAGE__->belongs_to(
     root_node => "IPlant::DB::TreeRec::Result::SpeciesTreeNode",
     { "foreign.species_tree_node_id" => "self.root_node_id" }
 );
+__PACKAGE__->belongs_to(
+    reconciliation => "IPlant::DB::TreeRec::Result::Reconciliation",
+    { "foreign.species_tree_id" => "self.species_tree_id" }
+);
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
