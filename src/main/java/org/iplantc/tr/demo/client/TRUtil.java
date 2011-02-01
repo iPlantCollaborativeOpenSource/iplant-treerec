@@ -13,7 +13,7 @@ public class TRUtil
 			return null;
 		}
 		
-		JSONObject jsonObj = (JSONObject)JSONParser.parse(json);
+		JSONObject jsonObj = (JSONObject)JSONParser.parseStrict(json);
 		JSONValue valItems = null;
 
 		// drill down to families array

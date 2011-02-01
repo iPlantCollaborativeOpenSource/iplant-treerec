@@ -156,7 +156,7 @@ public class TRViewerPanel extends ContentPanel
 				@Override
 				public void onSuccess(String result)
 				{
-					JSONObject jsonObj = (JSONObject)JSONParser.parse(result);
+					JSONObject jsonObj = (JSONObject)JSONParser.parseStrict(result);
 
 					//drill down from the extra wrapping perl provides
 					if(jsonObj != null)

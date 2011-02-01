@@ -1,11 +1,15 @@
 package org.iplantc.tr.demo.client.panels;
 
+import java.util.ArrayList;
+
+import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEvent;
+import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEventHandler;
+
 import com.extjs.gxt.ui.client.util.Point;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Random;
 
 /**
- * Channel panel containing species tree.
+ * Channel panel containing gene tree.
  * 
  * @author amuir
  * 
@@ -20,11 +24,13 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	 * @param id unique id for this panel.
 	 * @param jsonTree tree data.
 	 * @param layoutTree layout data.
+	 * @param geneFamName gene family id
 	 */
 	public GeneTreeChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
-			String layoutTree)
+			String layoutTree, String geneFamId)
 	{
-		super(eventbus, caption, id, jsonTree, layoutTree);
+		super(eventbus, caption, id, jsonTree, layoutTree, geneFamId);
+		eventbus.addHandler(HighlightSpeciationInGeneTreeEvent.TYPE, new HighlightSpeciationInGeneTreeEventHandlerImpl());
 	}
 
 	/**
@@ -34,7 +40,6 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	{
 		treeView.clearHighlights();
 		treeView.highlight(idNode);
-
 		treeView.requestRender();
 	}
 
@@ -51,14 +56,14 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleSpeciesTreeInvestigationNodeSelect(int idNode, Point p)
 	{
-		int cntNodes = treeView.getTree().getNumberOfNodes();
-
-		treeView.clearHighlights();
-
-		int id = 1 + Random.nextInt(cntNodes - 2);
-
-		treeView.highlight(id);
-		treeView.zoomToFitSubtree(id);
+//		int cntNodes = treeView.getTree().getNumberOfNodes();
+//
+//		treeView.clearHighlights();
+//
+//		int id = 1 + Random.nextInt(cntNodes - 2);
+//
+//		treeView.highlight(id);
+//		treeView.zoomToFitSubtree(id);
 		
 	}
 
@@ -67,11 +72,11 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleSpeciesTreeNavNodeSelect(int idNode, Point p)
 	{
-		int cntNodes = treeView.getTree().getNumberOfNodes();
-
-		int id = 1 + Random.nextInt(cntNodes - 2);
-
-		treeView.zoomToFitSubtree(id);
+//		int cntNodes = treeView.getTree().getNumberOfNodes();
+//
+//		int id = 1 + Random.nextInt(cntNodes - 2);
+//
+//		treeView.zoomToFitSubtree(id);
 		
 		
 	}
@@ -80,6 +85,23 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
 	{
 		// TODO Auto-generated method stub
+		
+	}
+	
+	private class HighlightSpeciationInGeneTreeEventHandlerImpl implements HighlightSpeciationInGeneTreeEventHandler
+	{
+
+		@Override
+		public void onFire(HighlightSpeciationInGeneTreeEvent event)
+		{
+			ArrayList<Integer> idNodes = event.getNodesToHighlight();
+			
+			for (int i = 0 ;i < idNodes.size(); i++)
+			{
+				treeView.highlight(idNodes.get(i));
+			}
+			
+		}
 		
 	}
 	

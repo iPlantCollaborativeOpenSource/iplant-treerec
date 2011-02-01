@@ -13,6 +13,5 @@ public class TRViewerWindow extends Window
 		setLayout(new FitLayout());
 		pnl = new TestContainerPanel();
 		add(pnl);
-		setSize(936, 596);
 	}
 }

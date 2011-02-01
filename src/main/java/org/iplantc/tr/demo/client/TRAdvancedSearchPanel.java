@@ -45,7 +45,9 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{
 		if(params != null)
 		{
-			new TRViewerWindow(searchService, params).show();
+			TRViewerWindow  win = new TRViewerWindow(searchService, params);
+			win.show();
+			win.maximize();
 		}
 	}
 	
