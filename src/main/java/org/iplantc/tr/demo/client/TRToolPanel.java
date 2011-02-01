@@ -588,6 +588,11 @@ public class TRToolPanel extends VerticalPanel
 		new TRSearchResultsWindow(heading, results, true, cmdView).show();
 	}
 
+	/**
+	 * Shows the tree viewer if the result contains a non-empty "name" value and a non-empty "gene_count" value.
+	 * Otherwise, an error window is shown.
+	 * @param result
+	 */
 	private void showFamilyIdResult(String result)
 	{
 		JSONArray arr = TRUtil.parseItem(result).isArray();
@@ -599,8 +604,11 @@ public class TRToolPanel extends VerticalPanel
 				JSONString name = val.get("name").isString();
 				if(name != null && !name.stringValue().isEmpty())
 				{
-					cmdView.execute(name.stringValue());
-					return;
+					if (val.get("gene_count") != null)
+					{
+						cmdView.execute(name.stringValue());
+						return;
+					}
 				}
 			}
 		}
