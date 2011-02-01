@@ -17,16 +17,12 @@ import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
-import com.google.gwt.core.client.JsArray;
-import com.google.gwt.dev.json.JsonArray;
-import com.google.gwt.dev.json.JsonString;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -196,6 +192,28 @@ public class TRToolPanel extends VerticalPanel
 		return ret;
 	}
 
+	private void performSearch()
+	{
+		String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
+
+		if(type.equals(SEARCH_TYPE_GENE_NAME))
+		{
+			performGeneIdSearch(pnlSearchGeneName.getSearchTerm());
+		}
+		else if(type.equals(SEARCH_TYPE_BLAST))
+		{
+			performBLASTSearch(pnlSearchBlast.getSearchTerms());
+		}
+		else if(type.equals(SEARCH_TYPE_GO))
+		{
+			performGoTermSearch(pnlSearchGO.getSearchTerm());
+		}
+		else if(type.equals(SEARCH_TYPE_FAMILY_ID))
+		{
+			performGoAccessionSearch(pnlSearchFamilyId.getSearchTerm());
+		}
+	}
+
 	private void performGeneIdSearch(final String term)
 	{
 		if(searchService != null && term != null)
@@ -253,24 +271,7 @@ public class TRToolPanel extends VerticalPanel
 					@Override
 					public void componentSelected(ButtonEvent ce)
 					{
-						String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
-
-						if(type.equals(SEARCH_TYPE_GENE_NAME))
-						{
-							performGeneIdSearch(pnlSearchGeneName.getSearchTerm());
-						}
-						else if(type.equals(SEARCH_TYPE_BLAST))
-						{
-							performBLASTSearch(pnlSearchBlast.getSearchTerms());
-						}
-						else if(type.equals(SEARCH_TYPE_GO))
-						{
-							performGoTermSearch(pnlSearchGO.getSearchTerm());
-						}
-						else if(type.equals(SEARCH_TYPE_FAMILY_ID))
-						{
-							performGoAccessionSearch(pnlSearchFamilyId.getSearchTerm());
-						}
+						performSearch();
 					}
 				});
 		btn.setEnabled(false);
@@ -410,7 +411,7 @@ public class TRToolPanel extends VerticalPanel
 					String text = ret.getValue();
 					if(event.getKeyCode() == KeyCodes.KEY_ENTER)
 					{
-						performGeneIdSearch(text);
+						performSearch();
 					}
 					searchButton.setEnabled(text != null && !text.isEmpty());
 				}
@@ -590,12 +591,14 @@ public class TRToolPanel extends VerticalPanel
 	private void showFamilyIdResult(String result)
 	{
 		JSONArray arr = TRUtil.parseItem(result).isArray();
-		if (arr != null && arr.size()>0)
+		if(arr != null && arr.size() > 0)
 		{
 			JSONObject val = arr.get(0).isObject();
-			if(val != null) {
+			if(val != null)
+			{
 				JSONString name = val.get("name").isString();
-				if (name!=null && !name.stringValue().isEmpty()) {
+				if(name != null && !name.stringValue().isEmpty())
+				{
 					cmdView.execute(name.stringValue());
 					return;
 				}
