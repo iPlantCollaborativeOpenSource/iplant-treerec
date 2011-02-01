@@ -27,7 +27,7 @@ use Time::HiRes qw(time);
 use Readonly;
 
 # The default default species tree.
-Readonly my $DEFAULT_DEFAULT_SPECIES_TREE = 'bowers_rosids';
+Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
 {
     my %dbh_of;
@@ -86,7 +86,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE = 'bowers_rosids';
         $gene_family_info_of{ ident $self }     = $gene_family_info;
         $file_retriever_of{ ident $self }       = $file_retriever;
         $blast_searcher_of{ ident $self }       = $blast_searcher;
-        $default_species_tree_of{ ident $self } = $default_species_treee;
+        $default_species_tree_of{ ident $self } = $default_species_tree;
 
         return $self;
     }
