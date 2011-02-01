@@ -41,6 +41,8 @@ public abstract class TreeChannelPanel extends ContentPanel
 	private final String layoutTree;
 
 	protected EventBus eventbus;
+	
+	protected String geneFamName;
 
 	/**
 	 * Instantiate from an event bus, caption, id, tree and layout
@@ -50,13 +52,15 @@ public abstract class TreeChannelPanel extends ContentPanel
 	 * @param id unique id for this panel.
 	 * @param jsonTree tree data.
 	 * @param layoutTree layout data.
+	 * @param geneFamName gene family id
 	 */
 	public TreeChannelPanel(final EventBus eventbus, final String caption, final String id,
-			final String jsonTree, final String layoutTree)
+			final String jsonTree, final String layoutTree, String geneFamId)
 	{
 		this.eventbus = eventbus;
 		this.jsonTree = jsonTree;
 		this.layoutTree = layoutTree;
+		this.geneFamName = geneFamId;
 
 		init(caption, id);
 

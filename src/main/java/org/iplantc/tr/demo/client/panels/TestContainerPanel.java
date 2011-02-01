@@ -61,6 +61,8 @@ public class TestContainerPanel extends EventBusContainer
 		receiversSelect.add(receiverSelect);
 
 		containerOuter.add(pnl);
+		// set our default mode
+		toggleMode(Mode.NAVIGATE);
 		layout();
 	}
 
@@ -77,6 +79,8 @@ public class TestContainerPanel extends EventBusContainer
 		receiversSelect.add(receiverSelect);
 
 		containerOuter.add(pnl);
+		// set our default mode
+		toggleMode(Mode.NAVIGATE);
 		layout();
 	}
 
@@ -169,8 +173,6 @@ public class TestContainerPanel extends EventBusContainer
 
 		treeRetriever.getGeneTree(null, new GeneTreeRetrieverCallBack());
 		
-		// set our default mode
-		toggleMode(Mode.NAVIGATE);
 
 		// show
 		add(pnlOuter);
@@ -182,7 +184,7 @@ public class TestContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addSpeciesTreePanel(pnlOuter, new SpeciesTreeChannelPanel(eventbus, "Species Tree",
-					"idSpeciesTree", getTree(), getLayout()));
+					"idSpeciesTree", getTree(), getLayout(), "pg00892"));
 		}
 		
 	}
@@ -193,7 +195,7 @@ public class TestContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addGeneTreePanel(pnlOuter, new GeneTreeChannelPanel(eventbus, "Gene Tree", "idGeneTree",
-			getTree(), getLayout()));
+			getTree(), getLayout(),"pg00892"));
 		}
 		
 	}

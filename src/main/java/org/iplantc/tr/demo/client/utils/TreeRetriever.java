@@ -4,7 +4,6 @@ import org.iplantc.tr.demo.client.services.LayoutServiceFacade;
 import org.iplantc.tr.demo.client.services.TreeServices;
 
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 
@@ -18,13 +17,14 @@ public class TreeRetriever
 	
 	public void getSpeciesTree(String geneFamilyID, final TreeRetrieverCallBack callback)
 	{
-		TreeServices.getSpeciesData(new AsyncCallback<String>()
+		TreeServices.getSpeciesData("pg00892", new AsyncCallback<String>()
 		{
 			
 			@Override
 			public void onSuccess(String result)
 			{
-				final String tree = parseTreeJson(result) ;
+				JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+				final String tree = JsonUtil.getObject(o1, "item").toString();
 				if (tree != null)
 				{
 					LayoutServiceFacade.getInstance().getLayout(tree, new AsyncCallback<String>()
@@ -65,14 +65,15 @@ public class TreeRetriever
 			public void onFailure(Throwable caught)
 			{
 				System.out.println(caught.toString());
-				
 			}
 
 			@Override
 			public void onSuccess(String result)
 			{
 				
-				final String tree = parseTreeJson(result) ;
+				JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+				JSONObject o2 = JsonUtil.getObject(o1, "item").isObject();
+				final String tree = JsonUtil.getObject(o2, "gene-tree").toString();
 				if (tree != null)
 				{
 					LayoutServiceFacade.getInstance().getLayout(tree, new AsyncCallback<String>()
@@ -96,22 +97,6 @@ public class TreeRetriever
 				}
 			}
 		});
-	}
-	
-	private String parseTreeJson (String json)
-	{
-		String tree = null;
-		JSONObject obj = JSONParser.parseStrict(json).isObject();
-		if (obj != null)
-		{
-			final JSONObject obj1 = obj.get("data").isObject();
-			if(obj1 != null)
-			{
-				tree = obj1.get("item").toString();
-			}
-		}
-		
-		return tree;
 	}
 	
 }

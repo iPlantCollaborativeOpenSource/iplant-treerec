@@ -195,6 +195,30 @@ public class JsonUtil
 
 		return ret;
 	}
+	
+	/**
+	 * 
+	 * @param jsonObj
+	 * @param key
+	 * @return
+	 */
+	public static JSONArray getArray(final JSONObject jsonObj, final String key)
+	{
+		JSONArray ret = null; // assume failure
+
+		if(jsonObj != null && key != null)
+		{
+			JSONValue val = jsonObj.get(key);
+
+			if(val != null)
+			{
+				ret = val.isArray();
+			}
+		}
+
+		return ret;
+	}
+	
 
 	/**
 	 * Returns the JSONObject at a given array index, or null if there is no JSONObject at
