@@ -248,8 +248,7 @@ use Time::HiRes qw(time);
         my $tree_loader = $gene_tree_loader_of{ ident $self };
 
         # Load the tree.
-        my $tree = $tree_loader->load_gene_tree( $family_name,
-            $species_tree_name );
+        my $tree = $tree_loader->load_gene_tree($family_name);
 
         # Format and return the tree.
         my $filename     = "${family_name}_genetree.nhx";
@@ -288,8 +287,7 @@ use Time::HiRes qw(time);
         my $rec_loader  = IPlant::TreeRec::ReconciliationLoader->new($dbh);
 
         # Load the tree.
-        my $tree = $tree_loader->load_gene_tree( $family_name,
-            $species_tree_name );
+        my $tree = $tree_loader->load_gene_tree($family_name);
 
         # Load the reconciliation if we're supposed to.
         my $reconciliation;
@@ -330,8 +328,7 @@ use Time::HiRes qw(time);
         my $tree_loader = $gene_tree_loader_of{ ident $self };
 
         # Load the tree.
-        my $tree = $tree_loader->load_species_tree( $species_tree_name,
-            $family_name );
+        my $tree = $tree_loader->load_species_tree($species_tree_name);
 
         # Determine the file name.
         my $filename
@@ -370,8 +367,7 @@ use Time::HiRes qw(time);
         my $formatter   = IPlant::TreeRec::TreeDataFormatter->new();
 
         # Load the tree.
-        my $tree = $tree_loader->load_species_tree( $species_tree_name,
-            $family_name );
+        my $tree = $tree_loader->load_species_tree($species_tree_name);
 
         # Format and return the tree.
         return $formatter->format_tree($tree);
