@@ -14,7 +14,6 @@ import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
@@ -180,14 +179,6 @@ public class TRSearchResultsWindow extends Window
 		}
 	}
 
-	private void updateSearchPanelCaption(String term)
-	{
-		if(pnlGrid != null)
-		{
-			pnlGrid.setHeading("Results for:" + term);
-		}
-	}
-
 	private ToolBar buildButtonBar()
 	{
 		ToolBar ret = new ToolBar();
@@ -290,8 +281,7 @@ public class TRSearchResultsWindow extends Window
 		public Object render(final TRSearchResult result, String property, ColumnData config, int rowIndex,
 				int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
 		{
-			HTML numTerms = new HTML(result.getNumGoTerms());
-			HTML link = new HTML("<a href=\"#\">(view all)</a>");
+			HTML link = new HTML(result.getNumGoTerms() + " <a href=\"#\"> (view all)</a>");
 			link.addClickHandler(new ClickHandler()
 			{
 				@Override
@@ -300,13 +290,7 @@ public class TRSearchResultsWindow extends Window
 					showWordCloud(result);
 				}
 			});
-			
-			HorizontalPanel panel = new HorizontalPanel();
-			panel.setLayout(new FitLayout());
-			panel.add(numTerms);
-			panel.add(link);
-			
-			return panel;
+			return link;
 		}
 		
 		private void showWordCloud(TRSearchResult result) {

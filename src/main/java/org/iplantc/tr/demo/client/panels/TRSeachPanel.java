@@ -22,6 +22,7 @@ import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.VerticalPanel;
+import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 
 /**
  * @author sriram
@@ -72,6 +73,9 @@ public class TRSeachPanel extends EventBusContainer
 					{
 						TRAdvancedSearchPanel advPanel = new TRAdvancedSearchPanel();
 						Dialog d = new Dialog();
+						d.setLayout(new CenterLayout());
+						d.setHeading("Search");
+						d.setSize(413, 279);
 						d.add(advPanel);
 						d.show();
 					}

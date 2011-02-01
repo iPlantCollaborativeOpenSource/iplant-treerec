@@ -4,6 +4,7 @@ import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.VerticalPanel;
+import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Element;
@@ -24,14 +25,14 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{			
 		setHeaderVisible(false);
 		initInnerPanel();
+		setLayout(new FitLayout());
 		setScrollMode(Scroll.AUTO);
 	}
 
 	private void initInnerPanel()
 	{
 		pnlInner = new VerticalPanel();
-		pnlInner.setSpacing(10);
-		pnlInner.setStyleAttribute("background-color", "white");		
+		pnlInner.setLayout(new FitLayout());
 	}
 	
 	private void initTableData()
