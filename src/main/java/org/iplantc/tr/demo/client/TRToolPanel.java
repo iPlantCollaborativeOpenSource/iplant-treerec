@@ -294,6 +294,7 @@ public class TRToolPanel extends VerticalPanel
 
 		ret.add(buildSearchTypeSelectionPanel());
 		ret.add(pnlSearchBlast);
+		pnlSearchBlast.setFocusWidget();
 
 		return ret;
 	}
