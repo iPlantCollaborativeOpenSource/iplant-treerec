@@ -76,9 +76,12 @@ use Readonly;
     sub load {
         my ( $self, $species_tree_name, $family_name ) = @_;
 
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
         # Get the reconciliation.
-        my $reconciliation
-            = $self->_get_reconciliation( $species_tree_name, $family_name );
+        my $reconciliation = $dbh->resultset('Reconciliation')
+            ->for_species_tree_and_family( $species_tree_name, $family_name );
 
         return {
             speciesToGene => $self->_species_to_gene($reconciliation),
@@ -206,98 +209,6 @@ use Readonly;
             :                       'duplication';
 
         return $event_type;
-    }
-
-    ##########################################################################
-    # Usage      : $reconciliation = $loader->_get_reconciliation(
-    #                  $species_tree_name, $family_name );
-    #
-    # Purpose    : Retrieves a reconciliation from the database.
-    #
-    # Returns    : The reconciliation.
-    #
-    # Parameters : $species_tree_name - the name of the species tree.
-    #              $family_name       - the name of the gene family.
-    #
-    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
-    #              IPlant::TreeRec::TreeNotFoundException
-    #              IPlant::TreeRec::ReconciliationNotFoundException
-    sub _get_reconciliation {
-        my ( $self, $species_tree_name, $family_name ) = @_;
-
-        # Get the species tree and protein tree.
-        my $species_tree = $self->_get_species_tree($species_tree_name);
-        my $protein_tree = $self->_get_protein_tree($family_name);
-
-        # Get the database handle.
-        my $dbh = $dbh_of{ ident $self };
-
-        # Get the reconciliation.
-        my $reconciliation = $dbh->resultset('Reconciliation')->find(
-            {   'species_tree_id' => $species_tree->id(),
-                'protein_tree_id' => $protein_tree->id(),
-            }
-        );
-        IPlant::TreeRec::ReconciliationNotFoundException->throw()
-            if !defined $reconciliation;
-
-        return $reconciliation;
-    }
-
-    ##########################################################################
-    # Usage      : $reconciliation = $loader->_get_species_tree(
-    #                  $species_tree_name );
-    #
-    # Purpose    : Retrieves a species tree from the database.
-    #
-    # Returns    : $species_tree_name - the name of the species tree.
-    #
-    # Parameters : $species_tree_name - the name of the species tree.
-    #
-    # Throws     : IPlant::TreeRec::TreeNotFoundException
-    sub _get_species_tree {
-        my ( $self, $species_tree_name ) = @_;
-
-        # Get the database handle.
-        my $dbh = $dbh_of{ ident $self };
-
-        # Get the species tree.
-        my $species_tree = $dbh->resultset('SpeciesTree')
-            ->find( { 'species_tree_name' => $species_tree_name } );
-        IPlant::TreeRec::TreeNotFoundException->throw()
-            if !defined $species_tree;
-
-        return $species_tree;
-    }
-
-    ##########################################################################
-    # Usage      : $tree = $loader->_get_protein_tree($family_name);
-    #
-    # Purpose    : Retrieves the protein tree for the given gene family name
-    #              from the database.
-    #
-    # Returns    : The protein tree.
-    #
-    # Parameters : $family_name - the name of the gene family.
-    #
-    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
-    #              IPlant::TreeRec::TreeNotFoundException
-    sub _get_protein_tree {
-        my ( $self, $family_name ) = @_;
-
-        # Get the gene family.
-        my $dbh    = $dbh_of{ ident $self };
-        my $family = $dbh->resultset('Family')
-            ->find( { 'stable_id' => $family_name } );
-        IPlant::TreeRec::GeneFamilyNotFound->throw()
-            if !defined $family;
-
-        # Get the protein tree from the database.
-        my $db_tree = $family->protein_tree();
-        IPlant::TreeRec::TreeNotFoundException->throw()
-            if !defined $db_tree;
-
-        return $db_tree;
     }
 }
 

@@ -48,7 +48,7 @@ __PACKAGE__->set_primary_key("protein_tree_id");
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sH1nI0G3YJU+RazMybUdfg
 
 __PACKAGE__->belongs_to(
-    protein_tree => "IPlant::DB::TreeRec::Result::Family",
+    family => "IPlant::DB::TreeRec::Result::Family",
     { "foreign.family_id" => "self.family_id" }
 );
 __PACKAGE__->has_many(
@@ -58,6 +58,10 @@ __PACKAGE__->has_many(
 __PACKAGE__->has_one(
     root_node => "IPlant::DB::TreeRec::Result::ProteinTreeNode",
     { "foreign.node_id" => "self.root_node_id" }
+);
+__PACKAGE__->belongs_to(
+    reconciliation => "IPlant::DB::TreeRec::Result::Reconciliation",
+    { "foreign.protein_tree_id" => "self.protein_tree_id" }
 );
 
 # You can replace this text with custom content, and it will be preserved on regeneration

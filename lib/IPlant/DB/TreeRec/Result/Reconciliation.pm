@@ -63,6 +63,14 @@ __PACKAGE__->has_many(
     nodes => "IPlant::DB::TreeRec::Result::ReconciliationNode",
     { "foreign.reconciliation_id" => "self.reconciliation_id" }
 );
+__PACKAGE__->has_one(
+    species_tree => "IPlant::DB::TreeRec::Result::SpeciesTree",
+    { "foreign.species_tree_id" => "self.species_tree_id" }
+);
+__PACKAGE__->has_one(
+    protein_tree => "IPlant::DB::TreeRec::Result::ProteinTree",
+    { "foreign.protein_tree_id" => "self.protein_tree_id" }
+);
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

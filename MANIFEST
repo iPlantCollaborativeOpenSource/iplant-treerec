@@ -32,6 +32,9 @@ lib/IPlant/DB/TreeRec/Result/SpeciesTreeAttribute.pm
 lib/IPlant/DB/TreeRec/Result/SpeciesTreeNode.pm
 lib/IPlant/DB/TreeRec/Result/SpeciesTreeNodeAttribute.pm
 lib/IPlant/DB/TreeRec/Result/SpeciesTreeNodePath.pm
+lib/IPlant/DB/TreeRec/ResultSet/ProteinTree.pm
+lib/IPlant/DB/TreeRec/ResultSet/Reconciliation.pm
+lib/IPlant/DB/TreeRec/ResultSet/SpeciesTree.pm
 lib/IPlant/TreeRec.pm
 lib/IPlant/TreeRec/BlastArgs.pm
 lib/IPlant/TreeRec/BlastSearcher.pm
