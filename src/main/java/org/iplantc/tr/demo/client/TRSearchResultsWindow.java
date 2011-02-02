@@ -7,6 +7,10 @@ import org.iplantc.tr.demo.client.images.Resources;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
+import com.extjs.gxt.ui.client.data.BasePagingLoader;
+import com.extjs.gxt.ui.client.data.PagingLoadResult;
+import com.extjs.gxt.ui.client.data.PagingLoader;
+import com.extjs.gxt.ui.client.data.PagingModelMemoryProxy;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
@@ -23,6 +27,7 @@ import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
+import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -38,20 +43,21 @@ public class TRSearchResultsWindow extends Window
 	private ClientCommand cmdViewFamily;
 	private ArrayList<Button> buttons;
 	private ContentPanel pnlGrid;
+	private PagingToolBar pageBar;
 
 	public TRSearchResultsWindow(String searchTerms, String results, boolean showBlastColumns,
 			ClientCommand cmdViewFamily)
 	{
-		init(searchTerms, results);
 		this.showBlastColumns = showBlastColumns;
 		this.cmdViewFamily = cmdViewFamily;
+		init(searchTerms, results);
 	}
 
 	private void init(String heading, String results)
 	{
 		buttons = new ArrayList<Button>();
 		setHeading("Tree Reconciliation Search Results");
-		gridResults = buildGrid(results);
+		buildGrid(results);
 		setLayout(new FitLayout());
 		pnlGrid = new ContentPanel();
 		pnlGrid.setLayout(new FitLayout());
@@ -63,39 +69,51 @@ public class TRSearchResultsWindow extends Window
 	private void compose()
 	{
 		pnlGrid.add(gridResults);
+		pnlGrid.setBottomComponent(pageBar);
 		add(pnlGrid);
 	}
 
-	private Grid<TRSearchResult> buildGrid(String json)
+	/**
+	 * Builds the grid and the paging tool bar.
+	 * @param json
+	 */
+	private void buildGrid(String json)
 	{
-		ListStore<TRSearchResult> store = new ListStore<TRSearchResult>();
 		JsArray<JsTRSearchResult> arr = TRUtil.parseFamilies(json);
 
+		List<TRSearchResult> results = new ArrayList<TRSearchResult>();
 		if(arr != null)
 		{
 			for(int i = 0,len = arr.length();i < len;i++)
 			{
 				TRSearchResult item = new TRSearchResult(arr.get(i));
-				store.add(item);
+				results.add(item);
 			}
 		}
 
+		PagingModelMemoryProxy proxy = new PagingModelMemoryProxy(results);
+		PagingLoader<PagingLoadResult<?>> loader = new BasePagingLoader<PagingLoadResult<?>>(proxy);
+		ListStore<TRSearchResult> store = new ListStore<TRSearchResult>(loader);
+		pageBar = new PagingToolBar(20);
+		pageBar.bind(loader);
+		loader.load(0, 20);
+
 		final ColumnModel cm = buildColumnModel();
 
-		final Grid<TRSearchResult> ret = new Grid<TRSearchResult>(store, cm);
+		gridResults = new Grid<TRSearchResult>(store, cm);
 
-		ret.getSelectionModel().setSelectionMode(SelectionMode.MULTI);
-		ret.setAutoExpandColumn("name");
+		gridResults.getSelectionModel().setSelectionMode(SelectionMode.MULTI);
+		gridResults.setAutoExpandColumn("name");
 
-		ret.getView().setEmptyText("No results to display.");
-		ret.getView().setForceFit(true);
+		gridResults.getView().setEmptyText("No results to display.");
+		gridResults.getView().setForceFit(true);
 
-		ret.getSelectionModel().addListener(Events.SelectionChange, new Listener<BaseEvent>()
+		gridResults.getSelectionModel().addListener(Events.SelectionChange, new Listener<BaseEvent>()
 		{
 			@Override
 			public void handleEvent(BaseEvent be)
 			{
-				if(ret.getSelectionModel().getSelectedItems().size() == 0)
+				if(gridResults.getSelectionModel().getSelectedItems().size() == 0)
 				{
 					disableButton(TR_VIEW_BTN_ID);
 				}
@@ -105,8 +123,6 @@ public class TRSearchResultsWindow extends Window
 				}
 			}
 		});
-
-		return ret;
 	}
 
 	// build column with custom renderer

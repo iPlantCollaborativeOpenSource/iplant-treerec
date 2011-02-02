@@ -199,4 +199,26 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		return ret;
 	}	
+	
+	//retrieve summary of a gene family
+	@Override
+	public String getSummary(String idGeneFamily) throws IllegalArgumentException
+	{
+		String ret = "";
+
+		try
+		{
+			// TODO change back to gargery when it's updated
+//			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
+			URLConnection connection = get("http://votan.iplantcollaborative.org/" + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
+
+			ret = retrieveResult(connection);
+		}
+		catch(IOException e)
+		{
+			throw new IllegalArgumentException("Search failed.", e);
+		}
+
+		return ret;
+	}	
 }

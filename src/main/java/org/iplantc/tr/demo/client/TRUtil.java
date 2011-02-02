@@ -7,26 +7,34 @@ import com.google.gwt.json.client.JSONValue;
 
 public class TRUtil
 {
-	static JsArray<JsTRSearchResult> parseFamilies(String json)
+	static JSONValue parseItem(String json)
 	{
 		if(json == null) {
 			return null;
 		}
 		
 		JSONObject jsonObj = (JSONObject)JSONParser.parseStrict(json);
-		JSONValue valItems = null;
 
-		// drill down to families array
+		// drill down to "item" key
 		JSONValue val = jsonObj.get("data");
 
 		if(val != null)
 		{
 			val = ((JSONObject)val).get("item");
+		}
 
-			if(val != null)
-			{
-				valItems = ((JSONObject)val).get("families");
-			}
+		return val;
+	}
+	
+	static JsArray<JsTRSearchResult> parseFamilies(String json)
+	{
+		JSONValue val = parseItem(json);
+		JSONValue valItems = null;
+
+		// get families array in the "item" node
+		if(val != null)
+		{
+			valItems = ((JSONObject)val).get("families");
 		}
 
 		if(!isEmpty(valItems))

@@ -17,12 +17,12 @@ import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.widget.Component;
-import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.VerticalPanel;
-import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
+import com.extjs.gxt.ui.client.widget.Window;
+import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 
 /**
  * @author sriram
@@ -72,12 +72,12 @@ public class TRSeachPanel extends EventBusContainer
 					public void handleEvent(BaseEvent be)
 					{
 						TRAdvancedSearchPanel advPanel = new TRAdvancedSearchPanel();
-						Dialog d = new Dialog();
-						d.setLayout(new CenterLayout());
-						d.setHeading("Search");
-						d.setSize(413, 279);
-						d.add(advPanel);
-						d.show();
+						Window w = new Window();
+						w.setLayout(new FitLayout());
+						w.setHeading("Search");
+						w.setSize(399, 229);
+						w.add(advPanel);
+						w.show();
 					}
 				});
 		pnl.add(link);

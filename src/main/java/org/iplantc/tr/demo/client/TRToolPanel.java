@@ -2,7 +2,6 @@ package org.iplantc.tr.demo.client;
 
 import java.util.List;
 
-import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
 import com.extjs.gxt.ui.client.event.KeyListener;
@@ -18,12 +17,12 @@ import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
-import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.extjs.gxt.ui.client.widget.layout.TableData;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,7 +41,7 @@ public class TRToolPanel extends VerticalPanel
 
 	private ListBox selectSearchType;
 
-	private VerticalPanel pnlSearch;
+	private ContentPanel pnlSearch;
 
 	private SimpleSearchPanel pnlSearchGeneName;
 	private SimpleSearchPanel pnlSearchGO;
@@ -50,29 +49,40 @@ public class TRToolPanel extends VerticalPanel
 
 	private BLASTSearchPanel pnlSearchBlast;
 
+	private HorizontalPanel pnlButtons;
+	private Button searchButton;
+	private Button cancelButton;
+	private Status waitIcon;
+
 	private SearchServiceAsync searchService;
 	private ClientCommand cmdView;
 	private ClientCommand cmdSearchBegin;
 	private ClientCommand cmdSearchComplete;
-	
-	
-	public TRToolPanel(SearchServiceAsync searchService,ClientCommand cmdView, ClientCommand cmdSearchBegin, ClientCommand cmdSearchComplete)
+
+	public TRToolPanel(SearchServiceAsync searchService, ClientCommand cmdView,
+			ClientCommand cmdSearchBegin, ClientCommand cmdSearchComplete)
 	{
 		this.searchService = searchService;
 		this.cmdView = cmdView;
 		this.cmdSearchBegin = cmdSearchBegin;
 		this.cmdSearchComplete = cmdSearchComplete;
-		
+
 		init();
-		
+
 		compose();
 	}
 
 	private void init()
 	{
-		setSpacing(5);		
+		waitIcon = new Status();
+		buildButtonPanel();
 	}
 
+	/**
+	 * Removes all search panels from this panel
+	 * 
+	 * @param pnl
+	 */
 	private void removeSearchPanelFromLayoutContainer(LayoutContainer pnl)
 	{
 		List<Component> components = pnl.getItems();
@@ -97,7 +107,8 @@ public class TRToolPanel extends VerticalPanel
 		searchPanel.setFocusWidget();
 	}
 
-	private SearchPanel getCurrentSearchPanel() {
+	private SearchPanel getCurrentSearchPanel()
+	{
 		String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
 
 		if(type.equals(SEARCH_TYPE_GENE_NAME))
@@ -121,7 +132,7 @@ public class TRToolPanel extends VerticalPanel
 			return null;
 		}
 	}
-	
+
 	private void showTextAreaSearchInput()
 	{
 		removeSearchPanelFromLayoutContainer(pnlSearch);
@@ -181,6 +192,28 @@ public class TRToolPanel extends VerticalPanel
 		return ret;
 	}
 
+	private void performSearch()
+	{
+		String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
+
+		if(type.equals(SEARCH_TYPE_GENE_NAME))
+		{
+			performGeneIdSearch(pnlSearchGeneName.getSearchTerm());
+		}
+		else if(type.equals(SEARCH_TYPE_BLAST))
+		{
+			performBLASTSearch(pnlSearchBlast.getSearchTerms());
+		}
+		else if(type.equals(SEARCH_TYPE_GO))
+		{
+			performGoTermSearch(pnlSearchGO.getSearchTerm());
+		}
+		else if(type.equals(SEARCH_TYPE_FAMILY_ID))
+		{
+			performGoAccessionSearch(pnlSearchFamilyId.getSearchTerm());
+		}
+	}
+
 	private void performGeneIdSearch(final String term)
 	{
 		if(searchService != null && term != null)
@@ -204,7 +237,7 @@ public class TRToolPanel extends VerticalPanel
 		if(term != null)
 		{
 			pnlSearchFamilyId.searchBegin();
-			searchService.getDetails(term, pnlSearchFamilyId.getSearchCallback(term));
+			searchService.getSummary(term, pnlSearchFamilyId.getSearchCallback(term));
 		}
 	}
 
@@ -214,7 +247,7 @@ public class TRToolPanel extends VerticalPanel
 
 		// XXX delete me
 		ret += "\"sequenceType\": \"protein\",";
-		
+
 		ret += "\"sequence\": \"" + JsonUtil.escapeNewLine(pnlSearchBlast.getSearchTerms()) + "\"";
 
 		ret += "}";
@@ -232,54 +265,30 @@ public class TRToolPanel extends VerticalPanel
 
 	private Button buildSearchButton()
 	{
-		Button btn = PanelHelper.buildButton("idTRSearchBtn", "Search", new SelectionListener<ButtonEvent>()
-		{
-			@Override
-			public void componentSelected(ButtonEvent ce)
-			{
-				String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
-
-				if(type.equals(SEARCH_TYPE_GENE_NAME))
+		Button btn = PanelHelper.buildButton("idTRSearchBtn", "Search",
+				new SelectionListener<ButtonEvent>()
 				{
-					performGeneIdSearch(pnlSearchGeneName.getSearchTerm());
-				}
-				else if(type.equals(SEARCH_TYPE_BLAST))
-				{
-					performBLASTSearch(pnlSearchBlast.getSearchTerms());
-				}
-				else if(type.equals(SEARCH_TYPE_GO))
-				{
-					performGoTermSearch(pnlSearchGO.getSearchTerm());
-				}
-				else if(type.equals(SEARCH_TYPE_FAMILY_ID))
-				{
-					performGoAccessionSearch(pnlSearchFamilyId.getSearchTerm());
-				}
-			}
-		});
+					@Override
+					public void componentSelected(ButtonEvent ce)
+					{
+						performSearch();
+					}
+				});
 		btn.setEnabled(false);
 		return btn;
 	}
 
-	private TableData buildTableLayoutData(HorizontalAlignment horizAlign)
+	private ContentPanel initSearchPanel()
 	{
-		TableData ret = new TableData();
+		ContentPanel ret = new ContentPanel();
+		ret.setHeaderVisible(false);
+		ret.setBodyStyle("backgroundColor: #EDEDED");
+		ret.setWidth(382);
+		ret.setHeight(159);
 
-		ret.setPadding(3);
-		ret.setHorizontalAlign(horizAlign);
-
-		return ret;
-	}
-
-	private VerticalPanel initSearchPanel()
-	{
-		VerticalPanel ret = new VerticalPanel();
-
-		ret.setSpacing(5);
-		ret.setStyleAttribute("background-color", "#EDEDED");
-		
 		pnlSearchGeneName = new SimpleSearchPanel("Enter the name of the gene of interest:");
-		pnlSearchGO = new SimpleSearchPanel("Enter GO term to query (can be accession number or one or multiple terms):");
+		pnlSearchGO = new SimpleSearchPanel(
+				"Enter GO term to query (can be accession number or one or multiple terms):");
 		pnlSearchFamilyId = new SimpleSearchPanel("Enter Gene Family ID (internal identifier):");
 		pnlSearchBlast = new BLASTSearchPanel();
 
@@ -292,13 +301,11 @@ public class TRToolPanel extends VerticalPanel
 	private void compose()
 	{
 		pnlSearch = initSearchPanel();
-	
+
 		ContentPanel pnlInner = new ContentPanel();
-		pnlInner.setLayout(new FitLayout());
 		pnlInner.setHeaderVisible(false);
-		
-		pnlInner.add(pnlSearch);
-		
+		pnlInner.setTopComponent(pnlSearch);
+		pnlInner.setBottomComponent(pnlButtons);
 		add(pnlInner);
 	}
 
@@ -307,22 +314,65 @@ public class TRToolPanel extends VerticalPanel
 		return getCurrentSearchPanel().getFocusWidget();
 	}
 
-	abstract class SearchPanel extends VerticalPanel {
-		
-		abstract public void setFocusWidget();
-		
-		abstract public Widget getFocusWidget();
+	/**
+	 * Builds the search and cancel buttons and the search panel
+	 */
+	private void buildButtonPanel()
+	{
+		searchButton = buildSearchButton();
+		cancelButton = buildCancelButton();
+
+		pnlButtons = new HorizontalPanel();
+		pnlButtons.setStyleAttribute("background-color", "#EDEDED");
+		pnlButtons.setSpacing(5);
+		pnlButtons.add(cancelButton);
+		pnlButtons.add(searchButton);
+		pnlButtons.add(waitIcon);
 	}
-	
+
+	private Button buildCancelButton()
+	{
+		Button btn = PanelHelper.buildButton("idTRCancelBtn", "Cancel",
+				new SelectionListener<ButtonEvent>()
+				{
+					@Override
+					public void componentSelected(ButtonEvent ce)
+					{
+						getCurrentSearchPanel().searchComplete();
+					}
+				});
+		btn.disable();
+		return btn;
+	}
+
+	abstract class SearchPanel extends VerticalPanel
+	{
+
+		abstract void setFocusWidget();
+
+		abstract Widget getFocusWidget();
+
+		void searchBegin()
+		{
+			waitIcon.setBusy("Working");
+			searchButton.disable();
+			cancelButton.enable();
+		}
+
+		void searchComplete()
+		{
+			cancelButton.disable();
+			searchButton.enable();
+			waitIcon.clearStatus("");
+		}
+	}
+
 	// simple search panel - contains text field and search button
 	class SimpleSearchPanel extends SearchPanel
 	{
 		private static final String TR_SEARCH_FIELD_ID = "idTRSearchField";
 
 		private TextField<String> entrySearch;
-		private Button searchButton;
-		private Button cancelButton;
-		private Status waitIcon;
 		private String searchLabel;
 
 		public SimpleSearchPanel(String searchLabel)
@@ -332,45 +382,21 @@ public class TRToolPanel extends VerticalPanel
 		}
 
 		private void init(String searchLabel)
-		{			
+		{
 			this.searchLabel = searchLabel;
 			entrySearch = buildSearchEntry();
-			searchButton = buildSearchButton();
-			cancelButton = buildCancelButton();
-			waitIcon = new Status();
 		}
 
 		private void compose()
 		{
 			VerticalPanel panelInner = new VerticalPanel();
 			panelInner.add(new Label(searchLabel));
-			
-			TableData searchLayout = buildTableLayoutData(HorizontalAlignment.LEFT);
-			panelInner.add(entrySearch, searchLayout);
 
-			HorizontalPanel panelBottom = new HorizontalPanel();
-			panelBottom.add(waitIcon);
-			panelBottom.add(cancelButton);
-			panelBottom.add(searchButton);
-			TableData bottomLayout = buildTableLayoutData(HorizontalAlignment.RIGHT);
-			panelInner.add(panelBottom, bottomLayout);
-			
+			panelInner.add(entrySearch);
+
 			add(panelInner);
 		}
 
-		private Button buildCancelButton() {
-			Button btn = PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
-					{
-						@Override
-						public void componentSelected(ButtonEvent ce)
-						{
-							searchComplete();
-						}
-					});
-			btn.disable();
-			return btn;
-		}
-		
 		private TextField<String> buildSearchEntry()
 		{
 			final TextField<String> ret = new TextField<String>();
@@ -385,9 +411,9 @@ public class TRToolPanel extends VerticalPanel
 					String text = ret.getValue();
 					if(event.getKeyCode() == KeyCodes.KEY_ENTER)
 					{
-						performGeneIdSearch(text);
+						performSearch();
 					}
-					searchButton.setEnabled(text!=null && !text.isEmpty());
+					searchButton.setEnabled(text != null && !text.isEmpty());
 				}
 			});
 
@@ -418,42 +444,33 @@ public class TRToolPanel extends VerticalPanel
 			{
 				@Override
 				public void onFailure(Throwable arg0)
-				{					
+				{
 					searchComplete();
-					
+
 					String err = "Search failed for term: " + term;
-					MessageBox.alert("Error", err, null);					
+					MessageBox.alert("Error", err, null);
 				}
 
 				@Override
 				public void onSuccess(String result)
-				{					
+				{
 					// show results unless the search has been cancelled
-					if (cancelButton.isEnabled()) {
+					if(cancelButton.isEnabled())
+					{
 						searchComplete();
 						String value = selectSearchType.getValue(selectSearchType.getSelectedIndex());
 						searchComplete();
-						if(value.equals(SEARCH_TYPE_FAMILY_ID)) {
-							showTreeViewer(result);
+						if(value.equals(SEARCH_TYPE_FAMILY_ID))
+						{
+							showFamilyIdResult(result);
 						}
-						else {
+						else
+						{
 							showSimpleResultsWindow("Results for term " + term + ":", result);
 						}
 					}
 				}
 			};
-		}
-		
-		private void searchBegin() {
-			waitIcon.setBusy("Working");
-			searchButton.disable();
-			cancelButton.enable();
-		}
-		
-		private void searchComplete() {
-			cancelButton.disable();
-			searchButton.enable();
-			waitIcon.clearStatus("");
 		}
 	}
 
@@ -464,9 +481,6 @@ public class TRToolPanel extends VerticalPanel
 		private static final String TR_BLAST_SEARCH_AREA_ID = "idTRSearchField";
 
 		private SearchTextArea areaSearch;
-		private Button searchButton;
-		private Button cancelButton;
-		private Status waitIcon;
 
 		public BLASTSearchPanel()
 		{
@@ -487,7 +501,7 @@ public class TRToolPanel extends VerticalPanel
 				public void componentKeyUp(ComponentEvent event)
 				{
 					String text = ret.getValue();
-					searchButton.setEnabled(text!=null && !text.isEmpty());
+					searchButton.setEnabled(text != null && !text.isEmpty());
 				}
 			});
 
@@ -495,12 +509,8 @@ public class TRToolPanel extends VerticalPanel
 		}
 
 		private void init()
-		{			
+		{
 			areaSearch = buildSearchArea();
-			searchButton = buildSearchButton();
-			cancelButton = buildCancelButton();
-			cancelButton.disable();
-			waitIcon = new Status();
 		}
 
 		private void compose()
@@ -509,34 +519,9 @@ public class TRToolPanel extends VerticalPanel
 			add(new Label("Enter protein or nucleotide sequence for gene of interest below:"));
 
 			// add search components
-			VerticalPanel panelInner = new VerticalPanel();
-
-			TableData searchLayout = buildTableLayoutData(HorizontalAlignment.LEFT);
-			panelInner.add(areaSearch, searchLayout);
-			
-			HorizontalPanel panelBottom = new HorizontalPanel();
-			panelBottom.add(waitIcon);
-			panelBottom.add(cancelButton);
-			panelBottom.add(searchButton);
-			TableData bottomLayout = buildTableLayoutData(HorizontalAlignment.RIGHT);
-			panelInner.add(panelBottom, bottomLayout);
-
-			add(panelInner);
+			add(areaSearch);
 		}
 
-		private Button buildCancelButton() {
-			Button btn = PanelHelper.buildButton("idTRCancelBtn", "Cancel", new SelectionListener<ButtonEvent>()
-					{
-						@Override
-						public void componentSelected(ButtonEvent ce)
-						{
-							searchComplete();
-						}
-					});
-			btn.disable();
-			return btn;
-		}
-		
 		public String getSearchTerms()
 		{
 			return areaSearch.getValue();
@@ -563,59 +548,70 @@ public class TRToolPanel extends VerticalPanel
 				public void onFailure(Throwable arg0)
 				{
 					searchComplete();
-					
+
 					String err = "Search failed for term: " + pnlSearchBlast.getSearchTerms();
-					MessageBox.alert("Error", err, null);					
+					MessageBox.alert("Error", err, null);
 				}
 
 				@Override
 				public void onSuccess(String result)
 				{
 					// show results unless the search has been cancelled
-					if (cancelButton.isEnabled()) {
+					if(cancelButton.isEnabled())
+					{
 						searchComplete();
 						showBlastResultsWindow("Results for BLAST search for entered sequence:", result);
 					}
 				}
 			};
 		}
-		
-		private void searchBegin() {
-			waitIcon.setBusy("Working");
-			searchButton.disable();
-			cancelButton.enable();
-		}
-		
-		private void searchComplete() {
-			searchButton.enable();
-			cancelButton.disable();
-			waitIcon.clearStatus("");
-		}
-		
+
 		class SearchTextArea extends TextArea
 		{
 			@Override
 			protected void afterRender()
 			{
 				super.afterRender();
-				
+
 				el().setElementAttribute("spellcheck", "false");
 			}
 		}
-	}	
-	
-	private void showSimpleResultsWindow(String heading, String results) {
+	}
+
+	private void showSimpleResultsWindow(String heading, String results)
+	{
 		new TRSearchResultsWindow(heading, results, false, cmdView).show();
 	}
-	
-	private void showBlastResultsWindow(String heading, String results) {
+
+	private void showBlastResultsWindow(String heading, String results)
+	{
 		new TRSearchResultsWindow(heading, results, true, cmdView).show();
 	}
-	
-	private void showTreeViewer(String result) {
-		JsArray<JsTRSearchResult> arr = TRUtil.parseFamilies(result);
-		if (arr!=null && arr.length()>0)
-			cmdView.execute(arr.get(0).getName());
-		System.out.println("fam id search result = "+result);
+
+	/**
+	 * Shows the tree viewer if the result contains a non-empty "name" value and a non-empty "gene_count" value.
+	 * Otherwise, an error window is shown.
+	 * @param result
+	 */
+	private void showFamilyIdResult(String result)
+	{
+		JSONArray arr = TRUtil.parseItem(result).isArray();
+		if(arr != null && arr.size() > 0)
+		{
+			JSONObject val = arr.get(0).isObject();
+			if(val != null)
+			{
+				JSONString name = val.get("name").isString();
+				if(name != null && !name.stringValue().isEmpty())
+				{
+					if (val.get("gene_count") != null)
+					{
+						cmdView.execute(name.stringValue());
+						return;
+					}
+				}
+			}
+		}
+		MessageBox.alert("Not Found", "The gene family ID was not found.", null);
 	}
 }
