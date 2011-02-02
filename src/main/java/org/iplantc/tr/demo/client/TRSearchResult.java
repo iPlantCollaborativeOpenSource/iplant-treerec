@@ -16,8 +16,8 @@ public class TRSearchResult extends BaseModel
 	public TRSearchResult(JsTRSearchResult jsResult)
 	{		
 		set("name", jsResult.getName());
-		set("eValue", "blah");
-		set("alignLength", "foobar?");
+		set("eValue", "#");
+		set("alignLength", "#");
 		set("goAnnotations", jsResult.getGOAnnotations());
 		set("numGenes", Integer.toString(jsResult.getGeneCount()));
 		set("numSpecies", Integer.toString(jsResult.getSpeciesCount()));
@@ -51,7 +51,7 @@ public class TRSearchResult extends BaseModel
 	 */
 	public String getNumGoTerms()
 	{
-		return "12345";
+		return "#";
 	}
 	
 	/**
