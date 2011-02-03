@@ -1,7 +1,6 @@
 package org.iplantc.tr.demo.client.events;
 
 import com.extjs.gxt.ui.client.util.Point;
-import com.google.gwt.event.shared.GwtEvent;
 
 /**
  * {@inheritDoc}
@@ -9,7 +8,7 @@ import com.google.gwt.event.shared.GwtEvent;
 public class SpeciesTreeInvestigationEdgeSelectEvent extends TreeEdgeSelectedEvent<SpeciesTreeInvestigationEdgeSelectEventHandler>
 {
 
-	public static final GwtEvent.Type<SpeciesTreeInvestigationEdgeSelectEventHandler> TYPE = new Type<SpeciesTreeInvestigationEdgeSelectEventHandler>();
+	public static final Type<SpeciesTreeInvestigationEdgeSelectEventHandler> TYPE = new Type<SpeciesTreeInvestigationEdgeSelectEventHandler>();
  	
 	/**
 	 * Instantiate from a node id.
@@ -26,9 +25,8 @@ public class SpeciesTreeInvestigationEdgeSelectEvent extends TreeEdgeSelectedEve
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public Type getAssociatedType()
+	public Type<SpeciesTreeInvestigationEdgeSelectEventHandler> getAssociatedType()
 	{
 		return TYPE;
 	}

@@ -8,7 +8,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import org.iplantc.tr.demo.client.SearchService;
+
+import org.iplantc.tr.demo.client.services.SearchService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
