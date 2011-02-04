@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import org.iplantc.tr.demo.client.EventBusContainer;
 import org.iplantc.tr.demo.client.Hyperlink;
-import org.iplantc.tr.demo.client.TRAdvancedSearchPanel;
 import org.iplantc.tr.demo.client.receivers.Receiver;
 import org.iplantc.tr.demo.client.receivers.SpeciesTreeInvestigationModeReceiver;
 import org.iplantc.tr.demo.client.utils.TreeRetriever;

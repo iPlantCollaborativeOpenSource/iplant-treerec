@@ -1,4 +1,4 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.windows;
 
 import com.extjs.gxt.ui.client.widget.Window;
 import com.google.gwt.user.client.ui.HTMLPanel;

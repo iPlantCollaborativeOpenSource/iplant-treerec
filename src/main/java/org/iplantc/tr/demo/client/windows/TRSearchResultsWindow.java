@@ -1,9 +1,12 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.windows;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.iplantc.tr.demo.client.images.Resources;
+import org.iplantc.tr.demo.client.JsTRSearchResult;
+import org.iplantc.tr.demo.client.TRSearchResult;
+import org.iplantc.tr.demo.client.commands.ClientCommand;
+import org.iplantc.tr.demo.client.utils.TRUtil;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
@@ -12,10 +15,8 @@ import com.extjs.gxt.ui.client.data.PagingLoadResult;
 import com.extjs.gxt.ui.client.data.PagingLoader;
 import com.extjs.gxt.ui.client.data.PagingModelMemoryProxy;
 import com.extjs.gxt.ui.client.event.BaseEvent;
-import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.Window;
@@ -26,13 +27,10 @@ import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.grid.GridCellRenderer;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
-import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
-import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.HTML;
 
 public class TRSearchResultsWindow extends Window
@@ -167,75 +165,6 @@ public class TRSearchResultsWindow extends Window
 				HorizontalAlignment.CENTER));
 
 		return new ColumnModel(config);
-	}
-
-	private String getSelectedGeneInfo()
-	{
-		String ret = null; // assume failure
-
-		TRSearchResult result = gridResults.getSelectionModel().getSelectedItem();
-
-		// do we have a selection?
-		if(result != null)
-		{
-			ret = result.getName();
-		}
-
-		return ret;
-	}
-
-	private void launchViewers()
-	{
-		String name = getSelectedGeneInfo();
-
-		// do we have any genes to view
-		if(name != null)
-		{
-			cmdViewFamily.execute(name);
-		}
-	}
-
-	private ToolBar buildButtonBar()
-	{
-		ToolBar ret = new ToolBar();
-
-		ret.add(new FillToolItem());
-		addButtons();
-
-		// add all buttons to our toolbar
-		for(Button btn : buttons)
-		{
-			ret.add(btn);
-		}
-
-		return ret;
-	}
-
-	private void addButton(String caption, String id, AbstractImagePrototype icon,
-			SelectionListener<ButtonEvent> listener)
-	{
-		Button btn = new Button(caption, icon, listener);
-
-		btn.setId(id);
-		btn.setEnabled(false);
-		btn.setHeight(23);
-
-		buttons.add(btn);
-	}
-
-	private void addButtons()
-	{
-		buttons = new ArrayList<Button>();
-
-		addButton("View", TR_VIEW_BTN_ID, AbstractImagePrototype.create(Resources.ICONS.listItems()),
-				new SelectionListener<ButtonEvent>()
-				{
-					@Override
-					public void componentSelected(ButtonEvent ce)
-					{
-						launchViewers();
-					}
-				});
 	}
 
 	private void enableButton(String id)

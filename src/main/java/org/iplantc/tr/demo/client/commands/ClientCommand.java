@@ -1,4 +1,4 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.commands;
 
 /**
  * Basic interface for command pattern.

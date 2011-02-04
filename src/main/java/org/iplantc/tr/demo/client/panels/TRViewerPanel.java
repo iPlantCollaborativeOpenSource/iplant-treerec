@@ -1,5 +1,7 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.panels;
 
+
+import org.iplantc.tr.demo.client.services.SearchServiceAsync;
 
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;

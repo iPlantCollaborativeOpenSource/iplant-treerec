@@ -1,4 +1,9 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.panels;
+
+import org.iplantc.tr.demo.client.commands.ClientCommand;
+import org.iplantc.tr.demo.client.services.SearchService;
+import org.iplantc.tr.demo.client.services.SearchServiceAsync;
+import org.iplantc.tr.demo.client.windows.TRViewerWindow;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.Scroll;
@@ -62,7 +67,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			
 		initTableData();
 	    
-		pnlInner.add(new TRToolPanel(searchService, new ViewCommand(), new SearchBeginCommand(), new SearchCompleteCommand()), tableData);
+		pnlInner.add(new TRToolPanel(searchService, new ViewCommand()), tableData);
 			
 		add(pnlInner);		
 	}
@@ -73,24 +78,6 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		public void execute(final String params)
 		{
 			doView(params);
-		}
-	}
-	
-	class SearchBeginCommand implements ClientCommand
-	{
-		@Override
-		public void execute(final String params)
-		{
-			mask("Working...");
-		}
-	}
-	
-	class SearchCompleteCommand implements ClientCommand
-	{
-		@Override
-		public void execute(final String params)
-		{
-			unmask();
 		}
 	}
 }

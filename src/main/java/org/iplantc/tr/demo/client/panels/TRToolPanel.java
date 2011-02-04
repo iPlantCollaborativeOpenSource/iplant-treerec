@@ -1,6 +1,12 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.panels;
 
 import java.util.List;
+
+import org.iplantc.tr.demo.client.commands.ClientCommand;
+import org.iplantc.tr.demo.client.services.SearchServiceAsync;
+import org.iplantc.tr.demo.client.utils.JsonUtil;
+import org.iplantc.tr.demo.client.utils.TRUtil;
+import org.iplantc.tr.demo.client.windows.TRSearchResultsWindow;
 
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
@@ -36,9 +42,6 @@ public class TRToolPanel extends VerticalPanel
 	private static final String SEARCH_TYPE_GO = "go";
 	private static final String SEARCH_TYPE_FAMILY_ID = "family_id";
 
-	private final int GRID_HEIGHT_NORMAL = 260;
-	private final int GRID_HEIGHT_SHORT = 142;
-
 	private ListBox selectSearchType;
 
 	private ContentPanel pnlSearch;
@@ -56,16 +59,11 @@ public class TRToolPanel extends VerticalPanel
 
 	private SearchServiceAsync searchService;
 	private ClientCommand cmdView;
-	private ClientCommand cmdSearchBegin;
-	private ClientCommand cmdSearchComplete;
 
-	public TRToolPanel(SearchServiceAsync searchService, ClientCommand cmdView,
-			ClientCommand cmdSearchBegin, ClientCommand cmdSearchComplete)
+	public TRToolPanel(SearchServiceAsync searchService, ClientCommand cmdView)
 	{
 		this.searchService = searchService;
 		this.cmdView = cmdView;
-		this.cmdSearchBegin = cmdSearchBegin;
-		this.cmdSearchComplete = cmdSearchComplete;
 
 		init();
 
@@ -294,6 +292,7 @@ public class TRToolPanel extends VerticalPanel
 
 		ret.add(buildSearchTypeSelectionPanel());
 		ret.add(pnlSearchBlast);
+		pnlSearchBlast.setFocusWidget();
 
 		return ret;
 	}

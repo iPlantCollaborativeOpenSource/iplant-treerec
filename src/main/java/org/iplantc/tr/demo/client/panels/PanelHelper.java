@@ -1,4 +1,4 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.panels;
 
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;

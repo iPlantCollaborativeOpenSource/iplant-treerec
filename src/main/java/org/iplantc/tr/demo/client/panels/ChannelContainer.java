@@ -1,4 +1,4 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.panels;
 
 import java.util.ArrayList;
 import java.util.List;

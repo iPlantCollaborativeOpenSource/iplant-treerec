@@ -2,6 +2,7 @@ package org.iplantc.tr.demo.client;
 
 import org.iplantc.core.broadcaster.shared.BroadcastCommand;
 import org.iplantc.tr.demo.client.commands.EventBusBroadcastCommand;
+import org.iplantc.tr.demo.client.panels.ChannelContainer;
 
 import com.google.gwt.event.shared.SimpleEventBus;
 

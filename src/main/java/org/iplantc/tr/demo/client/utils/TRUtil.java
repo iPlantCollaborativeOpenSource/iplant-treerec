@@ -1,4 +1,6 @@
-package org.iplantc.tr.demo.client;
+package org.iplantc.tr.demo.client.utils;
+
+import org.iplantc.tr.demo.client.JsTRSearchResult;
 
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
@@ -7,7 +9,7 @@ import com.google.gwt.json.client.JSONValue;
 
 public class TRUtil
 {
-	static JSONValue parseItem(String json)
+	public static JSONValue parseItem(String json)
 	{
 		if(json == null) {
 			return null;
@@ -26,7 +28,7 @@ public class TRUtil
 		return val;
 	}
 	
-	static JsArray<JsTRSearchResult> parseFamilies(String json)
+	public static JsArray<JsTRSearchResult> parseFamilies(String json)
 	{
 		JSONValue val = parseItem(json);
 		JSONValue valItems = null;
