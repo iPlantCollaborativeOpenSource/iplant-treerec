@@ -515,7 +515,7 @@ public class TRToolPanel extends VerticalPanel
 		private void compose()
 		{
 			// add type selection
-			add(new Label("Enter protein or nucleotide sequence for gene of interest below:"));
+			add(new Label("Enter protein or nucleotide sequence for gene of interest:"));
 
 			// add search components
 			add(areaSearch);
