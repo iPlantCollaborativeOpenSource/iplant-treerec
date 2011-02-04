@@ -27,7 +27,7 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
  * @author sriram
  *
  */
-public class TRSeachPanel extends EventBusContainer
+public class TRSearchPanel extends EventBusContainer
 {
 
 	TreeRetriever treeRetriever;
@@ -35,7 +35,7 @@ public class TRSeachPanel extends EventBusContainer
 	private ArrayList<Receiver> receiversSelect;
 	
 	
-	public TRSeachPanel()
+	public TRSearchPanel()
 	{
 		
 		treeRetriever = new TreeRetriever();
@@ -73,8 +73,8 @@ public class TRSeachPanel extends EventBusContainer
 						TRAdvancedSearchPanel advPanel = new TRAdvancedSearchPanel();
 						Window w = new Window();
 						w.setLayout(new FitLayout());
-						w.setHeading("Search");
-						w.setSize(399, 229);
+						w.setHeading("Searchious");
+						w.setSize(419, 249);
 						w.setResizable(false);
 						w.add(advPanel);
 						w.show();

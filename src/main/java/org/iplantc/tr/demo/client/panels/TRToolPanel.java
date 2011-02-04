@@ -33,7 +33,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TRToolPanel extends VerticalPanel
+public class TRToolPanel extends ContentPanel
 {
 	private static final String TR_SEARCH_TYPE_LIST_BOX_ID = "idTRSearchTypeSelection";
 
@@ -44,7 +44,7 @@ public class TRToolPanel extends VerticalPanel
 
 	private ListBox selectSearchType;
 
-	private ContentPanel pnlSearch;
+	private VerticalPanel pnlSearch;
 
 	private SimpleSearchPanel pnlSearchGeneName;
 	private SimpleSearchPanel pnlSearchGO;
@@ -74,6 +74,9 @@ public class TRToolPanel extends VerticalPanel
 	{
 		waitIcon = new Status();
 		buildButtonPanel();
+		setBorders(false);
+		setBodyStyle("background-color: #EDEDED");
+		setStyleAttribute("background-color", "#EDEDED");
 	}
 
 	/**
@@ -107,28 +110,28 @@ public class TRToolPanel extends VerticalPanel
 
 	private SearchPanel getCurrentSearchPanel()
 	{
+		SearchPanel ret = null;  //assume failure
+		
 		String type = selectSearchType.getValue(selectSearchType.getSelectedIndex());
 
 		if(type.equals(SEARCH_TYPE_GENE_NAME))
 		{
-			return pnlSearchGeneName;
+			ret = pnlSearchGeneName;
 		}
 		else if(type.equals(SEARCH_TYPE_BLAST))
 		{
-			return pnlSearchBlast;
+			ret = pnlSearchBlast;
 		}
 		else if(type.equals(SEARCH_TYPE_GO))
 		{
-			return pnlSearchGO;
+			ret = pnlSearchGO;
 		}
 		else if(type.equals(SEARCH_TYPE_FAMILY_ID))
 		{
-			return pnlSearchFamilyId;
+			ret = pnlSearchFamilyId;
 		}
-		else
-		{
-			return null;
-		}
+		
+		return ret;
 	}
 
 	private void showTextAreaSearchInput()
@@ -182,9 +185,11 @@ public class TRToolPanel extends VerticalPanel
 	{
 		VerticalPanel ret = new VerticalPanel();
 
+		ret.setStyleAttribute("background-color", "#EDEDED");
+		
 		selectSearchType = initSearchTypeSelection();
 
-		ret.add(new Label("Select appropriate search type:"));
+		ret.add(new Label("Search type:"));
 		ret.add(selectSearchType);
 
 		return ret;
@@ -276,22 +281,25 @@ public class TRToolPanel extends VerticalPanel
 		return btn;
 	}
 
-	private ContentPanel initSearchPanel()
+	private VerticalPanel initSearchPanel()
 	{
-		ContentPanel ret = new ContentPanel();
-		ret.setHeaderVisible(false);
-		ret.setBodyStyle("backgroundColor: #EDEDED");
-		ret.setWidth(382);
-		ret.setHeight(159);
-
-		pnlSearchGeneName = new SimpleSearchPanel("Enter the name of the gene of interest:");
+		VerticalPanel ret = new VerticalPanel();
+		ret.setSize(382, 159);
+		ret.setBorders(false);
+		ret.setSpacing(5);
+		ret.setStyleAttribute("background-color", "#EDEDED");
+		
+		pnlSearchGeneName = new SimpleSearchPanel("Gene of interest:");
 		pnlSearchGO = new SimpleSearchPanel(
-				"Enter GO term to query (can be accession number or one or multiple terms):");
-		pnlSearchFamilyId = new SimpleSearchPanel("Enter Gene Family ID (internal identifier):");
+				"GO term to query (can be accession number or one or multiple terms):");
+		
+		pnlSearchFamilyId = new SimpleSearchPanel("Gene Family ID (internal identifier):");
+		
 		pnlSearchBlast = new BLASTSearchPanel();
 
 		ret.add(buildSearchTypeSelectionPanel());
 		ret.add(pnlSearchBlast);
+		
 		pnlSearchBlast.setFocusWidget();
 
 		return ret;
@@ -300,12 +308,14 @@ public class TRToolPanel extends VerticalPanel
 	private void compose()
 	{
 		pnlSearch = initSearchPanel();
-
-		ContentPanel pnlInner = new ContentPanel();
-		pnlInner.setHeaderVisible(false);
-		pnlInner.setTopComponent(pnlSearch);
-		pnlInner.setBottomComponent(pnlButtons);
-		add(pnlInner);
+		
+		setBorders(false);
+		setBodyBorder(false);
+		setHeaderVisible(false);
+		setSize(402, 214);
+		
+		add(pnlSearch);
+		setBottomComponent(pnlButtons);		
 	}
 
 	public Widget getFocusWidget()
@@ -322,7 +332,7 @@ public class TRToolPanel extends VerticalPanel
 		cancelButton = buildCancelButton();
 
 		pnlButtons = new HorizontalPanel();
-		pnlButtons.setStyleAttribute("background-color", "#EDEDED");
+		
 		pnlButtons.setSpacing(5);
 		pnlButtons.add(cancelButton);
 		pnlButtons.add(searchButton);
@@ -340,13 +350,14 @@ public class TRToolPanel extends VerticalPanel
 						getCurrentSearchPanel().searchComplete();
 					}
 				});
+		
 		btn.disable();
+		
 		return btn;
 	}
 
 	abstract class SearchPanel extends VerticalPanel
 	{
-
 		abstract void setFocusWidget();
 
 		abstract Widget getFocusWidget();
@@ -383,7 +394,8 @@ public class TRToolPanel extends VerticalPanel
 		private void init(String searchLabel)
 		{
 			this.searchLabel = searchLabel;
-			entrySearch = buildSearchEntry();
+			entrySearch = buildSearchEntry();	
+			setWidth(400);
 		}
 
 		private void compose()
@@ -495,6 +507,7 @@ public class TRToolPanel extends VerticalPanel
 			ret.setSize(380, 99);
 			ret.setSelectOnFocus(true);
 			ret.setId(TR_BLAST_SEARCH_AREA_ID);
+						
 			ret.addKeyListener(new KeyListener()
 			{
 				public void componentKeyUp(ComponentEvent event)
@@ -509,13 +522,15 @@ public class TRToolPanel extends VerticalPanel
 
 		private void init()
 		{
+			setWidth(400);
 			areaSearch = buildSearchArea();
+			setStyleAttribute("background-color", "#EDEDED");
 		}
 
 		private void compose()
 		{
 			// add type selection
-			add(new Label("Enter protein or nucleotide sequence for gene of interest below:"));
+			add(new Label("Protein or nucleotide sequence for gene of interest:"));
 
 			// add search components
 			add(areaSearch);
@@ -595,6 +610,7 @@ public class TRToolPanel extends VerticalPanel
 	private void showFamilyIdResult(String result)
 	{
 		JSONArray arr = TRUtil.parseItem(result).isArray();
+		
 		if(arr != null && arr.size() > 0)
 		{
 			JSONObject val = arr.get(0).isObject();
@@ -611,6 +627,7 @@ public class TRToolPanel extends VerticalPanel
 				}
 			}
 		}
+		
 		MessageBox.alert("Not Found", "The gene family ID was not found.", null);
 	}
 }
