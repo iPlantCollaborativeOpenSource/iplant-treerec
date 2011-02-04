@@ -505,10 +505,14 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     ##########################################################################
     # Usage      : $results_ref = $treerec->blast_search($blast_args_json);
     #
-    # Purpose    : Performs a BLAST search on the given BLAST search
-    #              arguments.
+    # Purpose    : Performs a BLAST search on the given BLAST arguments
+    #              search.
     #
     # Returns    : Summaries of all of the matching gene families.
+    #              Relevant Keys as:
+    #               geneFamilyName
+    #               length
+    #               evalue
     #
     # Parameters : $blast_args_json - a JSON string representing the search
     #                                 parameters.
@@ -517,26 +521,152 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     sub blast_search {
         my ( $self, $blast_args_json ) = @_;
 
-        # Just use the default species tree name for now.
-        my $species_tree_name = $default_species_tree_of{ ident $self };
-
         # Prepare for the search.
         my $searcher = $blast_searcher_of{ ident $self };
         my $blast_args
             = IPlant::TreeRec::BlastArgs->from_json($blast_args_json);
 
-        # Get the list of matching gene identifiers.
-        my @gene_ids = $searcher->search($blast_args);
+	# Do the BLAST search
+        my @blast_results = $searcher->search($blast_args);
+	
+	# Find the gene family name for each BLAST match
+        @blast_results 
+	    = $self->_blast_results_to_family_names(@blast_results);
 
-        # Get the summary information for each matching gene ID.
-        my @results = map { { name => $_ } }
-            $self->_gene_ids_to_family_names(@gene_ids);
-        $self->_load_gene_family_summaries( \@results, $species_tree_name );
+	# Only keep the best hit for each gene family. The BLAST program output
+	# is already sorted with the best blast hit at the top so loading the 
+        # top value for each gene_family_name should give the unique list of 
+	# best matches for each gene family name.
+	# The number of BLAST hits for each family is also stored in the
+        # seen hash if needed:
+	#    my $gene_family = $ind_uniq->{'gene_family_name'};
+	#    my $num_hits = $seen->{$gene_family};
+	my %seen = ();
+	my $seen = \%seen;
+	my @uniq;
+	foreach my $result (@blast_results) {     
+	    push(@uniq, $result) unless $seen{
+
+		# The following will return a single row for each gene family
+		$result->{'gene_family_name'}
+
+		# The following will return a single row for each
+                # query_id.gene_family pair. This allows for input from multiple
+                # record FASTA files to be separated.
+		#$result->{'query_id'}.$result->{'gene_family_name'}
+
+	    }++;
+	}
+
+	# THE FOLLOWING IS BROKEN !!
+	# 02/04/2011
+	#my @uniq_results = $self->_load_blast_gene_family_summaries(@uniq);
 
         # Convert the hash keys to camel-case.
-        @results = map { camel_case_keys($_) } @results;
+        @uniq = map { camel_case_keys($_) } @uniq;
 
-        return { 'families', \@results };
+        return { 'families', \@uniq };
+
+    }
+    ##########################################################################
+    # Usage      : $updated_results_ref
+    #                  = $treerec->_load_gene_family_summaries($results_ref);
+    #
+    # Purpose    : Loads the gene family summary information from gene family
+    #              search results.  The search results should be in the form
+    #              of a list of hash references in which each element contains
+    #              a member named, "family_name", that contains the stable
+    #              identifier of the gene family.
+    #
+    # Returns    : A reference to the updated results hash.
+    #
+    # Parameters : $results_ref - a reference to the list of results.
+    #
+    # Throws     : No exceptions.
+    sub _load_blast_gene_family_summaries {
+        my ( $self, @blast_results ) = @_;
+
+	# JCE ADDED THE FOLLOWING FOR ERRCHCK
+	my $num_results = @blast_results;
+	print STDERR "Searching $num_results results\n";
+	# JCE ADDED THE ABOVE FOR ERRCHCK
+
+        # Fetch the tree loader and family info retreiver.
+        my $tree_loader = $gene_tree_loader_of{ ident $self };
+        my $info        = $gene_family_info_of{ ident $self };
+
+	my $i = 0;
+        for my $blast_result ( @blast_results ) {
+#            my $family_name = $result_ref->{name};
+            my $family_name = $blast_result->{'gene_family_name'};
+	    print STDERR "\tSearching Family:".$family_name."\n";
+
+	    # The following is using 
+            #   IPlant::DB::TreeRec::ResultSet::ProteinTree
+	    # via
+	    #   IPlant::TreeRec::DatabaseTreeLoader
+	    # which is returning the error "no protein tree found for family.
+	    # The eval for this should go into DatabaseTreeLoader.pm
+	    #
+            my $tree = $tree_loader->load_gene_tree($family_name);
+#		unless $family_name =~ "pg17890";
+#            my $summary_ref = $info->get_summary( $family_name, $tree )
+#		unless $family_name =~ "pg17890";;
+#	    print STDERR $summary_ref."\n";
+#            $result_ref = { %{$result_ref}, %{$summary_ref} };
+	    $i++;
+        }
+
+        return @blast_results;
+    }
+
+    ##########################################################################
+    # Usage      : @names = 
+    #              $treerec->_blast_results_to_family_names(@blast_results);
+    #
+    # Purpose    : For set of  BLAST results contained in an array of hashes, 
+    #              this determines the gene family membership for each result 
+    #              and adds 
+    #
+    # Returns    : 
+    #
+    # Parameters : @gene_ids - the list of gene identifiers.
+    #
+    # Throws     : No exceptions.
+    # TO SPEED THIS UP, WE COULD ADD THE FAMILY NAME TO THE
+    # BLAST HEADERS AND PARSE THE RESULT FROM THE HIT IN THE
+    # BLAST RESULT
+    # FOR EXAMPLE FASTA HEADERS FOR BLAST DATABASE AS
+    # >geneID|geneFamilyName 
+    sub _blast_results_to_family_names {
+        my ( $self, @blast_results ) = @_;
+
+        # Fetch the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Find the family name for each gene ID in the list.
+        my @family_names;
+	my $i = 0;
+        for my $blast_result (@blast_results) {
+	    my $gene_id = $blast_result->{'gene_id'};
+            $gene_id =~ s/ _ [^_]+ \z //gxms;
+
+            my $member = $dbh->resultset('Member')
+                ->find( { stable_id => $gene_id } );
+
+
+	    # If the expectation is that a gene can belong to muliptle families 
+	    # then this would need to make gene_family_name an array
+            if ( defined $member ) {
+                for my $family ( $member->families() ) {
+		    $blast_results[$i]->{'gene_family_name'}=$family->stable_id();
+                }
+            }
+	    $i++;
+        }
+
+#        return uniq @family_names;
+        return @blast_results;
     }
 
     ##########################################################################
