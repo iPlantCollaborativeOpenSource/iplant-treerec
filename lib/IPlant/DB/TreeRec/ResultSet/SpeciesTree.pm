@@ -30,5 +30,32 @@ sub for_name {
     return $tree;
 }
 
+##########################################################################
+# Usage      : $species_tree = $dbh->resultset('SpeciesTree')
+#                  ->for_node_id($node_id);
+#
+# Purpose    : Finds the node species tree containing the species tree
+#              node with the given identifier.
+#
+# Returns    : The species tree.
+#
+# Parameters : $node_id - the species tree node identifier.
+#
+# Throws     : IPlant::TreeRec::TreeNotFoundException.
+sub for_node_id {
+    my ( $self, $node_id ) = @_;
+
+    # Find the tree.
+    my $tree = $self->find(
+        { 'nodes.species_tree_node_id' => $node_id },
+        { 'join' => 'nodes' }
+    );
+    IPlant::TreeRec::TreeNotFoundException->throw(
+        error => "no species tree found for node, $node_id" )
+        if !defined $tree;
+
+    return $tree;
+}
+
 1;
 __END__

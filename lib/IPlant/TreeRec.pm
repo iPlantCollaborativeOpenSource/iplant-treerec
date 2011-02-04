@@ -117,59 +117,65 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     }
 
     ##########################################################################
-    # Usage      : $results_ref = $treerec->go_search($search_string);
+    # Usage      : $results_ref = $treerec->go_search( $search_string,
+    #                  $species_tree_name );
     #
     # Purpose    : Performs a GO search.
     #
     # Returns    : Information about the matching gene families.
     #
-    # Parameters : $search_string - the string to search for.
+    # Parameters : $search_string     - the string to search for.
+    #              $species_tree_name - the name of the speices tree.
     #
     # Throws     : No exceptions.
     sub go_search {
-        my ( $self, $search_string ) = @_;
-        my $results_ref = $self->_do_gene_family_search( 'GoSearch',
-            "\%$search_string\%" );
+        my ( $self, $search_string, $species_tree_name ) = @_;
+        my $results_ref
+            = $self->_do_gene_family_search( 'GoSearch', "\%$search_string\%",
+            $species_tree_name );
         return $results_ref;
     }
 
     ##########################################################################
-    # Usage      : $results_ref
-    #                  = $treerec->go_accession_search($search_string);
+    # Usage      : $results_ref = $treerec->go_accession_search(
+    #                  $search_string, $species_tree_name );
     #
     # Purpose    : Performs a search by GO accession.
     #
     # Returns    : Information about the matching gene families.
     #
-    # Parameters : $search_string - the string to search for.
+    # Parameters : $search_string     - the string to search for.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : No exceptions.
     sub go_accession_search {
-        my ( $self, $search_string ) = @_;
+        my ( $self, $search_string, $species_tree_name ) = @_;
         my $results_ref = $self->_do_gene_family_search( 'GoAccessionSearch',
-            $search_string );
+            $search_string, $species_tree_name );
         return $results_ref;
     }
 
     ##########################################################################
-    # Usage      : $results_ref = $treerec->gene_id_search($search_string);
+    # Usage      : $results_ref = $treerec->gene_id_search( $search_string,
+    #                  $species_tree_name );
     #
     # Purpose    : Performs a gene identifier search.
     #
     # Returns    : Information about the matching gene families.
     #
-    # Parameters : $search_string - the string to search for.
+    # Parameters : $search_string     - the string to search for.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : No exceptions.
     sub gene_id_search {
-        my ( $self, $search_string ) = @_;
-        return $self->_do_gene_family_search( 'GeneIdSearch',
-            $search_string );
+        my ( $self, $search_string, $species_tree_name ) = @_;
+        return $self->_do_gene_family_search( 'GeneIdSearch', $search_string,
+            $species_tree_name );
     }
 
     ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_family_summary(
-    #                  $family_name );
+    #                  $family_name, $species_tree_name );
     #
     # Purpose    : Gets the summary information for the given gene family
     #              name.  The results of this method are returned as a single-
@@ -180,18 +186,27 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #              summary or a reference to an empty list of the gene family
     #              doesn't exist.
     #
-    # Parameters : $family_name - the name of the gene family.
+    # Parameters : $family_name       - the name of the gene family.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : No exceptions.
     sub get_gene_family_summary {
-        my ( $self, $family_name ) = @_;
+        my ( $self, $family_name, $species_tree_name ) = @_;
 
         # Fetch the database handle.
         my $dbh = $dbh_of{ ident $self };
 
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
+
         # Load the results.
         my @families = ( { name => $family_name } );
-        eval { $self->_load_gene_family_summaries(\@families) };
+        eval {
+            $self->_load_gene_family_summaries( \@families,
+                $species_tree_name );
+        };
         if ( my $e = IPlant::TreeRec::GeneFamilyNotFoundException->caught() )
         {
             @families = ();
@@ -223,12 +238,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         }
 
         # Fetch the tree loader and family info retreiver.
-        my $tree_loader = $gene_tree_loader_of{ ident $self };
-        my $info        = $gene_family_info_of{ ident $self };
+        my $info = $gene_family_info_of{ ident $self };
 
         # Load the detailed information for the gene family.
-        my $tree = $tree_loader->load_gene_tree($family_name);
-        my $details_ref = $info->get_details( $family_name, $tree );
+        my $details_ref
+            = $info->get_details( $family_name, $species_tree_name );
 
         # Fetch the list of URL suffixes for file retrieval.
         my $file_retriever = $file_retriever_of{ ident $self };
@@ -265,6 +279,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my ( $family_name, $species_tree_name )
             = $self->_extract_tree_args( $json, 'familyName' );
 
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
+
         # Fetch the tree loader.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
 
@@ -300,6 +319,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Extract the arguments.
         my ( $family_name, $species_tree_name )
             = $self->_extract_tree_args( $json, 'familyName' );
+
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
 
         # Get the objects we need.
         my $dbh         = $dbh_of{ ident $self };
@@ -345,6 +369,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my ( $family_name, $species_tree_name )
             = $self->_extract_tree_args($json);
 
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
+
         # Fetch the tree loader.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
 
@@ -382,6 +411,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Extract the arguments.
         my ( $family_name, $species_tree_name )
             = $self->_extract_tree_args($json);
+
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
 
         # Fetch the tree loader and create a tree formatter.
         my $tree_loader = $gene_tree_loader_of{ ident $self };
@@ -424,6 +458,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $dbh    = $dbh_of{ ident $self };
         my $finder = IPlant::TreeRec::DuplicationEventFinder->new($dbh);
 
+        # Get the species tree name.
+        my $species_tree
+            = $dbh->resultset('SpeciesTree')->for_node_id($node_id);
+        my $species_tree_name = $species_tree->species_tree_name();
+
         # Find the gene families containing duplication events.
         my @families
             = $finder->find_duplication_events( $node_id, $edge_selected );
@@ -432,7 +471,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         @families = map {
             { $_->get_columns() }
         } @families;
-        $self->_load_gene_family_summaries( \@families );
+        $self->_load_gene_family_summaries( \@families, $species_tree_name );
 
         # Convert the hash keys to camel-case.
         @families = map { camel_case_keys($_) } @families;
@@ -478,6 +517,9 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     sub blast_search {
         my ( $self, $blast_args_json ) = @_;
 
+        # Just use the default species tree name for now.
+        my $species_tree_name = $default_species_tree_of{ ident $self };
+
         # Prepare for the search.
         my $searcher = $blast_searcher_of{ ident $self };
         my $blast_args
@@ -489,7 +531,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Get the summary information for each matching gene ID.
         my @results = map { { name => $_ } }
             $self->_gene_ids_to_family_names(@gene_ids);
-        $self->_load_gene_family_summaries( \@results );
+        $self->_load_gene_family_summaries( \@results, $species_tree_name );
 
         # Convert the hash keys to camel-case.
         @results = map { camel_case_keys($_) } @results;
@@ -526,6 +568,12 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         # Parse the JSON that was provided to us.
         my $search_params_ref = JSON->new()->decode($json);
+
+        # Use the default species tree name of one wasn't provided.
+        if ( !defined $search_params_ref->{speciesTreeName} ) {
+            $search_params_ref->{speciesTreeName}
+                = $default_species_tree_of{ ident $self };
+        }
 
         # Create a new reconciliation resolver.
         my $dbh      = $dbh_of{ ident $self };
@@ -646,18 +694,24 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
     ##########################################################################
     # Usage      : $results_ref = $treerec->_do_gene_family_search( $type,
-    #                  $search_string );
+    #                  $search_string, $species_tree_name );
     #
     # Purpose    : Performs a gene family search.
     #
     # Returns    : Information about the matching gene families.
     #
-    # Parameters : $type          - the type of search to perform.
-    #              $search_string - the string to search for.
+    # Parameters : $type              - the type of search to perform.
+    #              $search_string     - the string to search for.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : No exceptions.
     sub _do_gene_family_search {
-        my ( $self, $type, $search_string ) = @_;
+        my ( $self, $type, $search_string, $species_tree_name ) = @_;
+
+        # Use the default species tree name if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
 
         # Perform the search.
         my $dbh     = $dbh_of{ ident $self };
@@ -668,7 +722,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         @results = map {
             { $_->get_columns() }
         } @results;
-        $self->_load_gene_family_summaries( \@results );
+        $self->_load_gene_family_summaries( \@results, $species_tree_name );
 
         # Convert the hash keys to camel-case.
         @results = map { camel_case_keys($_) } @results;
@@ -678,7 +732,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
     ##########################################################################
     # Usage      : $updated_results_ref
-    #                  = $treerec->_load_gene_family_summaries($results_ref);
+    #                  = $treerec->_load_gene_family_summaries( $results_ref,
+    #                    $species_tree_name );
     #
     # Purpose    : Loads the gene family summary information from gene family
     #              search results.  The search results should be in the form
@@ -688,21 +743,21 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #
     # Returns    : A reference to the updated results hash.
     #
-    # Parameters : $results_ref - a reference to the list of results.
+    # Parameters : $results_ref       - a reference to the list of results.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : No exceptions.
     sub _load_gene_family_summaries {
-        my ( $self, $results_ref ) = @_;
+        my ( $self, $results_ref, $species_tree_name ) = @_;
 
         # Fetch the tree loader and family info retreiver.
-        my $tree_loader = $gene_tree_loader_of{ ident $self };
-        my $info        = $gene_family_info_of{ ident $self };
+        my $info = $gene_family_info_of{ ident $self };
 
         # Load the summary for each of the matching gene families.
         for my $result_ref ( @{$results_ref} ) {
             my $family_name = $result_ref->{name};
-            my $tree        = $tree_loader->load_gene_tree($family_name);
-            my $summary_ref = $info->get_summary( $family_name, $tree );
+            my $summary_ref
+                = $info->get_summary( $family_name, $species_tree_name );
             $result_ref = { %{$result_ref}, %{$summary_ref} };
         }
 

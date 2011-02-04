@@ -25,6 +25,7 @@ WriteMakefile(
         'IPC::Run'               => 0,
         'JSON'                   => 0,
         'List::MoreUtils'        => 0,
+        'Memoize'                => 0,
         'Perl6::Slurp'           => 0,
         'Readonly'               => 0,
         'Test::More'             => 0,
