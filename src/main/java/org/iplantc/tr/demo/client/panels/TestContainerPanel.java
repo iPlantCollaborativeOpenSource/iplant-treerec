@@ -4,43 +4,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.iplantc.tr.demo.client.EventBusContainer;
+import org.iplantc.tr.demo.client.Hyperlink;
 import org.iplantc.tr.demo.client.receivers.GeneTreeInvestigationModeReceiver;
 import org.iplantc.tr.demo.client.receivers.GeneTreeNavModeReceiver;
 import org.iplantc.tr.demo.client.receivers.Receiver;
 import org.iplantc.tr.demo.client.receivers.SpeciesTreeInvestigationModeReceiver;
 import org.iplantc.tr.demo.client.receivers.SpeciesTreeNavModeReceiver;
+import org.iplantc.tr.demo.client.services.SearchService;
+import org.iplantc.tr.demo.client.services.SearchServiceAsync;
 import org.iplantc.tr.demo.client.utils.PanelHelper;
+import org.iplantc.tr.demo.client.utils.TRUtil;
 import org.iplantc.tr.demo.client.utils.TreeRetriever;
 import org.iplantc.tr.demo.client.utils.TreeRetrieverCallBack;
+import org.iplantc.tr.demo.client.windows.SummaryWindow;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
+import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
+import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.ToggleButton;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class TestContainerPanel extends EventBusContainer
 {
 	private ToggleButton btnNav;
 	private ToggleButton btnSelect;
 
+	private String idGeneFamily;
+	
 	List<Receiver> receiversNav;
 	List<Receiver> receiversSelect;
 	
 	TreeRetriever treeRetriever;
-	
-	
 	HorizontalPanel pnlOuter;
+	
+	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
+	
 	
 	enum Mode
 	{
 		NAVIGATE, INVESTIGATION
 	}
 
-	public TestContainerPanel()
+	public TestContainerPanel(String idGeneFamily)
 	{
+		this.idGeneFamily = idGeneFamily;
 		receiversNav = new ArrayList<Receiver>();
 		receiversSelect = new ArrayList<Receiver>();
 
@@ -61,8 +77,7 @@ public class TestContainerPanel extends EventBusContainer
 		receiversSelect.add(receiverSelect);
 
 		containerOuter.add(pnl);
-		// set our default mode
-		toggleMode(Mode.NAVIGATE);
+		
 		layout();
 	}
 
@@ -79,8 +94,6 @@ public class TestContainerPanel extends EventBusContainer
 		receiversSelect.add(receiverSelect);
 
 		containerOuter.add(pnl);
-		// set our default mode
-		toggleMode(Mode.NAVIGATE);
 		layout();
 	}
 
@@ -120,6 +133,54 @@ public class TestContainerPanel extends EventBusContainer
 				});
 	}
 
+	private Hyperlink buildSummaryLink() {
+		Hyperlink link = new Hyperlink("Get supporting data for this reconciliation");
+		link.addListener(Events.OnClick, new Listener<BaseEvent>()
+				{
+		
+					@Override
+					public void handleEvent(BaseEvent be)
+					{
+						showSummaryWindow();
+					}
+				});
+		return link;
+	}
+
+	private void showSummaryWindow() {
+		searchService.getDetails(idGeneFamily, new AsyncCallback<String>()
+				{
+			@Override
+			public void onFailure(Throwable arg0)
+			{
+				arg0.printStackTrace();
+				// do nothing... for now.
+			}
+
+			@Override
+			public void onSuccess(String result)
+			{
+                JSONValue dataItem = TRUtil.parseItem(result);
+
+                if(dataItem != null)
+                {
+                        JSONObject jsonObj = dataItem.isObject();
+                        if (jsonObj != null)
+                        {
+                                showDetails(jsonObj);
+                        }
+                }
+			}
+		});
+	}
+	
+	private void showDetails(final JSONObject jsonObj)
+	{
+		TRDetailsPanel pnl = new TRDetailsPanel(idGeneFamily, jsonObj);
+		
+		new SummaryWindow(pnl, idGeneFamily).show();
+	}
+	
 	private ToolBar buildToolbar()
 	{
 		ToolBar ret = new ToolBar();
@@ -131,6 +192,7 @@ public class TestContainerPanel extends EventBusContainer
 
 		ret.add(btnNav);
 		ret.add(btnSelect);
+		ret.add(buildSummaryLink());
 
 		return ret;
 	}
@@ -168,11 +230,8 @@ public class TestContainerPanel extends EventBusContainer
 		// gratuitous outer panel for spacing
 		pnlOuter = new HorizontalPanel();
 		pnlOuter.setSpacing(10);
-
-		treeRetriever.getSpeciesTree(null, new SpeciesTreeRetrieverCallBack());
-
-		treeRetriever.getGeneTree(null, new GeneTreeRetrieverCallBack());
 		
+		treeRetriever.getSpeciesTree(null, new SpeciesTreeRetrieverCallBack());
 
 		// show
 		add(pnlOuter);
@@ -184,7 +243,8 @@ public class TestContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addSpeciesTreePanel(pnlOuter, new SpeciesTreeChannelPanel(eventbus, "Species Tree",
-					"idSpeciesTree", getTree(), getLayout(), "pg00892"));
+					"idSpeciesTree", getTree(), getLayout(), idGeneFamily));
+			treeRetriever.getGeneTree(null, new GeneTreeRetrieverCallBack());
 		}
 		
 	}
@@ -195,7 +255,9 @@ public class TestContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addGeneTreePanel(pnlOuter, new GeneTreeChannelPanel(eventbus, "Gene Tree", "idGeneTree",
-			getTree(), getLayout(),"pg00892"));
+			getTree(), getLayout(), idGeneFamily));
+			// set our default mode
+			toggleMode(Mode.NAVIGATE);
 		}
 		
 	}

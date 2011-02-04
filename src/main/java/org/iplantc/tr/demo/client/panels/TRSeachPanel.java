@@ -75,6 +75,7 @@ public class TRSeachPanel extends EventBusContainer
 						w.setLayout(new FitLayout());
 						w.setHeading("Search");
 						w.setSize(399, 229);
+						w.setResizable(false);
 						w.add(advPanel);
 						w.show();
 					}
