@@ -189,7 +189,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
+			// TODO change back to gargery when it's updated
+//			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
+			URLConnection connection = get("http://votan.iplantcollaborative.org/treereconciliation/get/gene-family-details/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
 		}
