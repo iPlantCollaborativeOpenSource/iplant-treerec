@@ -5,7 +5,7 @@ use strict;
 
 #########################
 
-use Test::More tests => 61;
+use Test::More tests => 65;
 BEGIN { use_ok('IPlant::DB::TreeRec') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cv') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvterm') };
@@ -17,6 +17,7 @@ BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvtermsynonym') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Db') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Dbxref') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Dbxrefprop') };
+BEGIN { use_ok('IPlant::DB::TreeRec::Result::DuplicationCount') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::DuplicationSearch') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Family') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::FamilyMember') };
@@ -34,11 +35,14 @@ BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTreeNodeAttribute') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Reconciliation') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::ReconciliationNode') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Sequence') };
+BEGIN { use_ok('IPlant::DB::TreeRec::Result::SpeciationCount') };
+BEGIN { use_ok('IPlant::DB::TreeRec::Result::SpeciesCount') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::SpeciesTree') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::SpeciesTreeAttribute') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::SpeciesTreeNode') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::SpeciesTreeNodeAttribute') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::SpeciesTreeNodePath') };
+BEGIN { use_ok('IPlant::DB::TreeRec::ResultSet::Family') };
 BEGIN { use_ok('IPlant::DB::TreeRec::ResultSet::ProteinTree') };
 BEGIN { use_ok('IPlant::DB::TreeRec::ResultSet::Reconciliation') };
 BEGIN { use_ok('IPlant::DB::TreeRec::ResultSet::SpeciesTree') };

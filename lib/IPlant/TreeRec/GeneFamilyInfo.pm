@@ -9,6 +9,12 @@ our $VERSION = '0.0.1';
 
 use Carp;
 use Class::Std::Utils;
+use English qw( -no_match_vars );
+use Memoize;
+memoize( '_count_genes' );
+memoize( '_count_duplications' );
+memoize( '_count_speciations' );
+memoize( '_count_species' );
 
 {
     my %dbh_of;
@@ -68,22 +74,23 @@ use Class::Std::Utils;
     }
 
     ##########################################################################
-    # Usage      : $summary_ref
-    #                  = $info->get_summary( $family_name, $tree);
+    # Usage      : $summary_ref = $info->get_summary( $family_name,
+    #                  $species_tree_name );
     #
     # Purpose    : Obtains summary information for a gene family.
     #
     # Returns    : The summary information.
     #
-    # Parameters : $family_name - the gene family name.
-    #              $tree        - the gene family tree.
+    # Parameters : $family_name       - the gene family name.
+    #              $species_tree_name - the gene family tree.
     #
     # Throws     : No exceptions.
     sub get_summary {
-        my ( $self, $family_name, $tree ) = @_;
+        my ( $self, $family_name, $species_tree_name ) = @_;
 
         # Obtain the tree counts.
-        my $summary_ref = $self->_get_tree_counts($tree);
+        my $summary_ref
+            = $self->_get_tree_counts( $family_name, $species_tree_name );
 
         # Obtain the first GO term.
         $summary_ref->{go_annotations} = $self->_get_go_term($family_name);
@@ -92,8 +99,8 @@ use Class::Std::Utils;
     }
 
     ##########################################################################
-    # Usage      : $details_ref
-    #                  = $info->get_details( $family_name, $tree);
+    # Usage      : $details_ref = $info->get_details( $family_name,
+    #                  $species_tree_name );
     #
     # Purpose    : Obtains detail information for a gene family.  Currently,
     #              the detail information is the same as the summary
@@ -102,15 +109,16 @@ use Class::Std::Utils;
     #
     # Returns    : The detail information.
     #
-    # Parameters : $family_name - the gene family name.
-    #              $tree        - the gene family tree.
+    # Parameters : $family_name       - the gene family name.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : No exceptions.
     sub get_details {
-        my ( $self, $family_name, $tree ) = @_;
+        my ( $self, $family_name, $species_tree_name ) = @_;
 
         # Obtain the tree counts.
-        my $details_ref = $self->_get_tree_counts($tree);
+        my $details_ref
+            = $self->_get_tree_counts( $family_name, $species_tree_name );
 
         # Obtain all of the GO terms.
         $details_ref->{go_annotations}
@@ -171,143 +179,133 @@ use Class::Std::Utils;
         return map { $_->go_term() } @results;
     }
 
-    # A data structure used for counting specific node types.
-    my %NODE_COUNTER_FOR = (
-        gene_count         => \&_count_gene_nodes,
-        duplication_events => \&_count_duplication_events,
-        speciation_events  => \&_count_speciation_events,
-        species_count      => \&_count_species,
-    );
-
-    # A hash of unique species names.
-    my %seen_species;
-
     ##########################################################################
-    # Usage      : $counts_ref = $info->_get_tree_counts($tree);
+    # Usage      : $counts_ref = $info->_get_tree_counts( $family_name,
+    #                  $species_tree_name );
     #
     # Purpose    : Obtains the node counts for the tree.
     #
     # Returns    : A reference to the counts hash.
     #
-    # Parameters : $tree - the tree to obtain the counts from.
+    # Parameters : $family_name       - the name of the gene family.
+    #              $species_tree_name - the name of the species tree.
     #
     # Throws     : No exceptions.
     sub _get_tree_counts {
-        my ( $self, $tree ) = @_;
+        my ( $self, $family_name, $species_tree_name ) = @_;
 
-        # Initialize any temporary data structures.
-        %seen_species = ();
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
 
-        # Determine the node where we're supposed to start counting.
-        my $start_node = ( $tree->get_root_node()->each_Descendent() )[0];
+        # Get the gene family, species tree and reconciliation.
+        my $family = $dbh->resultset('Family')->for_name($family_name);
+        my $species_tree
+            = $dbh->resultset('SpeciesTree')->for_name($species_tree_name);
+        my $rec = $dbh->resultset('Reconciliation')
+            ->for_species_tree_and_family( $species_tree_name, $family_name );
 
-        # Count the special nodes in the tree.
-        return $self->_get_subtree_counts( $start_node, {} );
+        # Get all of the counts.
+        my %counts = (
+            'gene_count'         => $self->_count_genes($family),
+            'duplication_events' => $self->_count_duplications($rec),
+            'speciation_events'  => $self->_count_speciations($rec),
+            'species_count'      => $self->_count_species($species_tree),
+        );
+
+        return \%counts;
     }
 
     ##########################################################################
-    # Usage      : $counts_ref = $info->_get_subtree_counts( $node,
-    #                  $counts_ref );
+    # Usage      : $count = $info->_count_genes($family);
     #
-    # Purpose    : Adds the node counts for the subtree rooted at the given
-    #              node to the given counts hash.
+    # Purpose    : Counts the number of genes in the given gene family.
     #
-    # Returns    : A reference to the counts hash.
+    # Returns    : The number of genes.
     #
-    # Parameters : $node       - the root of the subtree we're counting.
-    #              $counts_ref - a reference to the counts hash.
+    # Parameters : $family - the gene family to examine.
     #
     # Throws     : No exceptions.
-    sub _get_subtree_counts {
-        my ( $self, $node, $counts_ref ) = @_;
+    sub _count_genes {
+        my ( $self, $family ) = @_;
 
-        # Update the counts for the current node.
-        for my $count_id ( keys %NODE_COUNTER_FOR ) {
-            my $counter_ref = $NODE_COUNTER_FOR{$count_id};
-            $counts_ref->{$count_id} += $counter_ref->($node);
-        }
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
 
-        # Update the counts for the subtrees rooted at this node's children.
-        for my $child ( $node->each_Descendent() ) {
-            $self->_get_subtree_counts( $child, $counts_ref );
-        }
+        # Get the number of genes.
+        my $count = $dbh->resultset('FamilyMember')
+            ->count( { 'family_id' => $family->id() } );
 
-        return $counts_ref;
+        return $count;
     }
 
     ##########################################################################
-    # Usage      : $gene_count += _count_gene_nodes($node);
+    # Usage      : $count = $info->_count_duplications($reconciliation);
     #
-    # Purpose    : Determines whether or not the given tree node represents a
-    #              gene and returns the number of genes represented by the
-    #              node (that is, 0 or 1).
+    # Purpose    : Counts the number of duplication events associated with the
+    #              given reconciliation.
     #
-    # Returns    : The number of genes represented by the node.
+    # Returns    : The number of duplication events.
     #
-    # Parameters : $node - the node.
+    # Parameters : $reconciliation - the reconciliation to examine.
     #
     # Throws     : No exceptions.
-    sub _count_gene_nodes {
-        return $_[0]->is_Leaf() ? 1 : 0;
+    sub _count_duplications {
+        my ( $self, $reconciliation ) = @_;
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Get the number of duplications.
+        my @results = eval { $dbh->resultset('DuplicationCount')
+            ->search( {}, { 'bind' => [ $reconciliation->id() ] } ) };
+        warn $EVAL_ERROR if $EVAL_ERROR;
+        return scalar @results > 0 ? $results[0]->duplication_count() : 0;
     }
 
     ##########################################################################
-    # Usage      : $duplication_event_count
-    #                  += _count_duplication_events($node);
+    # Usage      : $count = $info->_count_speciations($reconciliation);
     #
-    # Purpose    : Determines whether or not the given tree node represents a
-    #              duplication events and returns the number of duplication
-    #              events represented by the node (that is, 0 or 1).
+    # Purpose    : Counts the number of speciation events associated with the
+    #              given reconciliation.
     #
-    # Returns    : The number of duplication events represented by the node.
+    # Returns    : The number of speciation events.
     #
-    # Parameters : $node - the node.
+    # Parameters : $reconciliation - the reconciliation to examine.
     #
     # Throws     : No exceptions.
-    sub _count_duplication_events {
-        my $value = $_[0]->get_tag_values('D');
-        return defined $value && ',Y,T,' =~ m/,$value,/ixms ? 1 : 0;
+    sub _count_speciations {
+        my ( $self, $reconciliation ) = @_;
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Get the number of speciations.
+        my @results = eval { $dbh->resultset('SpeciationCount')
+            ->search( {}, { 'bind' => [ $reconciliation->id() ] } ) };
+        warn $EVAL_ERROR if $EVAL_ERROR;
+        return scalar @results > 0 ? $results[0]->speciation_count() : 0;
     }
 
     ##########################################################################
-    # Usage      : $speciation_event_count
-    #                  += _count_speciation_events($node);
+    # Usage      : $count = $info->_count_species($species_tree);
     #
-    # Purpose    : Determines whether or not the given tree node represents a
-    #              speciation events and returns the number of speciation
-    #              events represented by the node (that is, 0 or 1).
+    # Purpose    : Counts the number of species in the given species tree.
     #
-    # Returns    : The number of speciation events represented by the node.
+    # Returns    : The species count.
     #
-    # Parameters : $node - the node.
-    #
-    # Throws     : No exceptions.
-    sub _count_speciation_events {
-        my $value = $_[0]->get_tag_values('D');
-        return defined $value && ',N,F,' =~ m/,$value,/ixms ? 1 : 0;
-    }
-
-    ##########################################################################
-    # Usage      : $species_count += _count_species($node);
-    #
-    # Purpose    : Determines whether or not the given tree node is associated
-    #              with a species that hasn't been counted yet and returns the
-    #              number of unseen species represented by the node (that is,
-    #              0 or 1).
-    #
-    # Returns    : The number of unseen speices represented by the node.
-    #
-    # Parameters : $node - the node.
+    # Parameters : $species_tree - the species tree.
     #
     # Throws     : No exceptions.
     sub _count_species {
-        my $species = $_[0]->get_tag_values('S');
-        my $count
-            = !defined $species ? 0
-            : $species =~ m/ snode \d+ /xms ? 0
-            : $seen_species{$species}++ > 0 ? 0
-            :                                 1;
-        return $count;
+        my ( $self, $species_tree ) = @_;
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Get the species tree count.
+        my @results = $dbh->resultset('SpeciesCount')
+            ->search( {}, { 'bind' => [ $species_tree->id() ] } );
+        return scalar @results > 0 ? $results[0]->species_count() : 0;
     }
 }
 
