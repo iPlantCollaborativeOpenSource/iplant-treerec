@@ -18,6 +18,7 @@ lib/IPlant/DB/TreeRec/Result/GeneIdSearch.pm
 lib/IPlant/DB/TreeRec/Result/GoAccessionSearch.pm
 lib/IPlant/DB/TreeRec/Result/GoSearch.pm
 lib/IPlant/DB/TreeRec/Result/GoTermsForFamily.pm
+lib/IPlant/DB/TreeRec/Result/GoTermsForFamilyAndCategory.pm
 lib/IPlant/DB/TreeRec/Result/Member.pm
 lib/IPlant/DB/TreeRec/Result/MemberAttribute.pm
 lib/IPlant/DB/TreeRec/Result/ProteinTree.pm

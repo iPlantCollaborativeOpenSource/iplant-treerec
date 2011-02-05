@@ -5,7 +5,7 @@ use strict;
 
 #########################
 
-use Test::More tests => 65;
+use Test::More tests => 66;
 BEGIN { use_ok('IPlant::DB::TreeRec') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cv') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvterm') };
@@ -25,6 +25,7 @@ BEGIN { use_ok('IPlant::DB::TreeRec::Result::GeneIdSearch') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::GoAccessionSearch') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::GoSearch') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::GoTermsForFamily') };
+BEGIN { use_ok('IPlant::DB::TreeRec::Result::GoTermsForFamilyAndCategory') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Member') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::MemberAttribute') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTree') };

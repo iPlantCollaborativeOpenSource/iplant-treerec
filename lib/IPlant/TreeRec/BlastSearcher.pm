@@ -113,8 +113,8 @@ use Readonly;
 	for my $row (@rows) {
 	    my $blast_result = {};
 	    my @cols = split (/\t/,$row);
-	    $blast_result->{'query_id'} = $cols[0];
-	    $blast_result->{'gene_id'} = $cols[1];
+            $blast_result->{'query_id'} = $self->_strip_species( $cols[0] );
+            $blast_result->{'gene_id'}  = $self->_strip_species( $cols[1] );
 	    $blast_result->{'evalue'} = $cols[2];
 	    $blast_result->{'query_start'} = $cols[3];
 	    $blast_result->{'query_end'} = $cols[4];
@@ -122,7 +122,22 @@ use Readonly;
 	    push @output, $blast_result;
 	}
 	return @output;
+    }
 
+    ##########################################################################
+    # Usage      : $gene_id = $searcher->_strip_species($gene_id);
+    #
+    # Purpose    : Removes the species name from the gene identifier.
+    #
+    # Returns    : The updated gene identifier.
+    #
+    # Parameters : $gene_id - the gene identifier to update.
+    #
+    # Throws     : No exceptions.
+    sub _strip_species {
+        my ( $self, $gene_id ) = @_;
+        $gene_id =~ s/ _ [^_]+ \z //xms;
+        return $gene_id;
     }
 }
 

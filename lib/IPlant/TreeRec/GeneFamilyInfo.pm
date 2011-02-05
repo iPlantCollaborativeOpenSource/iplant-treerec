@@ -11,10 +11,21 @@ use Carp;
 use Class::Std::Utils;
 use English qw( -no_match_vars );
 use Memoize;
+use Readonly;
+
+memoize( '_protein_tree_id_for_family' );
+memoize( '_get_representative_go_term' );
+memoize( '_get_go_category_id' );
+memoize( '_count_go_terms' );
 memoize( '_count_genes' );
 memoize( '_count_duplications' );
 memoize( '_count_speciations' );
 memoize( '_count_species' );
+
+# The list of GO term categories we're interested in, in order.
+Readonly my @GO_CATEGORIES =>
+    ( 'biological_process', 'cellular_component', 'molecular_function' );
+
 
 {
     my %dbh_of;
@@ -84,16 +95,34 @@ memoize( '_count_species' );
     # Parameters : $family_name       - the gene family name.
     #              $species_tree_name - the gene family tree.
     #
-    # Throws     : No exceptions.
+    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::ReconciliationNotFoundException
     sub get_summary {
         my ( $self, $family_name, $species_tree_name ) = @_;
 
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Get the gene family, species tree and reconciliation.
+        my $family = $dbh->resultset('Family')->for_name($family_name);
+        my $species_tree
+            = $dbh->resultset('SpeciesTree')->for_name($species_tree_name);
+        my $rec = $dbh->resultset('Reconciliation')
+            ->for_species_tree_and_family( $species_tree_name, $family_name );
+
+        # Get the protein tree identifier.
+        my $protein_tree_id = $self->_protein_tree_id_for_family($family);
+
         # Obtain the tree counts.
-        my $summary_ref
-            = $self->_get_tree_counts( $family_name, $species_tree_name );
+        my $summary_ref = $self->_get_tree_counts(
+            $family->id(), $species_tree->id(),
+            $rec->id(),    $protein_tree_id
+        );
 
         # Obtain the first GO term.
-        $summary_ref->{go_annotations} = $self->_get_go_term($family_name);
+        $summary_ref->{go_annotations}
+            = $self->_get_representative_go_term($protein_tree_id);
 
         return $summary_ref;
     }
@@ -112,86 +141,10 @@ memoize( '_count_species' );
     # Parameters : $family_name       - the gene family name.
     #              $species_tree_name - the name of the species tree.
     #
-    # Throws     : No exceptions.
+    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::ReconciliationNotFoundException
     sub get_details {
-        my ( $self, $family_name, $species_tree_name ) = @_;
-
-        # Obtain the tree counts.
-        my $details_ref
-            = $self->_get_tree_counts( $family_name, $species_tree_name );
-
-        # Obtain all of the GO terms.
-        $details_ref->{go_annotations}
-            = [ $self->_get_all_go_terms($family_name) ];
-
-        return $details_ref;
-    }
-
-    ##########################################################################
-    # Usage      : $truncated_go_term
-    #                  = $info->_get_go_term($family_name);
-    #
-    # Purpose    : Retrieves the first GO term for the given gene family and
-    #              truncates it if there's a length limit.
-    #
-    # Returns    : The truncated GO term.
-    #
-    # Parameters : $family_name - the name of the gene family.
-    #
-    # Throws     : No exceptions.
-    sub _get_go_term {
-        my ( $self, $family_name ) = @_;
-
-        # Fetch the first GO term.
-        my @go_terms = $self->_get_all_go_terms($family_name);
-        my $go_term = scalar @go_terms > 0 ? $go_terms[0] : "";
-
-        # Add an ellipsis for long or multiple terms.
-        my $length_limit = $go_term_length_limit_of{ ident $self };
-        if ( defined $length_limit ) {
-            if ( length $go_term > $length_limit || scalar @go_terms > 0 ) {
-                $go_term = substr( $go_term, 0, $length_limit - 3 ) . "...";
-            }
-        }
-
-        return $go_term;
-    }
-
-    ##########################################################################
-    # Usage      : @go_terms = $info->_get_all_go_terms($family_name);
-    #
-    # Purpose    : Retrieves the GO terms for the given gene family.
-    #
-    # Returns    : The list of GO terms.
-    #
-    # Parameters : $family_name - the name of the gene family.
-    #
-    # Throws     : No exceptions.
-    sub _get_all_go_terms {
-        my ( $self, $family_name )  = @_;
-
-        # Get all of the GO term objects from the database.
-        my $dbh     = $dbh_of{ ident $self };
-        my @results = $dbh->resultset('GoTermsForFamily')
-            ->search( {}, { 'bind' => [$family_name] } );
-
-        # Extract the actual GO term from each of the GO term objects.
-        return map { $_->go_term() } @results;
-    }
-
-    ##########################################################################
-    # Usage      : $counts_ref = $info->_get_tree_counts( $family_name,
-    #                  $species_tree_name );
-    #
-    # Purpose    : Obtains the node counts for the tree.
-    #
-    # Returns    : A reference to the counts hash.
-    #
-    # Parameters : $family_name       - the name of the gene family.
-    #              $species_tree_name - the name of the species tree.
-    #
-    # Throws     : No exceptions.
-    sub _get_tree_counts {
         my ( $self, $family_name, $species_tree_name ) = @_;
 
         # Get the database handle.
@@ -204,107 +157,293 @@ memoize( '_count_species' );
         my $rec = $dbh->resultset('Reconciliation')
             ->for_species_tree_and_family( $species_tree_name, $family_name );
 
+        # Get the protein tree identifier.
+        my $protein_tree_id = $self->_protein_tree_id_for_family($family);
+
+        # Obtain the tree counts.
+        my $details_ref = $self->_get_tree_counts(
+            $family->id(), $species_tree->id(),
+            $rec->id(),    $protein_tree_id
+        );
+
+        # Obtain all of the GO terms.
+        $details_ref->{go_annotations}
+            = [ $self->_get_all_go_terms($protein_tree_id) ];
+
+        return $details_ref;
+    }
+
+    ##########################################################################
+    # Usage      : $protein_tree_id = $info->_protein_tree_id_for_family(
+    #                  $family );
+    #
+    # Purpose    : Gets the protein tree identifier for a gene family.
+    #
+    # Returns    : The protein tree identifier.
+    #
+    # Parameters : $family - the gene family to get the protein tree for.
+    #
+    # Throws     : No exceptions.
+    sub _protein_tree_id_for_family {
+        my ( $self, $family ) = @_;
+
+        # Extract the family name.
+        my $family_name = $family->stable_id();
+
+        # Get the protein tree.
+        my $protein_tree = $family->protein_tree();
+        IPlant::TreeRec::TreeNotFoundException(
+            error => "no protein tree found for $family_name" )
+            if !defined $protein_tree;
+
+        return $protein_tree->id();
+    }
+
+    ##########################################################################
+    # Usage      : $term = $info->_get_representative_go_term(
+    #                  $protein_tree_id );
+    #
+    # Purpose    : Retrieves the most common go associated with the protein
+    #              tree with the given identifier for the first category in
+    #              our category list that has GO terms.
+    #
+    # Returns    : The GO term.
+    #
+    # Parameters : $protein_tree_id - the protein tree identifier.
+    #
+    # Throws     : No exceptions.
+    sub _get_representative_go_term {
+        my ( $self, $protein_tree_id ) = @_;
+
+        # Fetch the most common GO term in the first category that has terms.
+        my $go_term;
+        CATEGORY:
+        for my $category (@GO_CATEGORIES) {
+            my $category_id = $self->_get_go_category_id($category);
+            next CATEGORY if !defined $category_id;
+            $go_term = $self->_get_go_term( $protein_tree_id, $category_id );
+            last CATEGORY if defined $go_term;
+        }
+
+        return $go_term;
+    }
+
+    ##########################################################################
+    # Usage      : $cvterm_id = $info->_get_go_category_id($category);
+    #
+    # Purpose    : Get the cvterm ID for the GO category with the given name.
+    #
+    # Returns    : The ID.
+    #
+    # Parameters : $category - the name of the GO category.
+    #
+    # Throws     : No exceptions.
+    sub _get_go_category_id {
+        my ( $self, $category ) = @_;
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Get the cvterm for the GO category.
+        my $cvterm
+            = $dbh->resultset('Cvterm')->find( { 'name' => $category } );
+        return if !defined $cvterm;
+
+        return $cvterm->id();
+    }
+
+    ##########################################################################
+    # Usage      : $go_term = $info->_get_go_term( $protein_tree_id,
+    #                  $category_id );
+    #
+    # Purpose    : Finds the most common GO term in the GO term category with
+    #              the given identifier for the given protein tree ID.
+    #
+    # Returns    : The GO term or undef if no terms are found.
+    #
+    # Parameters : $protein_tree_id - the protein tree identifier.
+    #              $category_id     - the GO term category identifier.
+    #
+    # Throws     : No exceptions.
+    sub _get_go_term {
+        my ( $self, $protein_tree_id, $category_id ) = @_;
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Get the list of GO terms.
+        my @results = $dbh->resultset('GoTermsForFamilyAndCategory')
+            ->search( {}, { 'bind' => [ $category_id, $protein_tree_id ] } );
+        return if scalar @results == 0;
+
+        return $results[0]->go_term();
+    }
+
+    ##########################################################################
+    # Usage      : @go_terms = $info->_get_all_go_terms($protein_tree_id);
+    #
+    # Purpose    : Retrieves the GO terms for the given protein tree
+    #              identifier.
+    #
+    # Returns    : The list of GO terms.
+    #
+    # Parameters : $protein_tree_id - the protein tree identifier.
+    #
+    # Throws     : No exceptions.
+    sub _get_all_go_terms {
+        my ( $self, $protein_tree_id )  = @_;
+
+        # Get all of the GO term objects from the database.
+        my $dbh     = $dbh_of{ ident $self };
+        my @results = $dbh->resultset('GoTermsForFamily')
+            ->search( {}, { 'bind' => [$protein_tree_id] } );
+
+        # Extract the actual GO term from each of the GO term objects.
+        return map { $_->go_term() } @results;
+    }
+
+    ##########################################################################
+    # Usage      : $counts_ref = $info->_get_tree_counts( $family,
+    #                  $species_tree, $rec, $protein_tree_id );
+    #
+    # Purpose    : Obtains the node counts for the tree.
+    #
+    # Returns    : A reference to the counts hash.
+    #
+    # Parameters : $family_id       - the gene family identifier.
+    #              $species_tree_id - the species tree identifier.
+    #              $rec_id          - the reconciliation identifier.
+    #              $protein_tree_id - the protein tree identifier.
+    #
+    # Throws     : No exceptions.
+    sub _get_tree_counts {
+        my ( $self, $family_id, $species_tree_id, $rec_id, $protein_tree_id )
+            = @_;
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
         # Get all of the counts.
         my %counts = (
-            'gene_count'         => $self->_count_genes($family),
-            'duplication_events' => $self->_count_duplications($rec),
-            'speciation_events'  => $self->_count_speciations($rec),
-            'species_count'      => $self->_count_species($species_tree),
+            'gene_count'         => $self->_count_genes($family_id),
+            'duplication_events' => $self->_count_duplications($rec_id),
+            'speciation_events'  => $self->_count_speciations($rec_id),
+            'species_count'      => $self->_count_species($species_tree_id),
+            'go_term_count'      => $self->_count_go_terms($protein_tree_id),
         );
 
         return \%counts;
     }
 
     ##########################################################################
-    # Usage      : $count = $info->_count_genes($family);
+    # Usage      : $count = $info->_count_go_terms($protein_tree_id);
     #
-    # Purpose    : Counts the number of genes in the given gene family.
+    # Purpose    : Counts the number of GO terms associated with the given
+    #              protein tree identifier.
+    #
+    # Returns    : The GO term count.
+    #
+    # Parameters : $protein_tree_id - the protein tree identifier.
+    #
+    # Throws     : No exceptions.
+    sub _count_go_terms {
+        my ( $self, $protein_tree_id ) = @_;
+        return scalar $self->_get_all_go_terms($protein_tree_id);
+    }
+
+    ##########################################################################
+    # Usage      : $count = $info->_count_genes($family_id);
+    #
+    # Purpose    : Counts the number of genes in the given gene family ID.
     #
     # Returns    : The number of genes.
     #
-    # Parameters : $family - the gene family to examine.
+    # Parameters : $family_id - the identifier of the gene family to examine.
     #
     # Throws     : No exceptions.
     sub _count_genes {
-        my ( $self, $family ) = @_;
+        my ( $self, $family_id ) = @_;
 
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
 
         # Get the number of genes.
         my $count = $dbh->resultset('FamilyMember')
-            ->count( { 'family_id' => $family->id() } );
+            ->count( { 'family_id' => $family_id } );
 
         return $count;
     }
 
     ##########################################################################
-    # Usage      : $count = $info->_count_duplications($reconciliation);
+    # Usage      : $count = $info->_count_duplications($reconciliation_id);
     #
     # Purpose    : Counts the number of duplication events associated with the
-    #              given reconciliation.
+    #              given reconciliation ID.
     #
     # Returns    : The number of duplication events.
     #
-    # Parameters : $reconciliation - the reconciliation to examine.
+    # Parameters : $reconciliation_id - the ID of the reconciliation to
+    #                                   examine.
     #
     # Throws     : No exceptions.
     sub _count_duplications {
-        my ( $self, $reconciliation ) = @_;
+        my ( $self, $reconciliation_id ) = @_;
 
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
 
         # Get the number of duplications.
         my @results = eval { $dbh->resultset('DuplicationCount')
-            ->search( {}, { 'bind' => [ $reconciliation->id() ] } ) };
+            ->search( {}, { 'bind' => [ $reconciliation_id ] } ) };
         warn $EVAL_ERROR if $EVAL_ERROR;
         return scalar @results > 0 ? $results[0]->duplication_count() : 0;
     }
 
     ##########################################################################
-    # Usage      : $count = $info->_count_speciations($reconciliation);
+    # Usage      : $count = $info->_count_speciations($reconciliation_id);
     #
     # Purpose    : Counts the number of speciation events associated with the
     #              given reconciliation.
     #
     # Returns    : The number of speciation events.
     #
-    # Parameters : $reconciliation - the reconciliation to examine.
+    # Parameters : $reconciliation_id - the ID of the reconciliation to
+    #                                   examine.
     #
     # Throws     : No exceptions.
     sub _count_speciations {
-        my ( $self, $reconciliation ) = @_;
+        my ( $self, $reconciliation_id ) = @_;
 
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
 
         # Get the number of speciations.
         my @results = eval { $dbh->resultset('SpeciationCount')
-            ->search( {}, { 'bind' => [ $reconciliation->id() ] } ) };
+            ->search( {}, { 'bind' => [ $reconciliation_id ] } ) };
         warn $EVAL_ERROR if $EVAL_ERROR;
         return scalar @results > 0 ? $results[0]->speciation_count() : 0;
     }
 
     ##########################################################################
-    # Usage      : $count = $info->_count_species($species_tree);
+    # Usage      : $count = $info->_count_species($species_tree_id);
     #
-    # Purpose    : Counts the number of species in the given species tree.
+    # Purpose    : Counts the number of species in the given species tree
+    #              identifier.
     #
     # Returns    : The species count.
     #
-    # Parameters : $species_tree - the species tree.
+    # Parameters : $species_tree_id - the species tree identifier.
     #
     # Throws     : No exceptions.
     sub _count_species {
-        my ( $self, $species_tree ) = @_;
+        my ( $self, $species_tree_id ) = @_;
 
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
 
         # Get the species tree count.
         my @results = $dbh->resultset('SpeciesCount')
-            ->search( {}, { 'bind' => [ $species_tree->id() ] } );
+            ->search( {}, { 'bind' => [ $species_tree_id ] } );
         return scalar @results > 0 ? $results[0]->species_count() : 0;
     }
 }

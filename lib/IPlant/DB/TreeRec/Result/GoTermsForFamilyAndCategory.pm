@@ -1,4 +1,4 @@
-package IPlant::DB::TreeRec::Result::GoTermsForFamily;
+package IPlant::DB::TreeRec::Result::GoTermsForFamilyAndCategory;
 
 use 5.008000;
 
@@ -44,7 +44,10 @@ LEFT JOIN dbxref ON
 cvterm.dbxref_id = dbxref.dbxref_id
 LEFT JOIN db ON
 dbxref.db_id = db.db_id
+LEFT JOIN cvtermpath ON
+cvtermpath.subject_id = cvterm.cvterm_id
 WHERE db.name = 'GO'
+AND cvtermpath.object_id = ?
 AND protein_tree_node.protein_tree_id = ?
 GROUP BY go_term
 ORDER BY count DESC
@@ -55,8 +58,8 @@ __END__
 
 =head1 NAME
 
-IPlant::DB::TreeRec::Result::GoTermsForFamily – view for obtaining the list of
-GO terms for a given gene family.
+IPlant::DB::TreeRec::Result::GoTermsForFamilyAndCategory – view for obtaining
+the list of GO terms for a given gene family and GO term category.
 
 =head1 ACCESSORS
 
