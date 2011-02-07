@@ -189,7 +189,6 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			// TODO change back to gargery when it's updated
 			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
@@ -210,7 +209,6 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			// TODO change back to gargery when it's updated
 			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
