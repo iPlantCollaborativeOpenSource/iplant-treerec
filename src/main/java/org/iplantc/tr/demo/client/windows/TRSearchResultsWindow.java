@@ -42,12 +42,25 @@ public class TRSearchResultsWindow extends Window
 	private ArrayList<Button> buttons;
 	private ContentPanel pnlGrid;
 	private PagingToolBar pageBar;
-
-	public TRSearchResultsWindow(String searchTerms, String results, boolean showBlastColumns,
+	
+	private static TRSearchResultsWindow instance;
+	
+	public static TRSearchResultsWindow getInstance()
+	{
+		if(instance == null)
+		{
+			instance = new TRSearchResultsWindow();
+		}
+		
+		return instance;
+	}
+	
+	public void init(String searchTerms, String results, boolean showBlastColumns,
 			ClientCommand cmdViewFamily)
 	{
 		this.showBlastColumns = showBlastColumns;
 		this.cmdViewFamily = cmdViewFamily;
+		
 		init(searchTerms, results);
 	}
 
@@ -57,18 +70,24 @@ public class TRSearchResultsWindow extends Window
 		setHeading("Tree Reconciliation Search Results");
 		buildGrid(results);
 		setLayout(new FitLayout());
+		
 		pnlGrid = new ContentPanel();
 		pnlGrid.setLayout(new FitLayout());
 		pnlGrid.setHeading(heading);
+		
 		compose();
 		setSize(640, 300);
 	}
 
 	private void compose()
 	{
+		removeAll();
+		
 		pnlGrid.add(gridResults);
 		pnlGrid.setBottomComponent(pageBar);
+		
 		add(pnlGrid);
+		layout();
 	}
 
 	/**
@@ -221,7 +240,6 @@ public class TRSearchResultsWindow extends Window
 	 */
 	class GoTermsColumnRenderer implements GridCellRenderer<TRSearchResult>
 	{
-
 		@Override
 		public Object render(final TRSearchResult result, String property, ColumnData config, int rowIndex,
 				int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)

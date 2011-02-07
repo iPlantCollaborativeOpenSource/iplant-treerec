@@ -1,7 +1,7 @@
 package org.iplantc.tr.demo.client.windows;
 
 import org.iplantc.tr.demo.client.commands.ClientCommand;
-import org.iplantc.tr.demo.client.panels.TRToolPanel;
+import org.iplantc.tr.demo.client.panels.TRAdvancedSearchPanel;
 import org.iplantc.tr.demo.client.services.SearchService;
 import org.iplantc.tr.demo.client.services.SearchServiceAsync;
 
@@ -13,7 +13,9 @@ public class TRSearchWindow extends Window
 {
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
 
-	public TRSearchWindow() 
+	private static TRSearchWindow instance;
+	
+	private TRSearchWindow() 
 	{
 		init();
 		
@@ -30,19 +32,33 @@ public class TRSearchWindow extends Window
 	
 	private void compose()
 	{
-		add(new TRToolPanel(searchService, new ViewCommand()));
+		removeAll();
+		
+		add(new TRAdvancedSearchPanel(searchService, new ViewCommand()));
+		
+		layout();
 	}
 	
 	private void doView(final String params)
 	{
 		if(params != null)
 		{
-			TRViewerWindow  win = new TRViewerWindow(null, params);
+			TRViewerWindow  win = new TRViewerWindow(params);
 			win.show();
 			win.maximize();
 		}
 	}
 	
+	public static TRSearchWindow getInstance()
+	{
+		if(instance == null)
+		{
+			instance = new TRSearchWindow();
+		}
+		
+		return instance;
+	}
+		
 	class ViewCommand implements ClientCommand
 	{
 		@Override

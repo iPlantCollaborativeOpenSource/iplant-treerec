@@ -33,7 +33,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TRToolPanel extends ContentPanel
+public class TRAdvancedSearchPanel extends ContentPanel
 {
 	private static final String TR_SEARCH_TYPE_LIST_BOX_ID = "idTRSearchTypeSelection";
 
@@ -55,7 +55,7 @@ public class TRToolPanel extends ContentPanel
 	private SearchServiceAsync searchService;
 	private ClientCommand cmdView;
 
-	public TRToolPanel(SearchServiceAsync searchService, ClientCommand cmdView)
+	public TRAdvancedSearchPanel(SearchServiceAsync searchService, ClientCommand cmdView)
 	{
 		this.searchService = searchService;
 		this.cmdView = cmdView;
@@ -585,14 +585,18 @@ public class TRToolPanel extends ContentPanel
 
 	private void showSimpleResultsWindow(String heading, String results)
 	{
-		TRSearchResultsWindow window = new TRSearchResultsWindow(heading, results, false, cmdView);
+		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
+		
+		window.init(heading, results, false, cmdView);
 		
 		window.show();
 	}
 
 	private void showBlastResultsWindow(String heading, String results)
 	{
-		TRSearchResultsWindow window = new TRSearchResultsWindow(heading, results, true, cmdView);
+		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
+		
+		window.init(heading, results, true, cmdView);
 		
 		window.show();
 	}

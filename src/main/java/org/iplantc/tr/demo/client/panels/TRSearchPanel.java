@@ -17,7 +17,6 @@ import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.widget.Component;
-import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.VerticalPanel;
@@ -51,31 +50,24 @@ public class TRSearchPanel extends EventBusContainer
 
 	private Component buildAdvSearch()
 	{
-		return new Label("The Tree Reconciliation application enables users to search"
-				+ " and explore the relationship between </br> a gene family of interest "
-				+ "and a species tree that contains this gene tree.");
+		return new Label("Explore the relationship between a gene family and its species tree.");
 	}
 
 	private Component buildInfoLabel()
-	{
-		HorizontalPanel pnl = new HorizontalPanel();
-		pnl.add(new Label(
-				"For users with a specific gene or sequence of interest, please use the&nbsp;&nbsp;"));
-
+	{		
 		Hyperlink link = new Hyperlink("Advanced Search Options");
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
 		{
 			@Override
 			public void handleEvent(BaseEvent be)
 			{
-				TRSearchWindow window = new TRSearchWindow();
+				TRSearchWindow window = TRSearchWindow.getInstance();
 				window.show();
+				window.toFront();
 			}
 		});
 
-		pnl.add(link);
-
-		return pnl;
+		return link;
 	}
 
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
