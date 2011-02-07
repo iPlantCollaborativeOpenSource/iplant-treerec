@@ -11,6 +11,7 @@ import org.iplantc.tr.demo.client.receivers.Receiver;
 import org.iplantc.tr.demo.client.receivers.SpeciesTreeInvestigationModeReceiver;
 import org.iplantc.tr.demo.client.utils.TreeRetriever;
 import org.iplantc.tr.demo.client.utils.TreeRetrieverCallBack;
+import org.iplantc.tr.demo.client.windows.TRSearchWindow;
 
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Events;
@@ -20,8 +21,6 @@ import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.VerticalPanel;
-import com.extjs.gxt.ui.client.widget.Window;
-import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 
 /**
  * @author sriram
@@ -52,7 +51,7 @@ public class TRSearchPanel extends EventBusContainer
 
 	private Component buildAdvSearch()
 	{
-		return new Label("The Tree Reconciliation application will enable users to search"
+		return new Label("The Tree Reconciliation application enables users to search"
 				+ " and explore the relationship between </br> a gene family of interest "
 				+ "and a species tree that contains this gene tree.");
 	}
@@ -69,15 +68,8 @@ public class TRSearchPanel extends EventBusContainer
 			@Override
 			public void handleEvent(BaseEvent be)
 			{
-				TRAdvancedSearchPanel advPanel = new TRAdvancedSearchPanel();
-				
-				Window w = new Window();
-				w.setLayout(new FitLayout());
-				w.setHeading("Search");
-				w.setSize(419, 249);
-				w.setResizable(false);
-				w.add(advPanel);
-				w.show();
+				TRSearchWindow window = new TRSearchWindow();
+				window.show();
 			}
 		});
 
