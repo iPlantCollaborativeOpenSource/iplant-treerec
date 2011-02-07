@@ -1,7 +1,7 @@
 package org.iplantc.tr.demo.client;
 
 
-import org.iplantc.tr.demo.client.panels.TRSeachPanel;
+import org.iplantc.tr.demo.client.panels.TRSearchPanel;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.Window;
@@ -20,7 +20,7 @@ public class TRDemo implements EntryPoint
 		setEntryPointTitle();
 		
 		ApplicationLayout layoutApplication = new ApplicationLayout();
-		layoutApplication.replaceCenterPanel(new TRSeachPanel());
+		layoutApplication.replaceCenterPanel(new TRSearchPanel());
 		
 		RootPanel.get().add(layoutApplication);
 	}

@@ -233,7 +233,7 @@ public class TestContainerPanel extends EventBusContainer
 		pnlOuter = new HorizontalPanel();
 		pnlOuter.setSpacing(10);
 
-		treeRetriever.getSpeciesTree(null, new SpeciesTreeRetrieverCallBack());
+		treeRetriever.getSpeciesTree(idGeneFamily, new SpeciesTreeRetrieverCallBack());
 
 		// show
 		add(pnlOuter);
@@ -246,7 +246,7 @@ public class TestContainerPanel extends EventBusContainer
 		{
 			addSpeciesTreePanel(pnlOuter, new SpeciesTreeChannelPanel(eventbus, "Species Tree",
 					"idSpeciesTree", getTree(), getLayout(), idGeneFamily));
-			treeRetriever.getGeneTree(null, new GeneTreeRetrieverCallBack());
+			treeRetriever.getGeneTree(idGeneFamily, new GeneTreeRetrieverCallBack());
 		}
 
 	}
