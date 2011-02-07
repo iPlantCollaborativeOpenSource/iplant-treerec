@@ -16,12 +16,13 @@ public class TRSearchResult extends BaseModel
 	public TRSearchResult(JsTRSearchResult jsResult)
 	{		
 		set("name", jsResult.getName());
-		set("eValue", "#");
-		set("alignLength", "#");
+		set("eValue", jsResult.getEValue());
+		set("alignLength", jsResult.getAlignLength());
 		set("goAnnotations", jsResult.getGOAnnotations());
-		set("numGenes", Integer.toString(jsResult.getGeneCount()));
-		set("numSpecies", Integer.toString(jsResult.getSpeciesCount()));
-		set("numDuplications", Integer.toString(jsResult.getDuplicationCount()));
+		set("goTermCount", String.valueOf(jsResult.getGoTermCount()));
+		set("numGenes", jsResult.getGeneCount());
+		set("numSpecies", jsResult.getSpeciesCount());
+		set("numDuplications", jsResult.getDuplicationCount());
 	}
 
 	/**
@@ -49,9 +50,9 @@ public class TRSearchResult extends BaseModel
 	 * 
 	 * @return number of GO terms in the family.
 	 */
-	public String getNumGoTerms()
+	public String getGoTermCount()
 	{
-		return "#";
+		return get("goTermCount");
 	}
 	
 	/**
