@@ -12,7 +12,7 @@ public class TRViewerWindow extends Window
 
 	public TRViewerWindow(SearchServiceAsync searchService, String idGene) {
 		setLayout(new FitLayout());
-		pnl = new TestContainerPanel();
+		pnl = new TestContainerPanel(idGene);
 		add(pnl);
 	}
 }

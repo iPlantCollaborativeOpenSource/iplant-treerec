@@ -3,7 +3,6 @@ package org.iplantc.tr.demo.client.receivers;
 import org.iplantc.tr.demo.client.events.GeneTreeInvestigationNodeSelectEvent;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 
-import com.extjs.gxt.ui.client.util.Point;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.json.client.JSONObject;
 
@@ -29,12 +28,8 @@ public class GeneTreeInvestigationModeReceiver extends EventBusReceiver
 	private void handleNodeClick(final JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		int x = (int) objJson.get("clicked_x").isNumber().doubleValue();
-		int y = (int) objJson.get("clicked_y").isNumber().doubleValue();
-		Point p = new Point(x,y);
-
 		GeneTreeInvestigationNodeSelectEvent event = new GeneTreeInvestigationNodeSelectEvent(Integer
-				.parseInt(id),p);
+				.parseInt(id),getAbsoluteCoordinates(objJson));
 		eventbus.fireEvent(event);
 	}
 	

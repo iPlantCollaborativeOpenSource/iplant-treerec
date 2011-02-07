@@ -17,7 +17,7 @@ public class TreeRetriever
 	
 	public void getSpeciesTree(String geneFamilyID, final TreeRetrieverCallBack callback)
 	{
-		TreeServices.getSpeciesData("pg00892", new AsyncCallback<String>()
+		TreeServices.getSpeciesData(geneFamilyID, new AsyncCallback<String>()
 		{
 			
 			@Override
@@ -58,7 +58,7 @@ public class TreeRetriever
 	
 	public void getGeneTree(String geneFamilyID, final TreeRetrieverCallBack callback)
 	{
-		TreeServices.getGeneData("pg00892", new AsyncCallback<String>()
+		TreeServices.getGeneData(geneFamilyID, new AsyncCallback<String>()
 		{
 
 			@Override

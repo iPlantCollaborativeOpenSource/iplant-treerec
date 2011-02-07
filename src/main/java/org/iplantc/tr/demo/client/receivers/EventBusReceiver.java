@@ -3,7 +3,9 @@ package org.iplantc.tr.demo.client.receivers;
 import org.iplantc.tr.demo.client.events.ChannelEvent;
 import org.iplantc.tr.demo.client.events.ChannelEventHandler;
 
+import com.extjs.gxt.ui.client.util.Point;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.json.client.JSONObject;
 
 /**
  * Abstract class for implementing a receiver with an event bus.
@@ -50,6 +52,26 @@ public abstract class EventBusReceiver extends Receiver
 			});
 		}
 	}
+	
+	protected Point getAbsoluteCoordinates(JSONObject obj)
+	{
+		if (obj.get("mouse") != null)
+		{
+			JSONObject mouseObj = obj.get("mouse").isObject();
+	
+			String temp = mouseObj.get("x").toString();
+			int x = Integer.parseInt(temp);
+	
+			temp =  mouseObj.get("y").toString();
+			int y = Integer.parseInt(temp);
+	
+			return new Point(x,y);
+		}
+		else
+		{
+			return null;
+		}
+	}
 
 	/**
 	 * Processes messages from channel events.
@@ -58,4 +80,7 @@ public abstract class EventBusReceiver extends Receiver
 	 * @param jsonMsg event message in JSON.
 	 */
 	protected abstract void processChannelMessage(final String idBroadcaster, final String jsonMsg);
+	
+	
+	
 }

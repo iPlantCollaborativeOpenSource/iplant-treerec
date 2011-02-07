@@ -26,25 +26,26 @@ public class TestContainerPanel extends EventBusContainer
 	private ToggleButton btnNav;
 	private ToggleButton btnSelect;
 
-	List<Receiver> receiversNav;
-	List<Receiver> receiversSelect;
+	private List<Receiver> receiversNav;
+	private List<Receiver> receiversSelect;
 	
-	TreeRetriever treeRetriever;
+	private TreeRetriever treeRetriever;
 	
-	
-	HorizontalPanel pnlOuter;
+	private String idGene;
+	private HorizontalPanel pnlOuter;
 	
 	enum Mode
 	{
 		NAVIGATE, INVESTIGATION
 	}
 
-	public TestContainerPanel()
+	public TestContainerPanel(String idGene)
 	{
 		receiversNav = new ArrayList<Receiver>();
 		receiversSelect = new ArrayList<Receiver>();
 
 		treeRetriever = new TreeRetriever();
+		this.idGene = idGene;
 		compose();
 	}
 
@@ -166,7 +167,7 @@ public class TestContainerPanel extends EventBusContainer
 		pnlOuter = new HorizontalPanel();
 		pnlOuter.setSpacing(10);
 		
-		treeRetriever.getSpeciesTree(null, new SpeciesTreeRetrieverCallBack());
+		treeRetriever.getSpeciesTree(idGene, new SpeciesTreeRetrieverCallBack());
 
 		// show
 		add(pnlOuter);
@@ -178,8 +179,8 @@ public class TestContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addSpeciesTreePanel(pnlOuter, new SpeciesTreeChannelPanel(eventbus, "Species Tree",
-					"idSpeciesTree", getTree(), getLayout(), "pg00892"));
-			treeRetriever.getGeneTree(null, new GeneTreeRetrieverCallBack());
+					"idSpeciesTree", getTree(), getLayout(), idGene));
+			treeRetriever.getGeneTree(idGene, new GeneTreeRetrieverCallBack());
 		}
 		
 	}
@@ -190,7 +191,7 @@ public class TestContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addGeneTreePanel(pnlOuter, new GeneTreeChannelPanel(eventbus, "Gene Tree", "idGeneTree",
-			getTree(), getLayout(),"pg00892"));
+			getTree(), getLayout(),idGene));
 			// set our default mode
 			toggleMode(Mode.NAVIGATE);
 		}

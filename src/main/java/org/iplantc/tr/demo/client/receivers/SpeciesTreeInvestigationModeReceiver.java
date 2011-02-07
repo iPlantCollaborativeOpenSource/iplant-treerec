@@ -4,7 +4,6 @@ import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEvent
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationNodeSelectEvent;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 
-import com.extjs.gxt.ui.client.util.Point;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.json.client.JSONObject;
 
@@ -30,23 +29,18 @@ public class SpeciesTreeInvestigationModeReceiver extends EventBusReceiver
 	private void handleNodeClick(final JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		int x = (int) objJson.get("clicked_x").isNumber().doubleValue();
-		int y = (int) objJson.get("clicked_y").isNumber().doubleValue();
-		Point p = new Point(x,y);
 		SpeciesTreeInvestigationNodeSelectEvent event = new SpeciesTreeInvestigationNodeSelectEvent(
-				Integer.parseInt(id),p);
+				Integer.parseInt(id),getAbsoluteCoordinates(objJson));
 		eventbus.fireEvent(event);
 	}
 	
 	private void handleEdgeClick(final JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		int x = (int) objJson.get("clicked_x").isNumber().doubleValue();
-		int y = (int) objJson.get("clicked_y").isNumber().doubleValue();
-		Point p = new Point(x,y);
+	
 		
 		SpeciesTreeInvestigationEdgeSelectEvent event = new SpeciesTreeInvestigationEdgeSelectEvent(Integer
-				.parseInt(id), p);
+				.parseInt(id), getAbsoluteCoordinates(objJson));
 		eventbus.fireEvent(event);
 	}
 
@@ -69,6 +63,8 @@ public class SpeciesTreeInvestigationModeReceiver extends EventBusReceiver
 			if(isOurEvent(idBroadcaster))
 			{
 				String event = JsonUtil.getString(objJson, "event");
+				
+				System.out.println("event-->" + event.toString());
 
 				if(event.equals("node_clicked"))
 				{
