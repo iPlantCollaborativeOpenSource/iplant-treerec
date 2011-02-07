@@ -19,7 +19,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class SearchServiceImpl extends RemoteServiceServlet implements SearchService
 {
-	private static final String HOSTNAME = "http://gargery.iplantcollaborative.org/";
+	private static final String HOSTNAME = "http://votan.iplantcollaborative.org/";
 	
 	private HttpURLConnection getUrlConnection(String address) throws IOException
 	{
@@ -190,8 +190,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		try
 		{
 			// TODO change back to gargery when it's updated
-//			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
-			URLConnection connection = get("http://votan.iplantcollaborative.org/treereconciliation/get/gene-family-details/" + idGeneFamily);
+			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
 		}
@@ -212,8 +211,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		try
 		{
 			// TODO change back to gargery when it's updated
-//			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
-			URLConnection connection = get("http://votan.iplantcollaborative.org/" + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
+			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
 		}
