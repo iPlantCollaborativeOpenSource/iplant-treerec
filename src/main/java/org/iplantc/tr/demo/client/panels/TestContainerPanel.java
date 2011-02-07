@@ -18,15 +18,16 @@ import org.iplantc.tr.demo.client.utils.TreeRetriever;
 import org.iplantc.tr.demo.client.utils.TreeRetrieverCallBack;
 import org.iplantc.tr.demo.client.windows.SummaryWindow;
 
-import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
+import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.button.ToggleButton;
+import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
@@ -39,16 +40,15 @@ public class TestContainerPanel extends EventBusContainer
 	private ToggleButton btnSelect;
 
 	private String idGeneFamily;
-	
+
 	List<Receiver> receiversNav;
 	List<Receiver> receiversSelect;
-	
+
 	TreeRetriever treeRetriever;
 	HorizontalPanel pnlOuter;
-	
+
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
-	
-	
+
 	enum Mode
 	{
 		NAVIGATE, INVESTIGATION
@@ -77,7 +77,7 @@ public class TestContainerPanel extends EventBusContainer
 		receiversSelect.add(receiverSelect);
 
 		containerOuter.add(pnl);
-		
+
 		layout();
 	}
 
@@ -133,23 +133,25 @@ public class TestContainerPanel extends EventBusContainer
 				});
 	}
 
-	private Hyperlink buildSummaryLink() {
+	private Hyperlink buildSummaryLink()
+	{
 		Hyperlink link = new Hyperlink("Get supporting data for this reconciliation");
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
-				{
-		
-					@Override
-					public void handleEvent(BaseEvent be)
-					{
-						showSummaryWindow();
-					}
-				});
+		{
+
+			@Override
+			public void handleEvent(BaseEvent be)
+			{
+				showSummaryWindow();
+			}
+		});
 		return link;
 	}
 
-	private void showSummaryWindow() {
+	private void showSummaryWindow()
+	{
 		searchService.getDetails(idGeneFamily, new AsyncCallback<String>()
-				{
+		{
 			@Override
 			public void onFailure(Throwable arg0)
 			{
@@ -160,38 +162,38 @@ public class TestContainerPanel extends EventBusContainer
 			@Override
 			public void onSuccess(String result)
 			{
-                JSONValue dataItem = TRUtil.parseItem(result);
+				JSONValue dataItem = TRUtil.parseItem(result);
 
-                if(dataItem != null)
-                {
-                        JSONObject jsonObj = dataItem.isObject();
-                        if (jsonObj != null)
-                        {
-                                showDetails(jsonObj);
-                        }
-                }
+				if(dataItem != null)
+				{
+					JSONObject jsonObj = dataItem.isObject();
+					if(jsonObj != null)
+					{
+						showDetails(jsonObj);
+					}
+				}
 			}
 		});
 	}
-	
+
 	private void showDetails(final JSONObject jsonObj)
 	{
 		TRDetailsPanel pnl = new TRDetailsPanel(idGeneFamily, jsonObj);
-		
+
 		new SummaryWindow(pnl, idGeneFamily).show();
 	}
-	
-	private ToolBar buildToolbar()
+
+	private Component buildToolbar()
 	{
 		ToolBar ret = new ToolBar();
 
 		buildNavButton();
 		buildSelectButton();
 
-		ret.setAlignment(HorizontalAlignment.CENTER);
-
 		ret.add(btnNav);
 		ret.add(btnSelect);
+		ret.add(new FillToolItem());
+
 		ret.add(buildSummaryLink());
 
 		return ret;
@@ -221,7 +223,7 @@ public class TestContainerPanel extends EventBusContainer
 			toggleReceivers(receiversSelect, receiversNav);
 		}
 	}
-	
+
 	private void compose()
 	{
 		// add our button bar
@@ -230,13 +232,13 @@ public class TestContainerPanel extends EventBusContainer
 		// gratuitous outer panel for spacing
 		pnlOuter = new HorizontalPanel();
 		pnlOuter.setSpacing(10);
-		
+
 		treeRetriever.getSpeciesTree(idGeneFamily, new SpeciesTreeRetrieverCallBack());
 
 		// show
 		add(pnlOuter);
 	}
-	
+
 	private class SpeciesTreeRetrieverCallBack extends TreeRetrieverCallBack
 	{
 		@Override
@@ -246,18 +248,20 @@ public class TestContainerPanel extends EventBusContainer
 					"idSpeciesTree", getTree(), getLayout(), idGeneFamily));
 			treeRetriever.getGeneTree(idGeneFamily, new GeneTreeRetrieverCallBack());
 		}
-		
+
 	}
-	
+
 	private class GeneTreeRetrieverCallBack extends TreeRetrieverCallBack
 	{
 		@Override
 		public void execute()
 		{
 			addGeneTreePanel(pnlOuter, new GeneTreeChannelPanel(eventbus, "Gene Tree", "idGeneTree",
-			getTree(), getLayout(), idGeneFamily));
+					getTree(), getLayout(), idGeneFamily));
 			// set our default mode
 			toggleMode(Mode.NAVIGATE);
-		}		
-	}	
+		}
+
+	}
+
 }

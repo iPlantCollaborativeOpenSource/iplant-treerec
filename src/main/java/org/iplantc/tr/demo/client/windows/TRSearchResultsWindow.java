@@ -76,7 +76,15 @@ public class TRSearchResultsWindow extends Window
 		pnlGrid.setHeading(heading);
 		
 		compose();
-		setSize(640, 300);
+		if (showBlastColumns)
+		{
+			// BLAST has two more columns
+			setSize(800, 300);
+		}
+		else
+		{
+			setSize(640, 300);
+		}
 	}
 
 	private void compose()
@@ -244,7 +252,7 @@ public class TRSearchResultsWindow extends Window
 		public Object render(final TRSearchResult result, String property, ColumnData config, int rowIndex,
 				int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
 		{
-			HTML link = new HTML(result.getNumGoTerms() + " <a href=\"#\"> (view all)</a>");
+			HTML link = new HTML(result.getGoTermCount() + " <a href=\"#\"> (view all)</a>");
 			link.addClickHandler(new ClickHandler()
 			{
 				@Override

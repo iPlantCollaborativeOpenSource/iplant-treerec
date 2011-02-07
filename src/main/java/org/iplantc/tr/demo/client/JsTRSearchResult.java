@@ -21,11 +21,54 @@ public class JsTRSearchResult extends JavaScriptObject
 	}-*/;
 
 	/**
+	 * Retrieve family name.
+	 * 
+	 * @return family name.
+	 */
+	public final native String getEValue() /*-{
+		// evalue is only present in BLAST searches
+		if (this.evalue)
+		{
+			return this.evalue;
+		}
+		else
+		{
+			return "";
+		}
+	}-*/;
+
+	/**
+	 * Retrieve family name.
+	 * 
+	 * @return family name.
+	 */
+	public final native int getAlignLength() /*-{
+		// length is only present in BLAST searches
+		if (this.length)
+		{
+			return this.length;
+		}
+		else
+		{
+			return 0;
+		}
+	}-*/;
+
+	/**
+	 * Retrieve family name.
+	 * 
+	 * @return family name.
+	 */
+	public final native int getGoTermCount() /*-{
+		return this.goTermCount;
+	}-*/;
+
+	/**
 	 * Retrieve gene count.
 	 * 
 	 * @return number of genes in family.
 	 */
-	public final native int getGeneCount() /*-{
+	public final native String getGeneCount() /*-{
 		return this.geneCount;
 	}-*/;
 
@@ -34,7 +77,7 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * 
 	 * @return number of species in a family.
 	 */
-	public final native int getSpeciesCount() /*-{
+	public final native String getSpeciesCount() /*-{
 		return this.speciesCount;
 	}-*/;
 
@@ -43,7 +86,7 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * 
 	 * @return number of duplication events.
 	 */
-	public final native int getDuplicationCount() /*-{
+	public final native String getDuplicationCount() /*-{
 		return this.duplicationEvents;
 	}-*/;
 
