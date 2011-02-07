@@ -66,7 +66,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	}
 
 	private void init()
-	{			
+	{
 		setBorders(false);
 		setBodyBorder(false);
 		setHeaderVisible(false);
@@ -182,8 +182,8 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		VerticalPanel ret = new VerticalPanel();
 
 		ret.setStyleAttribute("background-color", "#EDEDED");
-		ret.setStyleAttribute("margin-left", "5px");	
-		
+		ret.setStyleAttribute("margin-left", "5px");
+
 		selectSearchType = initSearchTypeSelection();
 
 		ret.add(new Label("Search type:"));
@@ -288,10 +288,10 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	}
 
 	private void compose()
-	{		
+	{
 		pnlSearch = initSearchPanel();
 
-		add(pnlSearch);	
+		add(pnlSearch);
 	}
 
 	public Widget getFocusWidget()
@@ -303,7 +303,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{
 		protected Button btnSearch;
 		protected Status waitIcon;
-		
+
 		protected abstract void setFocusWidget();
 
 		protected abstract Widget getFocusWidget();
@@ -312,7 +312,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		{
 			setSpacing(5);
 		}
-		
+
 		private Button buildSearchButton()
 		{
 			Button btn = PanelHelper.buildButton("idTRSearchBtn", "Search",
@@ -329,11 +329,11 @@ public class TRAdvancedSearchPanel extends ContentPanel
 
 			return btn;
 		}
-		
+
 		protected HorizontalPanel buildSearchBar()
 		{
 			HorizontalPanel ret = new HorizontalPanel();
-			
+
 			btnSearch = buildSearchButton();
 			waitIcon = new Status();
 
@@ -342,7 +342,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 
 			return ret;
 		}
-		
+
 		protected void searchBegin()
 		{
 			waitIcon.setBusy("Searching");
@@ -353,18 +353,18 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		{
 			btnSearch.enable();
 			waitIcon.clearStatus("");
-		}		
-		
+		}
+
 		protected boolean isValidSearchEntry(String entry)
 		{
-			boolean ret = false;  //assume failure
-			
-			//this is a really basic test, I expect this to change in the future.
+			boolean ret = false; // assume failure
+
+			// this is a really basic test, I expect this to change in the future.
 			if(entry != null && !entry.trim().isEmpty())
 			{
 				ret = true;
 			}
-			
+
 			return ret;
 		}
 	}
@@ -386,16 +386,16 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		private void init(String searchLabel)
 		{
 			this.searchLabel = searchLabel;
-			entrySearch = buildSearchEntry();			
+			entrySearch = buildSearchEntry();
 		}
 
 		private void compose()
 		{
 			VerticalPanel pnlInner = new VerticalPanel();
-			
+
 			pnlInner.add(new Label(searchLabel));
 			pnlInner.add(entrySearch);
-			
+
 			add(pnlInner);
 
 			add(buildSearchBar());
@@ -408,7 +408,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			ret.setId(TR_SEARCH_FIELD_ID);
 			ret.setWidth(290);
 			ret.setSelectOnFocus(true);
-			
+
 			ret.addKeyListener(new KeyListener()
 			{
 				public void componentKeyUp(ComponentEvent event)
@@ -417,7 +417,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 					{
 						performSearch();
 					}
-					
+
 					boolean enabled = isValidSearchEntry(ret.getValue());
 					btnSearch.setEnabled(enabled);
 				}
@@ -502,7 +502,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			ret.addKeyListener(new KeyListener()
 			{
 				public void componentKeyUp(ComponentEvent event)
-				{					
+				{
 					boolean enabled = isValidSearchEntry(ret.getValue());
 					btnSearch.setEnabled(enabled);
 				}
@@ -520,13 +520,13 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		private void compose()
 		{
 			VerticalPanel pnlInner = new VerticalPanel();
-			
+
 			// add type selection
 			pnlInner.add(new Label("Protein or nucleotide sequence for gene of interest:"));
 
 			// add search components
 			pnlInner.add(areaSearch);
-			
+
 			add(pnlInner);
 			add(buildSearchBar());
 		}
@@ -583,22 +583,24 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		}
 	}
 
-	private void showSimpleResultsWindow(String heading, String results)
+	private void showResultsWindow(final String heading, final String results, boolean isBlast)
 	{
 		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
-		
-		window.init(heading, results, false, cmdView);
-		
+
+		window.init(heading, results, isBlast, cmdView);
+
 		window.show();
+		window.toFront();
+	}
+
+	private void showSimpleResultsWindow(final String heading, final String results)
+	{
+		showResultsWindow(heading, results, false);
 	}
 
 	private void showBlastResultsWindow(String heading, String results)
 	{
-		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
-		
-		window.init(heading, results, true, cmdView);
-		
-		window.show();
+		showResultsWindow(heading, results, true);
 	}
 
 	/**

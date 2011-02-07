@@ -50,7 +50,7 @@ public class TRSearchPanel extends EventBusContainer
 
 	private Component buildAdvSearch()
 	{
-		return new Label("Explore the relationship between a gene family and its species tree.");
+		return new Label("Use this tree to find a gene family of interest.");
 	}
 
 	private Component buildInfoLabel()
