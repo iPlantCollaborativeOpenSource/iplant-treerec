@@ -25,25 +25,23 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 
 /**
  * @author sriram
- *
+ * 
  */
 public class TRSearchPanel extends EventBusContainer
 {
-
 	TreeRetriever treeRetriever;
 	VerticalPanel outerPanel;
 	private ArrayList<Receiver> receiversSelect;
-	
-	
+
 	public TRSearchPanel()
 	{
-		
 		treeRetriever = new TreeRetriever();
 		outerPanel = new VerticalPanel();
 		receiversSelect = new ArrayList<Receiver>();
+
 		compose();
 	}
-	
+
 	private void compose()
 	{
 		setHeading("Tree Reconciliation");
@@ -54,50 +52,54 @@ public class TRSearchPanel extends EventBusContainer
 
 	private Component buildAdvSearch()
 	{
-		return new Label("The Tree Reconciliation application will enable users to search" +
-				" and explore the relationship between </br> a gene family of interest " +
-				"and a species tree that contains this gene tree");
+		return new Label("The Tree Reconciliation application will enable users to search"
+				+ " and explore the relationship between </br> a gene family of interest "
+				+ "and a species tree that contains this gene tree.");
 	}
 
 	private Component buildInfoLabel()
 	{
 		HorizontalPanel pnl = new HorizontalPanel();
-		pnl.add(new Label("For users with a specific gene or sequence of interest, please use the&nbsp;&nbsp;"));
+		pnl.add(new Label(
+				"For users with a specific gene or sequence of interest, please use the&nbsp;&nbsp;"));
+
 		Hyperlink link = new Hyperlink("Advanced Search Options");
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
-				{
-		
-					@Override
-					public void handleEvent(BaseEvent be)
-					{
-						TRAdvancedSearchPanel advPanel = new TRAdvancedSearchPanel();
-						Window w = new Window();
-						w.setLayout(new FitLayout());
-						w.setHeading("Searchious");
-						w.setSize(419, 249);
-						w.setResizable(false);
-						w.add(advPanel);
-						w.show();
-					}
-				});
+		{
+			@Override
+			public void handleEvent(BaseEvent be)
+			{
+				TRAdvancedSearchPanel advPanel = new TRAdvancedSearchPanel();
+				
+				Window w = new Window();
+				w.setLayout(new FitLayout());
+				w.setHeading("Search");
+				w.setSize(419, 249);
+				w.setResizable(false);
+				w.add(advPanel);
+				w.show();
+			}
+		});
+
 		pnl.add(link);
+
 		return pnl;
 	}
-	
+
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		SpeciesTreeInvestigationModeReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
 				eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
-	
+
 		receiversSelect.add(receiverSelect);
-	
+
 		outerPanel.add(pnl);
+
 		layout();
 	}
 
-	
 	private class SpeciesTreeRetrieverCallBack extends TreeRetrieverCallBack
 	{
 		@Override
@@ -105,12 +107,11 @@ public class TRSearchPanel extends EventBusContainer
 		{
 			outerPanel.add(buildAdvSearch());
 			addSpeciesTreePanel(outerPanel, new TRSearchSpeciesChannelPanel(eventbus, "Species Tree",
-					"idSearchSpeciesTree", getTree(), getLayout(),""));
-			
+					"idSearchSpeciesTree", getTree(), getLayout(), ""));
+
 			outerPanel.add(buildInfoLabel());
 			layout();
 			show();
 		}
-		
 	}
 }
