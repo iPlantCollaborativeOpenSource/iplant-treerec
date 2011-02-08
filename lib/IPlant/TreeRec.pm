@@ -116,6 +116,73 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         return;
     }
 
+
+    ##########################################################################
+    # Usage      : $results_ref = $treerec->go_search( $search_string,
+    #                  $species_tree_name );
+    #
+    # Purpose    : Performs a search for a GO term or a GO accession
+    #              number.
+    #
+    # Returns    : Information about the matching gene families.
+    #
+    # Parameters : $search_string     - the string to search for.
+    #              $species_tree_name - the name of the speices tree.
+    #
+    # Throws     : No exceptions.
+    sub general_go_search {
+        my ( $self, $search_string, $species_tree_name ) = @_;
+	my $results_ref;
+
+	# Remove whitespaces from the beginning and end of search string
+	# This will take care of minor copy and paste errors.
+	$search_string =~ s/^\s+//;
+	$search_string =~ s/\s+$//;
+
+	# This is the case where users uses GO:#######	
+	if ($search_string =~ m/GO\:(\d*)/xms) {
+
+	    $search_string = $1;
+
+	    # Pad with zeros to catch cases where the user did not
+	    # enter the full GO value with leading zeros.
+	    $search_string = sprintf("%07d", $search_string);
+	    
+	    $results_ref 
+		= $self->_do_gene_family_search('GoAccessionSearch',
+						$search_string, 
+						$species_tree_name );
+	    return $results_ref;
+	}
+
+	# This is the case where users enter #####
+	elsif ($search_string =~ m/(^\d+)/xms ) {
+	    # This will only return the first complete digit if there is 
+	    # a longer list of digits
+
+	    # Pad with zeros to catch cases where the user did not
+	    # enter the full GO value with leading zeros.
+	    $search_string = sprintf("%07d", $search_string);
+	    $results_ref 
+		= $self->_do_gene_family_search('GoAccessionSearch',
+						$search_string, 
+						$species_tree_name );
+	    return $results_ref;
+	}
+
+	# The default is to assume the string is a text search
+	else {
+	    $results_ref
+		= $self->_do_gene_family_search( 'GoSearch', 
+						 "\%$search_string\%",
+						 $species_tree_name );
+	    return $results_ref;
+
+	}
+	
+
+    }
+
     ##########################################################################
     # Usage      : $results_ref = $treerec->go_search( $search_string,
     #                  $species_tree_name );
@@ -135,6 +202,9 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
             $species_tree_name );
         return $results_ref;
     }
+
+
+
 
     ##########################################################################
     # Usage      : $results_ref = $treerec->go_accession_search(
