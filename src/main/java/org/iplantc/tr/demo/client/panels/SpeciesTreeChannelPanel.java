@@ -92,72 +92,70 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 
 	private void displayMenu(Point p, int idNode)
 	{
-		Menu m = new Menu();
-		m.setData("idNode", idNode);
-		m.add(buildHighlightSpeciesMenuItem());
-		m.add(buildHighlightAllMenuItem());
-		m.add(buildSelectSubTreeMenuItem());
-		m.showAt(p.x, p.y);
+		Menu menu = new Menu();
+	
+		menu.setData("idNode", idNode);
+		menu.add(buildHighlightSpeciesMenuItem());
+		menu.add(buildHighlightAllMenuItem());
+		menu.add(buildSelectSubTreeMenuItem());
+		menu.showAt(p.x, p.y);
 	}
 
 	private MenuItem buildSelectSubTreeMenuItem()
 	{
-		MenuItem m = new MenuItem("Highlight speciation event in gene tree");
-		m.addSelectionListener(new HighlightSpeciationSelectionListener());
-		return m;
+		MenuItem item = new MenuItem("Highlight speciation event in gene tree");
+				
+		item.addSelectionListener(new HighlightSpeciationSelectionListener());
+		
+		return item;
 	}
 
 	private MenuItem buildHighlightAllMenuItem()
 	{
-		MenuItem m = new MenuItem("Highlight all descendants");
-		m.addSelectionListener(new SelectionListener<MenuEvent>()
+		MenuItem item = new MenuItem("Highlight all descendants");
+		
+		item.addSelectionListener(new SelectionListener<MenuEvent>()
 		{
 			@Override
 			public void componentSelected(MenuEvent ce)
 			{
-				
-
+				//TODO implement me!!!
 			}
 		});
 
-		return m;
+		return item;
 	}
 
 	private MenuItem buildHighlightSpeciesMenuItem()
 	{
-		MenuItem m = new MenuItem("Select sub tree (hide non selected species)");
-		m.addSelectionListener(new SelectionListener<MenuEvent>()
+		MenuItem item = new MenuItem("Select sub tree (hide non selected species)");
+		item.addSelectionListener(new SelectionListener<MenuEvent>()
 		{
-
 			@Override
 			public void componentSelected(MenuEvent ce)
 			{
-				// TODO Auto-generated method stub
-
+				// TODO implement me!!!!
 			}
 		});
 
-		return m;
+		return item;
 	}
 
 	@Override
 	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
 	{
 		Window.alert("clicked on edge");
-
 	}
 	
 	private class HighlightSpeciationSelectionListener extends SelectionListener<MenuEvent>
 	{
-
 		@Override
 		public void componentSelected(MenuEvent ce)
 		{
 			Menu m = (Menu)ce.getSource();
 			int idNode = Integer.parseInt(m.getData("idNode").toString());
 			TreeServices.getRelatedGeneEdgeNode("{\"familyName\":\"" + geneFamName  + "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + false  + "}", new AsyncCallback<String>()
-			{
-				
+			{				
 				@Override
 				public void onSuccess(String result)
 				{
@@ -182,9 +180,7 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 					System.out.println(arg0.toString());
 					
 				}
-			});
-			
-		}
-		
+			});			
+		}		
 	}
 }

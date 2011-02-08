@@ -18,6 +18,7 @@ import org.iplantc.tr.demo.client.utils.TreeRetriever;
 import org.iplantc.tr.demo.client.utils.TreeRetrieverCallBack;
 import org.iplantc.tr.demo.client.windows.SummaryWindow;
 
+import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
@@ -34,11 +35,10 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class TestContainerPanel extends EventBusContainer
+public class TreeContainerPanel extends EventBusContainer
 {
 	private ToggleButton btnNav;
 	private ToggleButton btnSelect;
-
 
 	private List<Receiver> receiversNav;
 	private List<Receiver> receiversSelect;
@@ -56,8 +56,7 @@ public class TestContainerPanel extends EventBusContainer
 		NAVIGATE, INVESTIGATION
 	}
 
-
-	public TestContainerPanel(String idGeneFamily)
+	public TreeContainerPanel(String idGeneFamily)
 	{
 		this.idGeneFamily = idGeneFamily;
 		receiversNav = new ArrayList<Receiver>();
@@ -65,6 +64,8 @@ public class TestContainerPanel extends EventBusContainer
 
 		treeRetriever = new TreeRetriever();
 	
+		setScrollMode(Scroll.AUTO);
+		
 		compose();
 	}
 
@@ -140,6 +141,7 @@ public class TestContainerPanel extends EventBusContainer
 	private Hyperlink buildSummaryLink()
 	{
 		Hyperlink link = new Hyperlink("Get supporting data for this reconciliation");
+		
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
 		{
 
@@ -149,6 +151,7 @@ public class TestContainerPanel extends EventBusContainer
 				showSummaryWindow();
 			}
 		});
+		
 		return link;
 	}
 
@@ -238,6 +241,7 @@ public class TestContainerPanel extends EventBusContainer
 		pnlOuter.setSpacing(10);
 
 		treeRetriever.getSpeciesTree(idGeneFamily, new SpeciesTreeRetrieverCallBack());
+		
 		// show
 		add(pnlOuter);
 	}
@@ -251,7 +255,6 @@ public class TestContainerPanel extends EventBusContainer
 					"idSpeciesTree", getTree(), getLayout(), idGeneFamily));
 			treeRetriever.getGeneTree(idGeneFamily, new GeneTreeRetrieverCallBack());
 		}
-
 	}
 
 	private class GeneTreeRetrieverCallBack extends TreeRetrieverCallBack
@@ -264,7 +267,5 @@ public class TestContainerPanel extends EventBusContainer
 			// set our default mode
 			toggleMode(Mode.NAVIGATE);
 		}
-
 	}
-
 }
