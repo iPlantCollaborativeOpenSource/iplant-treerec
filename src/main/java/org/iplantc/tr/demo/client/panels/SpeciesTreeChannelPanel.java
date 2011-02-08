@@ -74,11 +74,6 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleSpeciesTreeInvestigationNodeSelect(int idNode, Point p)
 	{
-		// treeView.clearHighlights();
-		// treeView.highlight(idNode);
-		//
-		// treeView.requestRender();
-
 		displayMenu(p, idNode);
 	}
 
@@ -98,6 +93,7 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 		menu.add(buildHighlightSpeciesMenuItem());
 		menu.add(buildHighlightAllMenuItem());
 		menu.add(buildSelectSubTreeMenuItem());
+		
 		menu.showAt(p.x, p.y);
 	}
 
@@ -177,8 +173,7 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 				@Override
 				public void onFailure(Throwable arg0)
 				{
-					System.out.println(arg0.toString());
-					
+					System.out.println(arg0.toString());					
 				}
 			});			
 		}		

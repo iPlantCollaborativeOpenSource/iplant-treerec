@@ -55,22 +55,20 @@ public abstract class EventBusReceiver extends Receiver
 	
 	protected Point getAbsoluteCoordinates(JSONObject obj)
 	{
-		if (obj.get("mouse") != null)
-		{
-			JSONObject mouseObj = obj.get("mouse").isObject();
-	
-			String temp = mouseObj.get("x").toString();
+		Point ret = null;   //assume failure
+		
+		if(obj != null)
+		{		
+			String temp = obj.get("clicked_x").toString();
 			int x = Integer.parseInt(temp);
 	
-			temp =  mouseObj.get("y").toString();
+			temp =  obj.get("clicked_y").toString();
 			int y = Integer.parseInt(temp);
 	
-			return new Point(x,y);
+			ret = new Point(x,y);
 		}
-		else
-		{
-			return null;
-		}
+		
+		return ret;
 	}
 
 	/**
@@ -79,8 +77,5 @@ public abstract class EventBusReceiver extends Receiver
 	 * @param idBroadcaster unique id of broadcaster which fired this event.
 	 * @param jsonMsg event message in JSON.
 	 */
-	protected abstract void processChannelMessage(final String idBroadcaster, final String jsonMsg);
-	
-	
-	
+	protected abstract void processChannelMessage(final String idBroadcaster, final String jsonMsg);	
 }
