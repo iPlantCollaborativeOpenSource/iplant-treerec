@@ -13,6 +13,7 @@ import org.iplantc.tr.demo.client.utils.TreeRetriever;
 import org.iplantc.tr.demo.client.utils.TreeRetrieverCallBack;
 import org.iplantc.tr.demo.client.windows.TRSearchWindow;
 
+import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
@@ -37,6 +38,7 @@ public class TRSearchPanel extends EventBusContainer
 		outerPanel = new VerticalPanel();
 		receiversSelect = new ArrayList<Receiver>();
 
+		setScrollMode(Scroll.AUTO);
 		compose();
 	}
 

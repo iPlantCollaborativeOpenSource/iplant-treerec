@@ -19,7 +19,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class SearchServiceImpl extends RemoteServiceServlet implements SearchService
 {
-	private static String HOSTNAME = "http://votan.iplantcollaborative.org/treereconciliation";
+	private static String HOSTNAME = "http://votan.iplantcollaborative.org/";
 	
 	private HttpURLConnection getUrlConnection(String address) throws IOException
 	{

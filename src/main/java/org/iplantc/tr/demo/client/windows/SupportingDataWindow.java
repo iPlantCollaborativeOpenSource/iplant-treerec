@@ -5,17 +5,19 @@ import org.iplantc.tr.demo.client.panels.TRDetailsPanel;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 
-public class SummaryWindow extends Window
+public class SupportingDataWindow extends Window
 {
-
-	public SummaryWindow(TRDetailsPanel pnl, String idGeneFamily) {
+	public SupportingDataWindow(TRDetailsPanel pnl, String idGeneFamily)
+	{
 		init(pnl, idGeneFamily);
 	}
-	
-	private void init(TRDetailsPanel pnl, String idGeneFamily) {
+
+	private void init(TRDetailsPanel pnl, String idGeneFamily)
+	{
 		setLayout(new FitLayout());
-		setHeading("Summary For Gene Family " + idGeneFamily);
-		setSize(600, 400);
+		setHeading("Supporting Data for Gene Family " + idGeneFamily);
+		setSize(400, 220);
+		
 		add(pnl);
 	}
 }

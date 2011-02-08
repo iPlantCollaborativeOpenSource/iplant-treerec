@@ -39,7 +39,7 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	protected void handleGeneTreeInvestigationNodeSelect(int idNode, Point p)
 	{
 		treeView.clearHighlights();
-		treeView.highlight(idNode);
+		treeView.highlightNode(idNode);
 		treeView.requestRender();
 	}
 
@@ -98,7 +98,7 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 			
 			for (int i = 0 ;i < idNodes.size(); i++)
 			{
-				treeView.highlight(idNodes.get(i));
+				treeView.highlightNode(idNodes.get(i));
 			}
 			
 		}

@@ -1,6 +1,8 @@
 package org.iplantc.tr.demo.client.receivers;
 
 import org.iplantc.tr.demo.client.events.SpeciesTreeNavNodeSelectEvent;
+import org.iplantc.tr.demo.client.events.TreeNodeMouseOutEvent;
+import org.iplantc.tr.demo.client.events.TreeNodeMouseOverEvent;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 
 import com.google.gwt.event.shared.EventBus;
@@ -55,7 +57,31 @@ public class SpeciesTreeNavModeReceiver extends EventBusReceiver
 				{
 					handleNodeClick(objJson);
 				}
+				
+				if (event.equals("node_mouse_over"))
+				{
+					handleNodeMouseOver(objJson);
+				}
+				
+				if (event.equals("node_mouse_out"))
+				{
+					handleNodeMouseOut(objJson);
+				}
 			}
 		}
+	}
+
+	private void handleNodeMouseOut(JSONObject objJson)
+	{
+		String id = JsonUtil.getString(objJson, "id");
+		TreeNodeMouseOutEvent event = new TreeNodeMouseOutEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
+		eventbus.fireEvent(event);
+	}
+
+	private void handleNodeMouseOver(JSONObject objJson)
+	{
+		String id = JsonUtil.getString(objJson, "id");
+		TreeNodeMouseOverEvent event = new TreeNodeMouseOverEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
+		eventbus.fireEvent(event);
 	}
 }

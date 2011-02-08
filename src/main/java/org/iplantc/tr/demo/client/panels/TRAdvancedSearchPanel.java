@@ -334,6 +334,8 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		{
 			HorizontalPanel ret = new HorizontalPanel();
 
+			ret.setStyleAttribute("margin-top", "5px");
+			
 			btnSearch = buildSearchButton();
 			waitIcon = new Status();
 

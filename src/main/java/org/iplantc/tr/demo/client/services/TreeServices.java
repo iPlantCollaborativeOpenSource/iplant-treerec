@@ -7,13 +7,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class TreeServices
 {
-	
-	private static String hostname = "http://votan.iplantcollaborative.org/treereconciliation";
+
+	private static final String HOSTNAME = "http://votan.iplantcollaborative.org/";
 
 	public static void getSpeciesData(String geneFamName, AsyncCallback<String> callback)
 	{
-	
-		String url = hostname + "/get/species-data";
+		String url = HOSTNAME + "treereconciliation/get/species-data";
 		if (geneFamName != null && !geneFamName.equals(""))
 		{
 			url = url + "/" + geneFamName;
@@ -24,21 +23,21 @@ public class TreeServices
 	
 	public static void getGeneData(String geneFamName, AsyncCallback<String> callback)
 	{
-		String url = hostname + "/get/gene-data/" + geneFamName;
+		String url = HOSTNAME + "treereconciliation/get/gene-data/" + geneFamName;
 		ServiceCallWrapper wrapper = new ServiceCallWrapper(url);
 		SharedServiceFacade.getInstance().getServiceData(wrapper, callback);	
 	}
 
 	public static void getRelatedGeneEdgeNode(String body, AsyncCallback<String> callback)
 	{
-		String url = hostname + "/get/related-nodes";
+		String url = HOSTNAME + "treereconciliation/get/related-nodes";
 		ServiceCallWrapper wrapper = new ServiceCallWrapper(ServiceCallWrapper.Type.POST,url,body);
 		SharedServiceFacade.getInstance().getServiceData(wrapper, callback);	
 	}
 	
 	public static void getRelatedSpeciesEdgeNode(String body, AsyncCallback<String> callback)
 	{
-		String url = hostname + "/get/related-nodes";
+		String url = HOSTNAME + "treereconciliation/get/related-nodes";
 		ServiceCallWrapper wrapper = new ServiceCallWrapper(ServiceCallWrapper.Type.POST,url,body);
 		SharedServiceFacade.getInstance().getServiceData(wrapper, callback);	
 	}
