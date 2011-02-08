@@ -142,6 +142,9 @@ public class TreeContainerPanel extends EventBusContainer
 	{
 		Hyperlink link = new Hyperlink("Get supporting data for this reconciliation");
 		
+		link.setStyleAttribute("margin-top", "15px");
+		link.setHeight(18);
+				
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
 		{
 
