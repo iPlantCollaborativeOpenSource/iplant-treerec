@@ -16,7 +16,7 @@ import org.iplantc.tr.demo.client.utils.PanelHelper;
 import org.iplantc.tr.demo.client.utils.TRUtil;
 import org.iplantc.tr.demo.client.utils.TreeRetriever;
 import org.iplantc.tr.demo.client.utils.TreeRetrieverCallBack;
-import org.iplantc.tr.demo.client.windows.SummaryWindow;
+import org.iplantc.tr.demo.client.windows.SupportingDataWindow;
 
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.event.BaseEvent;
@@ -190,7 +190,7 @@ public class TreeContainerPanel extends EventBusContainer
 	{
 		TRDetailsPanel pnl = new TRDetailsPanel(idGeneFamily, jsonObj);
 
-		new SummaryWindow(pnl, idGeneFamily).show();
+		new SupportingDataWindow(pnl, idGeneFamily).show();
 	}
 
 	private Component buildToolbar()
