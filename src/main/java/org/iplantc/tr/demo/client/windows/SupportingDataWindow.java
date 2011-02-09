@@ -16,7 +16,8 @@ public class SupportingDataWindow extends Window
 	{
 		setLayout(new FitLayout());
 		setHeading("Supporting Data for Gene Family " + idGeneFamily);
-		setSize(400, 220);
+		setSize(380, 220);
+		setResizable(false);
 
 		add(pnl);
 	}
