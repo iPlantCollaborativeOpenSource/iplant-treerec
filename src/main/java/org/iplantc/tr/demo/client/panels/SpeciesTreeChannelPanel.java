@@ -5,6 +5,12 @@ import java.util.ArrayList;
 import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightSpeciesSubTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightSpeciesSubTreeEventHandler;
+import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEvent;
+import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEventHandler;
+import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationNodeSelectEvent;
+import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationNodeSelectEventHandler;
+import org.iplantc.tr.demo.client.events.SpeciesTreeNavNodeSelectEvent;
+import org.iplantc.tr.demo.client.events.SpeciesTreeNavNodeSelectEventHandler;
 import org.iplantc.tr.demo.client.services.TreeServices;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 
@@ -49,30 +55,15 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 
 		handlers.add(eventbus.addHandler(HighlightSpeciesSubTreeEvent.TYPE,
 				new HighlightSpeciesSubTreeEventHandlerImpl()));
-	}
+		
+		handlers.add(eventbus.addHandler(SpeciesTreeInvestigationNodeSelectEvent.TYPE,
+				new SpeciesTreeInvestigationNodeSelectEventHandlerImpl()));
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleGeneTreeInvestigationNodeSelect(int idNode, Point p)
-	{
+		handlers.add(eventbus.addHandler(SpeciesTreeNavNodeSelectEvent.TYPE,
+				new SpeciesTreeNavNodeSelectEventHandlerImpl()));
 
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleGeneTreeNavNodeSelect(int idNode, Point p)
-	{
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleSpeciesTreeInvestigationNodeSelect(int idNode, Point p)
-	{
-		displayMenu(p, idNode);
+		handlers.add(eventbus.addHandler(SpeciesTreeInvestigationEdgeSelectEvent.TYPE,
+				new SpeciesTreeInvestigationEdgeSelectEventHandlerImpl()));
 	}
 
 	/**
@@ -139,12 +130,6 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 		return item;
 	}
 
-	@Override
-	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
-	{
-
-	}
-
 	private class HighlightSpeciesSubTreeEventHandlerImpl implements HighlightSpeciesSubTreeEventHandler
 	{
 		@Override
@@ -193,5 +178,33 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 						}
 					});
 		}
+	}
+	
+	private class SpeciesTreeInvestigationNodeSelectEventHandlerImpl implements SpeciesTreeInvestigationNodeSelectEventHandler
+	{
+		@Override
+		public void onFire(SpeciesTreeInvestigationNodeSelectEvent event)
+		{
+			displayMenu(event.getPoint(), event.getNodeId());			
+		}		
+	}
+	
+	private class SpeciesTreeNavNodeSelectEventHandlerImpl implements SpeciesTreeNavNodeSelectEventHandler {
+
+		@Override
+		public void onFire(SpeciesTreeNavNodeSelectEvent event)
+		{
+			treeView.zoomToFitSubtree(event.getNodeId());			
+		}		
+	}
+	
+	private class SpeciesTreeInvestigationEdgeSelectEventHandlerImpl implements SpeciesTreeInvestigationEdgeSelectEventHandler
+	{
+		@Override
+		public void onFire(SpeciesTreeInvestigationEdgeSelectEvent e)
+		{
+			// TODO implement me!!!			
+		}
+		
 	}
 }

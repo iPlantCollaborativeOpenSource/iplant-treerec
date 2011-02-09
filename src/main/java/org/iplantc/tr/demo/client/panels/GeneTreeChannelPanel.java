@@ -2,12 +2,15 @@ package org.iplantc.tr.demo.client.panels;
 
 import java.util.ArrayList;
 
+import org.iplantc.tr.demo.client.events.GeneTreeInvestigationNodeSelectEvent;
+import org.iplantc.tr.demo.client.events.GeneTreeInvestigationNodeSelectEventHandler;
+import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEvent;
+import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEventHandler;
 import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEventHandler;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEventHandler;
 
-import com.extjs.gxt.ui.client.util.Point;
 import com.google.gwt.event.shared.EventBus;
 
 /**
@@ -44,46 +47,15 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 
 		handlers.add(eventbus.addHandler(HighlightSpeciationInGeneTreeEvent.TYPE,
 				new HighlightSpeciationInGeneTreeEventHandlerImpl()));
+		
 		handlers.add(eventbus.addHandler(SpeciesTreeInvestigationLeafSelectEvent.TYPE,
 				new SpeciesTreeInvestigationLeafSelectEventHandlerImpl()));
-	}
+		
+		handlers.add(eventbus.addHandler(GeneTreeInvestigationNodeSelectEvent.TYPE,
+				new GeneTreeInvestigationNodeSelectEventHandlerImpl()));
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleGeneTreeInvestigationNodeSelect(int idNode, Point p)
-	{
-		treeView.clearHighlights();
-		treeView.highlightNode(idNode);
-		treeView.requestRender();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleGeneTreeNavNodeSelect(int idNode, Point p)
-	{
-		treeView.zoomToFitSubtree(idNode);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleSpeciesTreeInvestigationNodeSelect(int idNode, Point p)
-	{
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void handleSpeciesTreeNavNodeSelect(int idNode, Point p)
-	{
-	}
-
-	@Override
-	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
-	{
-
+		handlers.add(eventbus.addHandler(GeneTreeNavNodeSelectEvent.TYPE,
+				new GeneTreeNavNodeSelectEventHandlerImpl()));
 	}
 
 	private class HighlightSpeciationInGeneTreeEventHandlerImpl implements
@@ -94,9 +66,7 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 		{
 			ArrayList<Integer> idNodes = event.getNodesToHighlight();
 			highlightNodes(idNodes);
-
 		}
-
 	}
 
 	private class SpeciesTreeInvestigationLeafSelectEventHandlerImpl implements
@@ -107,10 +77,29 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 		{
 			ArrayList<Integer> idNodes = event.getGeneTreeNodesToSelect();
 			highlightNodes(idNodes);
-
 		}
 	}
 
+	private class GeneTreeInvestigationNodeSelectEventHandlerImpl implements GeneTreeInvestigationNodeSelectEventHandler
+	{
+		@Override
+		public void onFire(GeneTreeInvestigationNodeSelectEvent event)
+		{
+			treeView.clearHighlights();
+			treeView.highlightNode(event.getNodeId());
+			treeView.requestRender();			
+		}		
+	}
+	
+	private class GeneTreeNavNodeSelectEventHandlerImpl implements GeneTreeNavNodeSelectEventHandler
+	{
+		@Override
+		public void onFire(GeneTreeNavNodeSelectEvent event)
+		{
+			treeView.zoomToFitSubtree(event.getNodeId());			
+		}		
+	}
+	
 	private void highlightNodes(ArrayList<Integer> idNodes)
 	{
 		for(int i = 0;i < idNodes.size();i++)
@@ -118,5 +107,4 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 			treeView.highlightNode(idNodes.get(i));
 		}
 	}
-
 }

@@ -9,16 +9,6 @@ import org.iplantc.phyloviewer.client.layout.JsLayoutCladogram;
 import org.iplantc.phyloviewer.client.tree.viewer.DetailView;
 import org.iplantc.phyloviewer.client.tree.viewer.model.JsDocument;
 import org.iplantc.phyloviewer.shared.model.Document;
-import org.iplantc.tr.demo.client.events.GeneTreeInvestigationNodeSelectEvent;
-import org.iplantc.tr.demo.client.events.GeneTreeInvestigationNodeSelectEventHandler;
-import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEvent;
-import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEventHandler;
-import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEvent;
-import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEventHandler;
-import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationNodeSelectEvent;
-import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationNodeSelectEventHandler;
-import org.iplantc.tr.demo.client.events.SpeciesTreeNavNodeSelectEvent;
-import org.iplantc.tr.demo.client.events.SpeciesTreeNavNodeSelectEventHandler;
 import org.iplantc.tr.demo.client.events.TreeNodeMouseOutEvent;
 import org.iplantc.tr.demo.client.events.TreeNodeMouseOutEventHandler;
 import org.iplantc.tr.demo.client.events.TreeNodeMouseOverEvent;
@@ -203,46 +193,6 @@ public abstract class TreeChannelPanel extends ContentPanel
 	}
 
 	/**
-	 * Handle when a node is clicked in the gene tree while in investigation mode.
-	 * 
-	 * @param idNode unique id of clicked node.
-	 * @param point absolute point where user clicked in the screen
-	 */
-	protected abstract void handleGeneTreeInvestigationNodeSelect(int idNode, Point point);
-
-	/**
-	 * Handle when a node is clicked in the gene tree while in navigation mode.
-	 * 
-	 * @param idNode unique id of clicked node.
-	 * @param point absolute point where user clicked in the screen
-	 */
-	protected abstract void handleGeneTreeNavNodeSelect(int idNode, Point point);
-
-	/**
-	 * Handle when a node is clicked in the species tree while in investigation mode.
-	 * 
-	 * @param idNode unique id of clicked node.
-	 * @param point absolute point where user clicked in the screen
-	 */
-	protected abstract void handleSpeciesTreeInvestigationNodeSelect(int idNode, Point point);
-
-	/**
-	 * Handle when a node is clicked in the species tree while in navigation mode.
-	 * 
-	 * @param idNode unique id of clicked node.
-	 * @param point absolute point where user clicked in the screen
-	 */
-	protected abstract void handleSpeciesTreeNavNodeSelect(int idNode, Point point);
-
-	/**
-	 * Handle when a node is clicked in the species tree while in navigation mode.
-	 * 
-	 * @param idEdgeToNode unique id of node resulting from the edge.
-	 * @param point absolute point where user clicked in the screen
-	 */
-	protected abstract void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point);
-
-	/**
 	 * Handle when mouse hover over a node.
 	 * 
 	 * @param idEdgeToNode unique id of node resulting from the edge.
@@ -270,59 +220,7 @@ public abstract class TreeChannelPanel extends ContentPanel
 	protected void initListeners()
 	{
 		if(eventbus != null)
-		{
-			handlers.add(eventbus.addHandler(GeneTreeInvestigationNodeSelectEvent.TYPE,
-					new GeneTreeInvestigationNodeSelectEventHandler()
-					{
-						@Override
-						public void onFire(GeneTreeInvestigationNodeSelectEvent event)
-						{
-							handleGeneTreeInvestigationNodeSelect(event.getNodeId(), event.getPoint());
-						}
-					}));
-
-			handlers.add(eventbus.addHandler(GeneTreeNavNodeSelectEvent.TYPE,
-					new GeneTreeNavNodeSelectEventHandler()
-					{
-						@Override
-						public void onFire(GeneTreeNavNodeSelectEvent event)
-						{
-							handleGeneTreeNavNodeSelect(event.getNodeId(), event.getPoint());
-						}
-					}));
-
-			handlers.add(eventbus.addHandler(SpeciesTreeInvestigationNodeSelectEvent.TYPE,
-					new SpeciesTreeInvestigationNodeSelectEventHandler()
-					{
-						@Override
-						public void onFire(SpeciesTreeInvestigationNodeSelectEvent event)
-						{
-							handleSpeciesTreeInvestigationNodeSelect(event.getNodeId(), event.getPoint());
-						}
-					}));
-
-			handlers.add(eventbus.addHandler(SpeciesTreeNavNodeSelectEvent.TYPE,
-					new SpeciesTreeNavNodeSelectEventHandler()
-					{
-						@Override
-						public void onFire(SpeciesTreeNavNodeSelectEvent event)
-						{
-							handleSpeciesTreeNavNodeSelect(event.getNodeId(), event.getPoint());
-						}
-					}));
-
-			handlers.add(eventbus.addHandler(SpeciesTreeInvestigationEdgeSelectEvent.TYPE,
-					new SpeciesTreeInvestigationEdgeSelectEventHandler()
-					{
-						@Override
-						public void onFire(SpeciesTreeInvestigationEdgeSelectEvent event)
-						{
-							handleSpeciesTreeInvestigationEdgeSelect(event.getIdEdgeToNode(), event
-									.getPoint());
-
-						}
-					}));
-
+		{			
 			handlers.add(eventbus.addHandler(TreeNodeMouseOverEvent.TYPE,
 					new TreeNodeMouseOverEventHandler()
 					{
