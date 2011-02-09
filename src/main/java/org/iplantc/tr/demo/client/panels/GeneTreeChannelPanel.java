@@ -30,7 +30,30 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 			String layoutTree, String geneFamId)
 	{
 		super(eventbus, caption, id, jsonTree, layoutTree, geneFamId);
-		eventbus.addHandler(HighlightSpeciationInGeneTreeEvent.TYPE, new HighlightSpeciationInGeneTreeEventHandlerImpl());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void initListeners()
+	{
+		super.initListeners();
+
+		handlers.add(eventbus.addHandler(HighlightSpeciationInGeneTreeEvent.TYPE,
+				new HighlightSpeciationInGeneTreeEventHandler()
+				{
+					@Override
+					public void onFire(HighlightSpeciationInGeneTreeEvent event)
+					{
+						ArrayList<Integer> idNodes = event.getNodesToHighlight();
+
+						for(int i = 0;i < idNodes.size();i++)
+						{
+							treeView.highlightNode(idNodes.get(i));
+						}
+					}
+				}));
 	}
 
 	/**
@@ -56,15 +79,14 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleSpeciesTreeInvestigationNodeSelect(int idNode, Point p)
 	{
-//		int cntNodes = treeView.getTree().getNumberOfNodes();
-//
-//		treeView.clearHighlights();
-//
-//		int id = 1 + Random.nextInt(cntNodes - 2);
-//
-//		treeView.highlight(id);
-//		treeView.zoomToFitSubtree(id);
-		
+		// int cntNodes = treeView.getTree().getNumberOfNodes();
+		//
+		// treeView.clearHighlights();
+		//
+		// int id = 1 + Random.nextInt(cntNodes - 2);
+		//
+		// treeView.highlight(id);
+		// treeView.zoomToFitSubtree(id);
 	}
 
 	/**
@@ -72,38 +94,16 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleSpeciesTreeNavNodeSelect(int idNode, Point p)
 	{
-//		int cntNodes = treeView.getTree().getNumberOfNodes();
-//
-//		int id = 1 + Random.nextInt(cntNodes - 2);
-//
-//		treeView.zoomToFitSubtree(id);
-		
-		
+		// int cntNodes = treeView.getTree().getNumberOfNodes();
+		//
+		// int id = 1 + Random.nextInt(cntNodes - 2);
+		//
+		// treeView.zoomToFitSubtree(id);
 	}
 
 	@Override
 	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
 	{
 		// TODO Auto-generated method stub
-		
 	}
-	
-	private class HighlightSpeciationInGeneTreeEventHandlerImpl implements HighlightSpeciationInGeneTreeEventHandler
-	{
-
-		@Override
-		public void onFire(HighlightSpeciationInGeneTreeEvent event)
-		{
-			ArrayList<Integer> idNodes = event.getNodesToHighlight();
-			
-			for (int i = 0 ;i < idNodes.size(); i++)
-			{
-				treeView.highlightNode(idNodes.get(i));
-			}
-			
-		}
-		
-	}
-	
-
 }

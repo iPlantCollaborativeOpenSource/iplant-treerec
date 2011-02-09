@@ -40,6 +40,8 @@ public class TreeContainerPanel extends EventBusContainer
 	private ToggleButton btnNav;
 	private ToggleButton btnSelect;
 
+	private List<TreeChannelPanel> treePanels;
+	
 	private List<Receiver> receiversNav;
 	private List<Receiver> receiversSelect;
 	
@@ -48,7 +50,7 @@ public class TreeContainerPanel extends EventBusContainer
 	private HorizontalPanel pnlOuter;
 	
 	private String idGeneFamily;
-
+	
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
 
 	enum Mode
@@ -59,6 +61,8 @@ public class TreeContainerPanel extends EventBusContainer
 	public TreeContainerPanel(String idGeneFamily)
 	{
 		this.idGeneFamily = idGeneFamily;
+	
+		treePanels = new ArrayList<TreeChannelPanel>();
 		receiversNav = new ArrayList<Receiver>();
 		receiversSelect = new ArrayList<Receiver>();
 
@@ -81,8 +85,10 @@ public class TreeContainerPanel extends EventBusContainer
 		receiversNav.add(receiverNav);
 		receiversSelect.add(receiverSelect);
 
+		treePanels.add(pnl);
+		
 		containerOuter.add(pnl);
-
+		
 		layout();
 	}
 
@@ -98,6 +104,8 @@ public class TreeContainerPanel extends EventBusContainer
 		receiversNav.add(receiverNav);
 		receiversSelect.add(receiverSelect);
 
+		treePanels.add(pnl);
+		
 		containerOuter.add(pnl);
 		layout();
 	}
@@ -249,6 +257,16 @@ public class TreeContainerPanel extends EventBusContainer
 		add(pnlOuter);
 	}
 
+	public void cleanup()
+	{
+		for(TreeChannelPanel pnl : treePanels)
+		{
+			pnl.cleanup();
+		}
+		
+		treePanels.clear();
+	}
+	
 	private class SpeciesTreeRetrieverCallBack extends TreeRetrieverCallBack
 	{
 		@Override
