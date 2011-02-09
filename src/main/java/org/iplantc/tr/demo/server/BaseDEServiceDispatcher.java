@@ -33,8 +33,6 @@ public abstract class BaseDEServiceDispatcher extends RemoteServiceServlet imple
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(BaseDEServiceDispatcher.class);
 
-	
-
 	/**
 	 * The servlet context to use when looking up the keystore path.
 	 */

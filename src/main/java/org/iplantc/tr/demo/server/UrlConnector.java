@@ -20,5 +20,6 @@ public interface UrlConnector
 	 * @return the URL connection.
 	 * @throws IOException if the connection can't be established.
 	 */
-	public HttpURLConnection getUrlConnection(HttpServletRequest request, String address) throws IOException;
+	public HttpURLConnection getUrlConnection(HttpServletRequest request, String address)
+			throws IOException;
 }

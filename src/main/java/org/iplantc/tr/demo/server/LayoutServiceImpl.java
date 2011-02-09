@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-public class LayoutServiceImpl  extends RemoteServiceServlet implements LayoutService
+public class LayoutServiceImpl extends RemoteServiceServlet implements LayoutService
 {
 	/**
 	*
@@ -22,8 +22,6 @@ public class LayoutServiceImpl  extends RemoteServiceServlet implements LayoutSe
 	{
 		try
 		{
-		
-
 
 			JSONObject object = new JSONObject(json);
 			Tree tree = BuildTreeFromJSON.buildTree(object);

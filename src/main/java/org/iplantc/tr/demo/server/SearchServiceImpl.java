@@ -20,14 +20,14 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class SearchServiceImpl extends RemoteServiceServlet implements SearchService
 {
 	private static String HOSTNAME = "http://votan.iplantcollaborative.org/";
-	
+
 	private HttpURLConnection getUrlConnection(String address) throws IOException
 	{
 		URL url = new URL(address);
 
 		return (HttpURLConnection)url.openConnection();
 	}
-	
+
 	private URLConnection update(String address, String body) throws IOException
 	{
 		// make post mode connection
@@ -84,7 +84,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * Sends an HTTP GET request to another service.
 	 * 
@@ -97,11 +97,11 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		// make post mode connection
 		URLConnection urlc = getUrlConnection(address);
 		urlc.setDoOutput(true);
-	
+
 		return urlc;
 	}
 
-	//perform BLAST search
+	// perform BLAST search
 	@Override
 	public String doBLASTSearch(String json) throws IllegalArgumentException
 	{
@@ -121,7 +121,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		return ret;
 	}
 
-	//search by gene id
+	// search by gene id
 	@Override
 	public String doGeneIdSearch(String term) throws IllegalArgumentException
 	{
@@ -129,7 +129,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = get(HOSTNAME + "treereconciliation/search/gene-id-search/" + term);
+			URLConnection connection =
+					get(HOSTNAME + "treereconciliation/search/gene-id-search/" + term);
 
 			ret = retrieveResult(connection);
 		}
@@ -141,7 +142,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		return ret;
 	}
 
-	//search by GO accession
+	// search by GO accession
 	@Override
 	public String doGoAccessionSearch(String term) throws IllegalArgumentException
 	{
@@ -149,7 +150,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = update(HOSTNAME + "treereconciliation/search/go-accession-search/", term);
+			URLConnection connection =
+					update(HOSTNAME + "treereconciliation/search/go-accession-search/", term);
 
 			ret = retrieveResult(connection);
 		}
@@ -181,7 +183,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		return ret;
 	}
 
-	//retrieve details of a gene family
+	// retrieve details of a gene family
 	@Override
 	public String getDetails(String idGeneFamily) throws IllegalArgumentException
 	{
@@ -189,7 +191,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
+			URLConnection connection =
+					get(HOSTNAME + "treereconciliation/get/gene-family-details/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
 		}
@@ -199,9 +202,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		}
 
 		return ret;
-	}	
-	
-	//retrieve summary of a gene family
+	}
+
+	// retrieve summary of a gene family
 	@Override
 	public String getSummary(String idGeneFamily) throws IllegalArgumentException
 	{
@@ -209,7 +212,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		try
 		{
-			URLConnection connection = get(HOSTNAME + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
+			URLConnection connection =
+					get(HOSTNAME + "treereconciliation/get/gene-family-summary/" + idGeneFamily);
 
 			ret = retrieveResult(connection);
 		}
@@ -219,5 +223,5 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		}
 
 		return ret;
-	}	
+	}
 }

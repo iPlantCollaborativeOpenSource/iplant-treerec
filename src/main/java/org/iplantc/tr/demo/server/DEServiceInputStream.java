@@ -19,7 +19,7 @@ public class DEServiceInputStream extends FilterInputStream
 	/**
 	 * The HTTP headers.
 	 */
-	private Map<String, List<String>> httpHeaders;
+	private Map<String,List<String>> httpHeaders;
 
 	/**
 	 * Creates a DEServiceInputStream for the given URL connection.
@@ -45,8 +45,8 @@ public class DEServiceInputStream extends FilterInputStream
 	}
 
 	/**
-	 * Gets the value of the HTTP header field with the given name.  If the named HTTP header has multiple values then
-	 * only the last value is returned.
+	 * Gets the value of the HTTP header field with the given name. If the named HTTP header has multiple
+	 * values then only the last value is returned.
 	 * 
 	 * @param fieldName the name of the HTTP header field.
 	 * @return the value of the HTTP header field or null if the header field doesn't exist.
@@ -54,7 +54,7 @@ public class DEServiceInputStream extends FilterInputStream
 	public String getHeaderField(String fieldName)
 	{
 		List<String> fieldValues = httpHeaders.get(fieldName);
-		if (fieldValues != null && fieldValues.size() != 0) 
+		if(fieldValues != null && fieldValues.size() != 0)
 		{
 			return fieldValues.get(fieldValues.size() - 1);
 		}
