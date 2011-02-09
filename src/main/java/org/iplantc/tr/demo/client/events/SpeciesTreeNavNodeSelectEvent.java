@@ -12,7 +12,8 @@ import com.google.gwt.event.shared.GwtEvent;
 public class SpeciesTreeNavNodeSelectEvent extends
 		TreeNodeSelectEvent<SpeciesTreeNavNodeSelectEventHandler>
 {
-	public static final GwtEvent.Type<SpeciesTreeNavNodeSelectEventHandler> TYPE = new GwtEvent.Type<SpeciesTreeNavNodeSelectEventHandler>();
+	public static final GwtEvent.Type<SpeciesTreeNavNodeSelectEventHandler> TYPE =
+			new GwtEvent.Type<SpeciesTreeNavNodeSelectEventHandler>();
 
 	/**
 	 * Instantiate from a node id.

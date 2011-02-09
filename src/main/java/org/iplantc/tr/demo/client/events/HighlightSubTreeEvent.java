@@ -7,7 +7,7 @@ public abstract class HighlightSubTreeEvent<H extends EventHandler> extends GwtE
 {
 
 	private int idNode;
-	
+
 	/**
 	 * @return the idNode
 	 */
@@ -20,6 +20,5 @@ public abstract class HighlightSubTreeEvent<H extends EventHandler> extends GwtE
 	{
 		this.idNode = idNode;
 	}
-	
 
 }

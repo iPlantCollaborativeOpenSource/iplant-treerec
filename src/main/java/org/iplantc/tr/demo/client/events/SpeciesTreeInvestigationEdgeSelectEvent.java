@@ -5,11 +5,13 @@ import com.extjs.gxt.ui.client.util.Point;
 /**
  * {@inheritDoc}
  */
-public class SpeciesTreeInvestigationEdgeSelectEvent extends TreeEdgeSelectedEvent<SpeciesTreeInvestigationEdgeSelectEventHandler>
+public class SpeciesTreeInvestigationEdgeSelectEvent extends
+		TreeEdgeSelectedEvent<SpeciesTreeInvestigationEdgeSelectEventHandler>
 {
 
-	public static final Type<SpeciesTreeInvestigationEdgeSelectEventHandler> TYPE = new Type<SpeciesTreeInvestigationEdgeSelectEventHandler>();
- 	
+	public static final Type<SpeciesTreeInvestigationEdgeSelectEventHandler> TYPE =
+			new Type<SpeciesTreeInvestigationEdgeSelectEventHandler>();
+
 	/**
 	 * Instantiate from a node id.
 	 * 
@@ -18,8 +20,8 @@ public class SpeciesTreeInvestigationEdgeSelectEvent extends TreeEdgeSelectedEve
 	 */
 	public SpeciesTreeInvestigationEdgeSelectEvent(int id, Point p)
 	{
-		super(id,p);
-		
+		super(id, p);
+
 	}
 
 	/**
@@ -38,7 +40,7 @@ public class SpeciesTreeInvestigationEdgeSelectEvent extends TreeEdgeSelectedEve
 	protected void dispatch(SpeciesTreeInvestigationEdgeSelectEventHandler handler)
 	{
 		handler.onFire(this);
-		
+
 	}
 
 }

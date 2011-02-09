@@ -6,12 +6,12 @@ import com.google.gwt.event.shared.GwtEvent;
 public class TreeNodeMouseOverEvent extends GwtEvent<TreeNodeMouseOverEventHandler>
 {
 
-	public static final GwtEvent.Type<TreeNodeMouseOverEventHandler> TYPE = new GwtEvent.Type<TreeNodeMouseOverEventHandler>();
-	
+	public static final GwtEvent.Type<TreeNodeMouseOverEventHandler> TYPE =
+			new GwtEvent.Type<TreeNodeMouseOverEventHandler>();
+
 	private int idNode;
 	private Point point;
-	
-	
+
 	public TreeNodeMouseOverEvent(int idNode, Point point)
 	{
 		super();

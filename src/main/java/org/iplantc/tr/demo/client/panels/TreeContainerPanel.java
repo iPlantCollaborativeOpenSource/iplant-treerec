@@ -41,16 +41,16 @@ public class TreeContainerPanel extends EventBusContainer
 	private ToggleButton btnSelect;
 
 	private List<TreeChannelPanel> treePanels;
-	
+
 	private List<Receiver> receiversNav;
 	private List<Receiver> receiversSelect;
-	
+
 	private TreeRetriever treeRetriever;
-	
+
 	private HorizontalPanel pnlOuter;
-	
+
 	private String idGeneFamily;
-	
+
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
 
 	enum Mode
@@ -61,23 +61,23 @@ public class TreeContainerPanel extends EventBusContainer
 	public TreeContainerPanel(String idGeneFamily)
 	{
 		this.idGeneFamily = idGeneFamily;
-	
+
 		treePanels = new ArrayList<TreeChannelPanel>();
 		receiversNav = new ArrayList<Receiver>();
 		receiversSelect = new ArrayList<Receiver>();
 
 		treeRetriever = new TreeRetriever();
-	
+
 		setScrollMode(Scroll.AUTO);
-		
+
 		compose();
 	}
 
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		SpeciesTreeNavModeReceiver receiverNav = new SpeciesTreeNavModeReceiver(eventbus, pnl.getId());
-		SpeciesTreeInvestigationModeReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
-				eventbus, pnl.getId());
+		SpeciesTreeInvestigationModeReceiver receiverSelect =
+				new SpeciesTreeInvestigationModeReceiver(eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverNav, buildBroadcastCommand(pnl.getId()));
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
@@ -86,17 +86,17 @@ public class TreeContainerPanel extends EventBusContainer
 		receiversSelect.add(receiverSelect);
 
 		treePanels.add(pnl);
-		
+
 		containerOuter.add(pnl);
-		
+
 		layout();
 	}
 
 	private void addGeneTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		GeneTreeNavModeReceiver receiverNav = new GeneTreeNavModeReceiver(eventbus, pnl.getId());
-		GeneTreeInvestigationModeReceiver receiverSelect = new GeneTreeInvestigationModeReceiver(
-				eventbus, pnl.getId());
+		GeneTreeInvestigationModeReceiver receiverSelect =
+				new GeneTreeInvestigationModeReceiver(eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverNav, buildBroadcastCommand(pnl.getId()));
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
@@ -105,54 +105,56 @@ public class TreeContainerPanel extends EventBusContainer
 		receiversSelect.add(receiverSelect);
 
 		treePanels.add(pnl);
-		
+
 		containerOuter.add(pnl);
 		layout();
 	}
 
 	private void buildNavButton()
 	{
-		btnNav = PanelHelper.buildToggleButton("idNavBtn", "Navigate",
-				new SelectionListener<ButtonEvent>()
-				{
-					@Override
-					public void componentSelected(ButtonEvent ce)
-					{
-						if(btnSelect != null)
+		btnNav =
+				PanelHelper.buildToggleButton("idNavBtn", "Navigate",
+						new SelectionListener<ButtonEvent>()
 						{
-							btnSelect.toggle(false);
-							toggleMode(Mode.NAVIGATE);
-						}
-					}
-				});
+							@Override
+							public void componentSelected(ButtonEvent ce)
+							{
+								if(btnSelect != null)
+								{
+									btnSelect.toggle(false);
+									toggleMode(Mode.NAVIGATE);
+								}
+							}
+						});
 
 		btnNav.toggle(true);
 	}
 
 	private void buildSelectButton()
 	{
-		btnSelect = PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation",
-				new SelectionListener<ButtonEvent>()
-				{
-					@Override
-					public void componentSelected(ButtonEvent ce)
-					{
-						if(btnNav != null)
+		btnSelect =
+				PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation",
+						new SelectionListener<ButtonEvent>()
 						{
-							btnNav.toggle(false);
-							toggleMode(Mode.INVESTIGATION);
-						}
-					}
-				});
+							@Override
+							public void componentSelected(ButtonEvent ce)
+							{
+								if(btnNav != null)
+								{
+									btnNav.toggle(false);
+									toggleMode(Mode.INVESTIGATION);
+								}
+							}
+						});
 	}
 
 	private Hyperlink buildSummaryLink()
 	{
 		Hyperlink link = new Hyperlink("Get supporting data for this reconciliation");
-		
+
 		link.setStyleAttribute("margin-top", "15px");
 		link.setHeight(18);
-				
+
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
 		{
 
@@ -162,7 +164,7 @@ public class TreeContainerPanel extends EventBusContainer
 				showSummaryWindow();
 			}
 		});
-		
+
 		return link;
 	}
 
@@ -252,7 +254,7 @@ public class TreeContainerPanel extends EventBusContainer
 		pnlOuter.setSpacing(10);
 
 		treeRetriever.getSpeciesTree(idGeneFamily, new SpeciesTreeRetrieverCallBack());
-		
+
 		// show
 		add(pnlOuter);
 	}
@@ -263,10 +265,10 @@ public class TreeContainerPanel extends EventBusContainer
 		{
 			pnl.cleanup();
 		}
-		
+
 		treePanels.clear();
 	}
-	
+
 	private class SpeciesTreeRetrieverCallBack extends TreeRetrieverCallBack
 	{
 		@Override

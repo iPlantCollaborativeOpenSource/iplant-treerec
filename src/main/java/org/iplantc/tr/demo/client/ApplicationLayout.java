@@ -22,7 +22,7 @@ public class ApplicationLayout extends Viewport
 {
 	private ContentPanel north;
 	private Component center;
-		
+
 	private final BorderLayout layout;
 
 	private HeaderPanel headerPanel;
@@ -46,7 +46,7 @@ public class ApplicationLayout extends Viewport
 
 		setLayout(layout);
 
-		north = new ContentPanel();		
+		north = new ContentPanel();
 	}
 
 	private void assembleHeader()
@@ -65,7 +65,7 @@ public class ApplicationLayout extends Viewport
 	private void drawNorth()
 	{
 		north.setHeaderVisible(false);
-		
+
 		BorderLayoutData data = new BorderLayoutData(LayoutRegion.NORTH, 117);
 		data.setCollapsible(false);
 		data.setFloatable(false);
@@ -89,10 +89,10 @@ public class ApplicationLayout extends Viewport
 		}
 
 		center = view;
-				
+
 		BorderLayoutData data = new BorderLayoutData(LayoutRegion.CENTER);
 		data.setMargins(new Margins(0));
-		
+
 		if(center != null)
 		{
 			add(center, data);
@@ -100,7 +100,7 @@ public class ApplicationLayout extends Viewport
 
 		layout();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -108,12 +108,12 @@ public class ApplicationLayout extends Viewport
 	protected void onRender(Element parent, int index)
 	{
 		super.onRender(parent, index);
-		
+
 		drawNorth();
 
 		assembleHeader();
 	}
-		
+
 	class HeaderPanel extends HorizontalPanel
 	{
 		/**
@@ -123,11 +123,11 @@ public class ApplicationLayout extends Viewport
 		protected void afterRender()
 		{
 			super.afterRender();
-			el().createChild("<div class='header'> " +
-					"<div style='position: relative; margin-left: auto; margin-right: auto; top: 35px; font-family: Myriad Pro; color: #ffffff; font-size: 36px; text-align: center; line-height: 20px'>Tree Reconciliation<br/><font size='2' face='Myriad Pro'>Demonstration of Features</font>" +
-					"</div>" +
-					"</div>");		
-		}	
+			el()
+					.createChild(
+							"<div class='header'> "
+									+ "<div style='position: relative; margin-left: auto; margin-right: auto; top: 35px; font-family: Myriad Pro; color: #ffffff; font-size: 36px; text-align: center; line-height: 20px'>Tree Reconciliation<br/><font size='2' face='Myriad Pro'>Demonstration of Features</font>"
+									+ "</div>" + "</div>");
+		}
 	}
 }
-

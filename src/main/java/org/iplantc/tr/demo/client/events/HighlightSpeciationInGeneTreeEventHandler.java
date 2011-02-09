@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.EventHandler;
 
 /**
  * @author sriram
- *
+ * 
  */
 public interface HighlightSpeciationInGeneTreeEventHandler extends EventHandler
 {

@@ -42,8 +42,7 @@ public abstract class ChannelContainer extends ContentPanel
 	 * 
 	 * @param broadcaster broadcaster to add.
 	 * @param receiver receiver to use with our broadcaster.
-	 * @param cmdBroadcast command pattern implementation for allowing message
-	 *            broadcasting.
+	 * @param cmdBroadcast command pattern implementation for allowing message broadcasting.
 	 */
 	public void addBroadcaster(final Broadcaster broadcaster, final Receiver receiver,
 			BroadcastCommand cmdBroadcast)

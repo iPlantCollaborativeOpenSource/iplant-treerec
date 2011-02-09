@@ -1,6 +1,5 @@
 package org.iplantc.tr.demo.client.panels;
 
-
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
 import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
@@ -40,18 +39,19 @@ public class DownloadableImageViewPanel extends ContentPanel
 
 	private Button buildDownloadButton()
 	{
-		Button ret = PanelHelper.buildButton("btnDownload", "Download Image",
-				new SelectionListener<ButtonEvent>()
-				{
-					@Override
-					public void componentSelected(ButtonEvent ce)
-					{
-						if(urlDownload != null)
+		Button ret =
+				PanelHelper.buildButton("btnDownload", "Download Image",
+						new SelectionListener<ButtonEvent>()
 						{
-							Window.open(urlDownload, null, "width=100,height=100");
-						}
-					}
-				});
+							@Override
+							public void componentSelected(ButtonEvent ce)
+							{
+								if(urlDownload != null)
+								{
+									Window.open(urlDownload, null, "width=100,height=100");
+								}
+							}
+						});
 
 		// if we don't have download url... disable
 		if(urlDownload == null)
@@ -80,10 +80,10 @@ public class DownloadableImageViewPanel extends ContentPanel
 		ret.setBodyBorder(false);
 		ret.setStyleName("image-view-panel");
 		ret.add(new Image(urlDisplay));
-	
+
 		return ret;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -94,9 +94,9 @@ public class DownloadableImageViewPanel extends ContentPanel
 
 		setLayout(new BorderLayout());
 		BorderLayoutData data = new BorderLayoutData(LayoutRegion.CENTER);
-		
+
 		if(urlDisplay != null)
-		{						
+		{
 			add(buildViewPanel(), data);
 		}
 	}

@@ -5,12 +5,13 @@ import com.google.gwt.event.shared.GwtEvent;
 public class HighlightGeneSubTreeEvent extends HighlightSubTreeEvent<HighlightGeneSubTreeEventHandler>
 {
 
-	public static final GwtEvent.Type<HighlightGeneSubTreeEventHandler> TYPE = new GwtEvent.Type<HighlightGeneSubTreeEventHandler>();
-	
+	public static final GwtEvent.Type<HighlightGeneSubTreeEventHandler> TYPE =
+			new GwtEvent.Type<HighlightGeneSubTreeEventHandler>();
+
 	public HighlightGeneSubTreeEvent(int idNode)
 	{
 		super(idNode);
-		
+
 	}
 
 	@Override

@@ -65,7 +65,7 @@ public class Hyperlink extends Html
 	 * @param attribute a style attribute like text-decoration
 	 * @param style a style value like underline
 	 */
-	
+
 	public void setOnMouseOutStyle(final String attribute, final String style)
 	{
 		addListener(Events.OnMouseOut, new Listener<ComponentEvent>()
@@ -86,7 +86,7 @@ public class Hyperlink extends Html
 		sinkEvents(Events.OnMouseOut.getEventCode());
 		setOnMouseOverStyle("text-decoration", "underline");
 		setOnMouseOutStyle("text-decoration", "none");
-		
+
 	}
 
 }

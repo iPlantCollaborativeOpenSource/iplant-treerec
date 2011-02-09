@@ -14,14 +14,14 @@ public class TRSearchWindow extends Window
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
 
 	private static TRSearchWindow instance;
-	
-	private TRSearchWindow() 
+
+	private TRSearchWindow()
 	{
 		init();
-		
-		compose();		
+
+		compose();
 	}
-	
+
 	private void init()
 	{
 		setLayout(new FitLayout());
@@ -29,36 +29,36 @@ public class TRSearchWindow extends Window
 		setSize(419, 243);
 		setResizable(false);
 	}
-	
+
 	private void compose()
 	{
 		removeAll();
-		
+
 		add(new TRAdvancedSearchPanel(searchService, new ViewCommand()));
-		
+
 		layout();
 	}
-	
+
 	private void doView(final String params)
 	{
 		if(params != null)
 		{
-			TRViewerWindow  win = new TRViewerWindow(params);
+			TRViewerWindow win = new TRViewerWindow(params);
 			win.show();
 			win.maximize();
 		}
 	}
-	
+
 	public static TRSearchWindow getInstance()
 	{
 		if(instance == null)
 		{
 			instance = new TRSearchWindow();
 		}
-		
+
 		return instance;
 	}
-		
+
 	class ViewCommand implements ClientCommand
 	{
 		@Override

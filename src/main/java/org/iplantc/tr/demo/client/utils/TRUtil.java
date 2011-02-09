@@ -11,10 +11,11 @@ public class TRUtil
 {
 	public static JSONValue parseItem(String json)
 	{
-		if(json == null) {
+		if(json == null)
+		{
 			return null;
 		}
-		
+
 		JSONObject jsonObj = (JSONObject)JSONParser.parseStrict(json);
 
 		// drill down to "item" key
@@ -27,7 +28,7 @@ public class TRUtil
 
 		return val;
 	}
-	
+
 	public static JsArray<JsTRSearchResult> parseFamilies(String json)
 	{
 		JSONValue val = parseItem(json);
@@ -43,11 +44,12 @@ public class TRUtil
 		{
 			return JsonUtil.asArrayOf(valItems.toString());
 		}
-		else {
+		else
+		{
 			return null;
 		}
 	}
-	
+
 	private static boolean isEmpty(JSONValue in)
 	{
 		boolean ret = true; // assume we have an empty value

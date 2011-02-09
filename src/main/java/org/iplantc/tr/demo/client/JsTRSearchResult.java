@@ -17,8 +17,8 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return family name.
 	 */
 	public final native String getName() /*-{
-		return this.name;
-	}-*/;
+											return this.name;
+											}-*/;
 
 	/**
 	 * Retrieve family name.
@@ -26,16 +26,16 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return family name.
 	 */
 	public final native String getEValue() /*-{
-		// evalue is only present in BLAST searches
-		if (this.evalue)
-		{
-			return this.evalue;
-		}
-		else
-		{
-			return "";
-		}
-	}-*/;
+											// evalue is only present in BLAST searches
+											if (this.evalue)
+											{
+											return this.evalue;
+											}
+											else
+											{
+											return "";
+											}
+											}-*/;
 
 	/**
 	 * Retrieve family name.
@@ -43,16 +43,16 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return family name.
 	 */
 	public final native int getAlignLength() /*-{
-		// length is only present in BLAST searches
-		if (this.length)
-		{
-			return this.length;
-		}
-		else
-		{
-			return 0;
-		}
-	}-*/;
+												// length is only present in BLAST searches
+												if (this.length)
+												{
+												return this.length;
+												}
+												else
+												{
+												return 0;
+												}
+												}-*/;
 
 	/**
 	 * Retrieve family name.
@@ -60,8 +60,8 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return family name.
 	 */
 	public final native int getGoTermCount() /*-{
-		return this.goTermCount;
-	}-*/;
+												return this.goTermCount;
+												}-*/;
 
 	/**
 	 * Retrieve gene count.
@@ -69,8 +69,8 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return number of genes in family.
 	 */
 	public final native String getGeneCount() /*-{
-		return this.geneCount;
-	}-*/;
+												return this.geneCount;
+												}-*/;
 
 	/**
 	 * Retrieve species count.
@@ -78,8 +78,8 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return number of species in a family.
 	 */
 	public final native String getSpeciesCount() /*-{
-		return this.speciesCount;
-	}-*/;
+													return this.speciesCount;
+													}-*/;
 
 	/**
 	 * Retrieve number of duplication events.
@@ -87,8 +87,8 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return number of duplication events.
 	 */
 	public final native String getDuplicationCount() /*-{
-		return this.duplicationEvents;
-	}-*/;
+														return this.duplicationEvents;
+														}-*/;
 
 	/**
 	 * Retrieve GO annotations.
@@ -96,7 +96,6 @@ public class JsTRSearchResult extends JavaScriptObject
 	 * @return GO annotations for a family.
 	 */
 	public final native String getGOAnnotations() /*-{
-		return this.goAnnotations;
-	}-*/;
+													return this.goAnnotations;
+													}-*/;
 }
-

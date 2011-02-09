@@ -42,25 +42,25 @@ public class TRSearchResultsWindow extends Window
 	private ArrayList<Button> buttons;
 	private ContentPanel pnlGrid;
 	private PagingToolBar pageBar;
-	
+
 	private static TRSearchResultsWindow instance;
-	
+
 	public static TRSearchResultsWindow getInstance()
 	{
 		if(instance == null)
 		{
 			instance = new TRSearchResultsWindow();
 		}
-		
+
 		return instance;
 	}
-	
+
 	public void init(String searchTerms, String results, boolean showBlastColumns,
 			ClientCommand cmdViewFamily)
 	{
 		this.showBlastColumns = showBlastColumns;
 		this.cmdViewFamily = cmdViewFamily;
-		
+
 		init(searchTerms, results);
 	}
 
@@ -70,13 +70,13 @@ public class TRSearchResultsWindow extends Window
 		setHeading("Tree Reconciliation Search Results");
 		buildGrid(results);
 		setLayout(new FitLayout());
-		
+
 		pnlGrid = new ContentPanel();
 		pnlGrid.setLayout(new FitLayout());
 		pnlGrid.setHeading(heading);
-		
+
 		compose();
-		if (showBlastColumns)
+		if(showBlastColumns)
 		{
 			// BLAST has two more columns
 			setSize(800, 300);
@@ -90,16 +90,17 @@ public class TRSearchResultsWindow extends Window
 	private void compose()
 	{
 		removeAll();
-		
+
 		pnlGrid.add(gridResults);
 		pnlGrid.setBottomComponent(pageBar);
-		
+
 		add(pnlGrid);
 		layout();
 	}
 
 	/**
 	 * Builds the grid and the paging tool bar.
+	 * 
 	 * @param json
 	 */
 	private void buildGrid(String json)
@@ -166,8 +167,8 @@ public class TRSearchResultsWindow extends Window
 	{
 		List<ColumnConfig> config = new ArrayList<ColumnConfig>();
 
-		ColumnConfig geneFamilyConfig = buildConfig("name", "Gene Family<br/>Identifier", 140,
-				HorizontalAlignment.LEFT);
+		ColumnConfig geneFamilyConfig =
+				buildConfig("name", "Gene Family<br/>Identifier", 140, HorizontalAlignment.LEFT);
 		geneFamilyConfig.setRenderer(new GeneFamilyColumnRenderer());
 		config.add(geneFamilyConfig);
 
@@ -181,8 +182,9 @@ public class TRSearchResultsWindow extends Window
 		config.add(buildConfig("goAnnotations", "Molecular Function/<br/>Biological Process", 200,
 				HorizontalAlignment.LEFT));
 
-		ColumnConfig goTermsConfig = buildConfig("numGoTerms", "Number of GO<br/>terms in family", 120,
-				HorizontalAlignment.LEFT);
+		ColumnConfig goTermsConfig =
+				buildConfig("numGoTerms", "Number of GO<br/>terms in family", 120,
+						HorizontalAlignment.LEFT);
 		goTermsConfig.setRenderer(new GoTermsColumnRenderer());
 		config.add(goTermsConfig);
 
@@ -227,10 +229,10 @@ public class TRSearchResultsWindow extends Window
 	{
 
 		@Override
-		public Object render(final TRSearchResult result, String property, ColumnData config, int rowIndex,
-				int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
+		public Object render(final TRSearchResult result, String property, ColumnData config,
+				int rowIndex, int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
 		{
-			HTML link =  new HTML("<a href=\"#\">" + result.getName() + "</a>");
+			HTML link = new HTML("<a href=\"#\">" + result.getName() + "</a>");
 			link.addClickHandler(new ClickHandler()
 			{
 				@Override
@@ -249,8 +251,8 @@ public class TRSearchResultsWindow extends Window
 	class GoTermsColumnRenderer implements GridCellRenderer<TRSearchResult>
 	{
 		@Override
-		public Object render(final TRSearchResult result, String property, ColumnData config, int rowIndex,
-				int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
+		public Object render(final TRSearchResult result, String property, ColumnData config,
+				int rowIndex, int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
 		{
 			HTML link = new HTML(result.getGoTermCount() + " <a href=\"#\"> (view all)</a>");
 			link.addClickHandler(new ClickHandler()
@@ -263,8 +265,9 @@ public class TRSearchResultsWindow extends Window
 			});
 			return link;
 		}
-		
-		private void showWordCloud(TRSearchResult result) {
+
+		private void showWordCloud(TRSearchResult result)
+		{
 			new WordCloudWindow().show();
 		}
 	}

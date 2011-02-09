@@ -52,24 +52,24 @@ public abstract class EventBusReceiver extends Receiver
 			});
 		}
 	}
-	
+
 	protected Point getAbsoluteCoordinates(JSONObject obj)
 	{
-		Point ret = null;   //assume failure
-		
+		Point ret = null; // assume failure
+
 		if(obj != null)
-		{		
+		{
 			JSONObject mouseObj = obj.get("mouse").isObject();
-			
+
 			String temp = mouseObj.get("x").toString();
 			int x = Integer.parseInt(temp);
-	
-			temp =  mouseObj.get("y").toString();
+
+			temp = mouseObj.get("y").toString();
 			int y = Integer.parseInt(temp);
-	
-			ret = new Point(x,y);
+
+			ret = new Point(x, y);
 		}
-		
+
 		return ret;
 	}
 
@@ -79,5 +79,5 @@ public abstract class EventBusReceiver extends Receiver
 	 * @param idBroadcaster unique id of broadcaster which fired this event.
 	 * @param jsonMsg event message in JSON.
 	 */
-	protected abstract void processChannelMessage(final String idBroadcaster, final String jsonMsg);	
+	protected abstract void processChannelMessage(final String idBroadcaster, final String jsonMsg);
 }

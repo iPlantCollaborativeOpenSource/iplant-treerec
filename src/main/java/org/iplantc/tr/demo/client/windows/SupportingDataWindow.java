@@ -18,7 +18,7 @@ public class SupportingDataWindow extends Window
 		setHeading("Supporting Data for Gene Family " + idGeneFamily);
 		setSize(380, 220);
 		setResizable(false);
-		
+
 		add(pnl);
 	}
 }

@@ -30,7 +30,8 @@ public class SpeciesTreeNavModeReceiver extends EventBusReceiver
 	private void handleNodeClick(final JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		SpeciesTreeNavNodeSelectEvent event = new SpeciesTreeNavNodeSelectEvent(Integer.parseInt(id),getAbsoluteCoordinates(objJson));
+		SpeciesTreeNavNodeSelectEvent event =
+				new SpeciesTreeNavNodeSelectEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
 		eventbus.fireEvent(event);
 	}
 
@@ -57,13 +58,13 @@ public class SpeciesTreeNavModeReceiver extends EventBusReceiver
 				{
 					handleNodeClick(objJson);
 				}
-				
-				if (event.equals("node_mouse_over"))
+
+				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over"))
 				{
 					handleNodeMouseOver(objJson);
 				}
-				
-				if (event.equals("node_mouse_out"))
+
+				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out"))
 				{
 					handleNodeMouseOut(objJson);
 				}
@@ -74,14 +75,16 @@ public class SpeciesTreeNavModeReceiver extends EventBusReceiver
 	private void handleNodeMouseOut(JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		TreeNodeMouseOutEvent event = new TreeNodeMouseOutEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
+		TreeNodeMouseOutEvent event =
+				new TreeNodeMouseOutEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
 		eventbus.fireEvent(event);
 	}
 
 	private void handleNodeMouseOver(JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		TreeNodeMouseOverEvent event = new TreeNodeMouseOverEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
+		TreeNodeMouseOverEvent event =
+				new TreeNodeMouseOverEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
 		eventbus.fireEvent(event);
 	}
 }
