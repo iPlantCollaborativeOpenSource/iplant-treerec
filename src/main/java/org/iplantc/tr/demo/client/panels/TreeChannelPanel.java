@@ -1,8 +1,11 @@
 package org.iplantc.tr.demo.client.panels;
 
-import org.iplantc.phyloviewer.client.layout.JsLayoutCladogram;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.iplantc.core.broadcaster.shared.BroadcastCommand;
 import org.iplantc.core.broadcaster.shared.Broadcaster;
+import org.iplantc.phyloviewer.client.layout.JsLayoutCladogram;
 import org.iplantc.phyloviewer.client.tree.viewer.DetailView;
 import org.iplantc.phyloviewer.client.tree.viewer.model.JsDocument;
 import org.iplantc.phyloviewer.shared.model.Document;
@@ -30,6 +33,7 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Abstract tree channel panel.
@@ -45,8 +49,10 @@ public abstract class TreeChannelPanel extends ContentPanel
 	private final String layoutTree;
 
 	protected EventBus eventbus;
-	
+
 	protected String geneFamName;
+
+	protected List<HandlerRegistration> handlers;
 
 	/**
 	 * Instantiate from an event bus, caption, id, tree and layout
@@ -80,6 +86,8 @@ public abstract class TreeChannelPanel extends ContentPanel
 		setHeading(caption);
 
 		setId(id);
+
+		handlers = new ArrayList<HandlerRegistration>();
 	}
 
 	private final static native JsDocument getDocument(String json) /*-{
@@ -225,7 +233,7 @@ public abstract class TreeChannelPanel extends ContentPanel
 	 * @param point absolute point where user clicked in the screen
 	 */
 	protected abstract void handleSpeciesTreeNavNodeSelect(int idNode, Point point);
-	
+
 	/**
 	 * Handle when a node is clicked in the species tree while in navigation mode.
 	 * 
@@ -233,9 +241,9 @@ public abstract class TreeChannelPanel extends ContentPanel
 	 * @param point absolute point where user clicked in the screen
 	 */
 	protected abstract void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point);
-	
-	
-	/** Handle when mouse hover over a node.
+
+	/**
+	 * Handle when mouse hover over a node.
 	 * 
 	 * @param idEdgeToNode unique id of node resulting from the edge.
 	 * @param point absolute point where user clicked in the screen
@@ -244,8 +252,9 @@ public abstract class TreeChannelPanel extends ContentPanel
 	{
 		setStyleAttribute("cursor", "pointer");
 	}
-	 
-	/** Handle when mouse moves out of a node
+
+	/**
+	 * Handle when mouse moves out of a node
 	 * 
 	 * @param idEdgeToNode unique id of node resulting from the edge.
 	 * @param point absolute point where user clicked in the screen
@@ -254,8 +263,6 @@ public abstract class TreeChannelPanel extends ContentPanel
 	{
 		setStyleAttribute("cursor", "default");
 	}
-	 
-	 
 
 	/**
 	 * Initialize our event listeners and add them to the event bus.
@@ -264,26 +271,27 @@ public abstract class TreeChannelPanel extends ContentPanel
 	{
 		if(eventbus != null)
 		{
-			eventbus.addHandler(GeneTreeInvestigationNodeSelectEvent.TYPE,
+			handlers.add(eventbus.addHandler(GeneTreeInvestigationNodeSelectEvent.TYPE,
 					new GeneTreeInvestigationNodeSelectEventHandler()
 					{
 						@Override
 						public void onFire(GeneTreeInvestigationNodeSelectEvent event)
 						{
-							handleGeneTreeInvestigationNodeSelect(event.getNodeId(),event.getPoint());
+							handleGeneTreeInvestigationNodeSelect(event.getNodeId(), event.getPoint());
 						}
-					});
+					}));
 
-			eventbus.addHandler(GeneTreeNavNodeSelectEvent.TYPE, new GeneTreeNavNodeSelectEventHandler()
-			{
-				@Override
-				public void onFire(GeneTreeNavNodeSelectEvent event)
-				{
-					handleGeneTreeNavNodeSelect(event.getNodeId(), event.getPoint());
-				}
-			});
+			handlers.add(eventbus.addHandler(GeneTreeNavNodeSelectEvent.TYPE,
+					new GeneTreeNavNodeSelectEventHandler()
+					{
+						@Override
+						public void onFire(GeneTreeNavNodeSelectEvent event)
+						{
+							handleGeneTreeNavNodeSelect(event.getNodeId(), event.getPoint());
+						}
+					}));
 
-			eventbus.addHandler(SpeciesTreeInvestigationNodeSelectEvent.TYPE,
+			handlers.add(eventbus.addHandler(SpeciesTreeInvestigationNodeSelectEvent.TYPE,
 					new SpeciesTreeInvestigationNodeSelectEventHandler()
 					{
 						@Override
@@ -291,9 +299,9 @@ public abstract class TreeChannelPanel extends ContentPanel
 						{
 							handleSpeciesTreeInvestigationNodeSelect(event.getNodeId(), event.getPoint());
 						}
-					});
+					}));
 
-			eventbus.addHandler(SpeciesTreeNavNodeSelectEvent.TYPE,
+			handlers.add(eventbus.addHandler(SpeciesTreeNavNodeSelectEvent.TYPE,
 					new SpeciesTreeNavNodeSelectEventHandler()
 					{
 						@Override
@@ -301,40 +309,53 @@ public abstract class TreeChannelPanel extends ContentPanel
 						{
 							handleSpeciesTreeNavNodeSelect(event.getNodeId(), event.getPoint());
 						}
-					});
-			
-			eventbus.addHandler(SpeciesTreeInvestigationEdgeSelectEvent.TYPE,
+					}));
+
+			handlers.add(eventbus.addHandler(SpeciesTreeInvestigationEdgeSelectEvent.TYPE,
 					new SpeciesTreeInvestigationEdgeSelectEventHandler()
 					{
 						@Override
 						public void onFire(SpeciesTreeInvestigationEdgeSelectEvent event)
 						{
-							handleSpeciesTreeInvestigationEdgeSelect(event.getIdEdgeToNode(), event.getPoint());
-							
+							handleSpeciesTreeInvestigationEdgeSelect(event.getIdEdgeToNode(), event
+									.getPoint());
+
 						}
-					});
-			
-			eventbus.addHandler(TreeNodeMouseOverEvent.TYPE, new TreeNodeMouseOverEventHandler()
-			{
-				
-				@Override
-				public void onMouseOver(TreeNodeMouseOverEvent e)
-				{
-					handleMouseOver(e.getIdNode(),e.getPoint());
-					
-				}
-			});
-			
-			
-			eventbus.addHandler(TreeNodeMouseOutEvent.TYPE, new TreeNodeMouseOutEventHandler()
-			{
-				
-				@Override
-				public void onMouseOut(TreeNodeMouseOutEvent e)
-				{
-					handleMouseOut(e.getIdNode(),e.getPoint());				
-				}
-			});
+					}));
+
+			handlers.add(eventbus.addHandler(TreeNodeMouseOverEvent.TYPE,
+					new TreeNodeMouseOverEventHandler()
+					{
+
+						@Override
+						public void onMouseOver(TreeNodeMouseOverEvent e)
+						{
+							handleMouseOver(e.getIdNode(), e.getPoint());
+
+						}
+					}));
+
+			handlers.add(eventbus.addHandler(TreeNodeMouseOutEvent.TYPE,
+					new TreeNodeMouseOutEventHandler()
+					{
+						@Override
+						public void onMouseOut(TreeNodeMouseOutEvent e)
+						{
+							handleMouseOut(e.getIdNode(), e.getPoint());
+						}
+					}));
 		}
+	}
+
+	public void cleanup()
+	{
+		// unregister
+		for(HandlerRegistration reg : handlers)
+		{
+			reg.removeHandler();
+		}
+
+		// clear our list
+		handlers.clear();
 	}
 }

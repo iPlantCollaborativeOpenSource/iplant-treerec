@@ -40,22 +40,15 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 			String layoutTree, String geneFamId)
 	{
 		super(eventbus, caption, id, jsonTree, layoutTree, geneFamId);
-		addListeners();
 	}
 
-	private void addListeners()
+	@Override
+	protected void initListeners()
 	{
-		eventbus.addHandler(HighlightSpeciesSubTreeEvent.TYPE, new HighlightSpeciesSubTreeEventHandler()
-		{
+		super.initListeners();
 
-			@Override
-			public void onFire(HighlightSpeciesSubTreeEvent event)
-			{
-				treeView.highlightSubtree(event.getIdNode());
-
-			}
-		});
-
+		handlers.add(eventbus.addHandler(HighlightSpeciesSubTreeEvent.TYPE,
+				new HighlightSpeciesSubTreeEventHandlerImpl()));
 	}
 
 	/**
@@ -113,7 +106,8 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 
 	private MenuItem buildHighlightAllMenuItem()
 	{
-		MenuItem item = new MenuItem("Highlight all descendants (hide non selected species)");
+
+		MenuItem item = new MenuItem("Highlight all descendants (hide unselected species)");
 
 		item.addSelectionListener(new SelectionListener<MenuEvent>()
 		{
@@ -149,6 +143,16 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
 	{
 
+	}
+
+	private class HighlightSpeciesSubTreeEventHandlerImpl implements HighlightSpeciesSubTreeEventHandler
+	{
+		@Override
+		public void onFire(HighlightSpeciesSubTreeEvent event)
+		{
+			treeView.clearHighlights();
+			treeView.highlightSubtree(event.getIdNode());
+		}
 	}
 
 	private class HighlightSpeciationSelectionListener extends SelectionListener<MenuEvent>

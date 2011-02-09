@@ -32,8 +32,20 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 			String layoutTree, String geneFamId)
 	{
 		super(eventbus, caption, id, jsonTree, layoutTree, geneFamId);
-		eventbus.addHandler(HighlightSpeciationInGeneTreeEvent.TYPE, new HighlightSpeciationInGeneTreeEventHandlerImpl());
-		eventbus.addHandler(SpeciesTreeInvestigationLeafSelectEvent.TYPE, new SpeciesTreeInvestigationLeafSelectEventHandlerImpl());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void initListeners()
+	{
+		super.initListeners();
+
+		handlers.add(eventbus.addHandler(HighlightSpeciationInGeneTreeEvent.TYPE,
+				new HighlightSpeciationInGeneTreeEventHandlerImpl()));
+		handlers.add(eventbus.addHandler(SpeciesTreeInvestigationLeafSelectEvent.TYPE,
+				new SpeciesTreeInvestigationLeafSelectEventHandlerImpl()));
 	}
 
 	/**
@@ -59,7 +71,6 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleSpeciesTreeInvestigationNodeSelect(int idNode, Point p)
 	{
-		
 	}
 
 	/**
@@ -72,39 +83,37 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	@Override
 	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
 	{
-		// TODO Auto-generated method stub
-		
+
 	}
-	
-	private class HighlightSpeciationInGeneTreeEventHandlerImpl implements HighlightSpeciationInGeneTreeEventHandler
+
+	private class HighlightSpeciationInGeneTreeEventHandlerImpl implements
+			HighlightSpeciationInGeneTreeEventHandler
 	{
 		@Override
 		public void onFire(HighlightSpeciationInGeneTreeEvent event)
 		{
 			ArrayList<Integer> idNodes = event.getNodesToHighlight();
 			highlightNodes(idNodes);
-			
-			
+
 		}
-		
+
 	}
-	
-	
-	private class SpeciesTreeInvestigationLeafSelectEventHandlerImpl implements SpeciesTreeInvestigationLeafSelectEventHandler
+
+	private class SpeciesTreeInvestigationLeafSelectEventHandlerImpl implements
+			SpeciesTreeInvestigationLeafSelectEventHandler
 	{
 		@Override
 		public void onFire(SpeciesTreeInvestigationLeafSelectEvent event)
 		{
 			ArrayList<Integer> idNodes = event.getGeneTreeNodesToSelect();
 			highlightNodes(idNodes);
-			
+
 		}
 	}
-	
-	
+
 	private void highlightNodes(ArrayList<Integer> idNodes)
 	{
-		for (int i = 0 ;i < idNodes.size(); i++)
+		for(int i = 0;i < idNodes.size();i++)
 		{
 			treeView.highlightNode(idNodes.get(i));
 		}
