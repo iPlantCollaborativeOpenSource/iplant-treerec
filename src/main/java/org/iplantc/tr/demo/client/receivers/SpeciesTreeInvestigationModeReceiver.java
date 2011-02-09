@@ -78,20 +78,33 @@ public class SpeciesTreeInvestigationModeReceiver extends EventBusReceiver
 					handleEdgeClick(objJson);
 				}
 				
-				if (event.equals("node_mouse_over"))
+				if (event.equals("node_mouse_over") || event.equals("leaf_mouse_over"))
 				{
 					handleNodeMouseOver(objJson);
 				}
 				
-				if (event.equals("node_mouse_out"))
+				if (event.equals("node_mouse_out") || event.equals("leaf_mouse_out"))
 				{
 					handleNodeMouseOut(objJson);
+				}
+				
+				if (event.equals("leaf_clicked"))
+				{
+					handleLeafClick(objJson);
 				}
 			}
 		}
 	}
 	
 	
+	private void handleLeafClick(JSONObject objJson)
+	{
+		String id = JsonUtil.getString(objJson, "id");
+		//TODO: make service call to retrieve genes for this species and fire event
+		
+		
+	}
+
 	private void handleNodeMouseOut(JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");

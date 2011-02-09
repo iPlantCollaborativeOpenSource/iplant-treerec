@@ -16,7 +16,6 @@ import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -48,15 +47,15 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	{
 		eventbus.addHandler(HighlightSpeciesSubTreeEvent.TYPE, new HighlightSpeciesSubTreeEventHandler()
 		{
-			
+
 			@Override
 			public void onFire(HighlightSpeciesSubTreeEvent event)
 			{
 				treeView.highlightSubtree(event.getIdNode());
-				
+
 			}
 		});
-		
+
 	}
 
 	/**
@@ -64,14 +63,7 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleGeneTreeInvestigationNodeSelect(int idNode, Point p)
 	{
-		int cntNodes = treeView.getTree().getNumberOfNodes();
 
-		treeView.clearHighlights();
-
-		int id = 1 + Random.nextInt(cntNodes - 2);
-
-		treeView.highlightNode(id);
-		treeView.zoomToFitSubtree(id);
 	}
 
 	/**
@@ -79,11 +71,7 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	 */
 	protected void handleGeneTreeNavNodeSelect(int idNode, Point p)
 	{
-		int cntNodes = treeView.getTree().getNumberOfNodes();
 
-		int id = 1 + Random.nextInt(cntNodes - 2);
-
-		treeView.zoomToFitSubtree(id);
 	}
 
 	/**
@@ -105,34 +93,34 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	private void displayMenu(Point p, int idNode)
 	{
 		Menu menu = new Menu();
-	
+
 		menu.setData("idNode", idNode);
 		menu.add(buildHighlightSpeciesMenuItem());
 		menu.add(buildHighlightAllMenuItem());
 		menu.add(buildSelectSubTreeMenuItem());
-		
+
 		menu.showAt(p.x, p.y);
 	}
 
 	private MenuItem buildHighlightSpeciesMenuItem()
 	{
 		MenuItem item = new MenuItem("Highlight speciation event in gene tree");
-				
+
 		item.addSelectionListener(new HighlightSpeciationSelectionListener());
-		
+
 		return item;
 	}
 
 	private MenuItem buildHighlightAllMenuItem()
 	{
 		MenuItem item = new MenuItem("Highlight all descendants (hide non selected species)");
-		
+
 		item.addSelectionListener(new SelectionListener<MenuEvent>()
 		{
 			@Override
 			public void componentSelected(MenuEvent ce)
 			{
-				//TODO implement me!!!
+				// TODO implement me!!!
 			}
 		});
 
@@ -160,10 +148,9 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	@Override
 	protected void handleSpeciesTreeInvestigationEdgeSelect(int idEdgeToNode, Point point)
 	{
-		
 
 	}
-	
+
 	private class HighlightSpeciationSelectionListener extends SelectionListener<MenuEvent>
 	{
 		@Override
@@ -171,32 +158,36 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 		{
 			Menu m = (Menu)ce.getSource();
 			int idNode = Integer.parseInt(m.getData("idNode").toString());
-			TreeServices.getRelatedGeneEdgeNode("{\"familyName\":\"" + geneFamName  + "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + false  + "}", new AsyncCallback<String>()
-			{				
-				@Override
-				public void onSuccess(String result)
-				{
-					ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
-					JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
-					if (o1 != null)
+			TreeServices.getRelatedGeneEdgeNode("{\"familyName\":\"" + geneFamName
+					+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + false + "}",
+					new AsyncCallback<String>()
 					{
-						JSONArray gene_nodes = JsonUtil.getArray(o1, "item");
-						for (int i = 0;i <gene_nodes.size();i++)
+						@Override
+						public void onSuccess(String result)
 						{
-							nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes.get(i).isObject().get("geneTreeNode").toString())));
+							ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
+							JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+							if(o1 != null)
+							{
+								JSONArray gene_nodes = JsonUtil.getArray(o1, "item");
+								for(int i = 0;i < gene_nodes.size();i++)
+								{
+									nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes
+											.get(i).isObject().get("geneTreeNode").toString())));
+								}
+							}
+
+							HighlightSpeciationInGeneTreeEvent event =
+									new HighlightSpeciationInGeneTreeEvent(nodesToHighlight);
+							eventbus.fireEvent(event);
 						}
-					}
-					
-					HighlightSpeciationInGeneTreeEvent event = new HighlightSpeciationInGeneTreeEvent(nodesToHighlight);
-					eventbus.fireEvent(event);
-				}
-				
-				@Override
-				public void onFailure(Throwable arg0)
-				{
-					System.out.println(arg0.toString());					
-				}
-			});			
-		}		
+
+						@Override
+						public void onFailure(Throwable arg0)
+						{
+							System.out.println(arg0.toString());
+						}
+					});
+		}
 	}
 }
