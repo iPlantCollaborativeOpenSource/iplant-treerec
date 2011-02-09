@@ -47,16 +47,14 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	private void addListeners()
 	{
 		eventbus.addHandler(HighlightSpeciesSubTreeEvent.TYPE, new HighlightSpeciesSubTreeEventHandler()
-		{
-			
+		{			
 			@Override
 			public void onFire(HighlightSpeciesSubTreeEvent event)
 			{
-				treeView.highlightSubtree(event.getIdNode());
-				
+				treeView.clearHighlights();
+				treeView.highlightSubtree(event.getIdNode());				
 			}
-		});
-		
+		});		
 	}
 
 	/**
