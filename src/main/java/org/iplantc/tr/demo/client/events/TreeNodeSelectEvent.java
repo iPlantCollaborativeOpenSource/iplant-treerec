@@ -14,7 +14,7 @@ import com.google.gwt.event.shared.GwtEvent;
 public abstract class TreeNodeSelectEvent<H extends EventHandler> extends GwtEvent<H>
 {
 	protected int idNode;
-	
+
 	protected Point point;
 
 	/**

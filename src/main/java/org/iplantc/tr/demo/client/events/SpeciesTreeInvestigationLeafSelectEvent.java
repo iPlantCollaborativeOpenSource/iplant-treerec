@@ -8,10 +8,11 @@ public class SpeciesTreeInvestigationLeafSelectEvent extends
 		GwtEvent<SpeciesTreeInvestigationLeafSelectEventHandler>
 {
 
-	public static final GwtEvent.Type<SpeciesTreeInvestigationLeafSelectEventHandler> TYPE = new GwtEvent.Type<SpeciesTreeInvestigationLeafSelectEventHandler>();
-	
+	public static final GwtEvent.Type<SpeciesTreeInvestigationLeafSelectEventHandler> TYPE =
+			new GwtEvent.Type<SpeciesTreeInvestigationLeafSelectEventHandler>();
+
 	private ArrayList<Integer> geneTreeNodesToSelect;
-	
+
 	/**
 	 * @return the geneTreeNodesToSelect
 	 */

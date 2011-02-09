@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-public class HighlightSpeciationInGeneTreeEvent extends GwtEvent<HighlightSpeciationInGeneTreeEventHandler>
+public class HighlightSpeciationInGeneTreeEvent extends
+		GwtEvent<HighlightSpeciationInGeneTreeEventHandler>
 {
 
-
 	private ArrayList<Integer> nodesToHighlight;
-	
+
 	/**
 	 * @return the nodesToHighlight
 	 */
@@ -22,9 +22,10 @@ public class HighlightSpeciationInGeneTreeEvent extends GwtEvent<HighlightSpecia
 	{
 		this.nodesToHighlight = nodesToHighlight;
 	}
-	
-	public static final GwtEvent.Type<HighlightSpeciationInGeneTreeEventHandler> TYPE = new GwtEvent.Type<HighlightSpeciationInGeneTreeEventHandler>();
-	
+
+	public static final GwtEvent.Type<HighlightSpeciationInGeneTreeEventHandler> TYPE =
+			new GwtEvent.Type<HighlightSpeciationInGeneTreeEventHandler>();
+
 	@Override
 	public Type<HighlightSpeciationInGeneTreeEventHandler> getAssociatedType()
 	{

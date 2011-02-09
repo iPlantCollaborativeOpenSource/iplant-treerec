@@ -8,15 +8,15 @@ public abstract class TreeEdgeSelectedEvent<H extends EventHandler> extends GwtE
 {
 
 	private int idEdgeToNode;
-	
+
 	private Point point;
-	
+
 	public TreeEdgeSelectedEvent(int idEdgeToNode, Point p)
 	{
 		this.idEdgeToNode = idEdgeToNode;
 		this.point = p;
 	}
-	
+
 	/**
 	 * @return the point
 	 */
@@ -24,8 +24,7 @@ public abstract class TreeEdgeSelectedEvent<H extends EventHandler> extends GwtE
 	{
 		return point;
 	}
-	
-	
+
 	/**
 	 * @return the idEdgeToNode
 	 */
@@ -33,6 +32,5 @@ public abstract class TreeEdgeSelectedEvent<H extends EventHandler> extends GwtE
 	{
 		return idEdgeToNode;
 	}
-
 
 }

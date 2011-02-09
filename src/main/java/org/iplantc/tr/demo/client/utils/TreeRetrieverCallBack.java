@@ -1,17 +1,17 @@
 package org.iplantc.tr.demo.client.utils;
 
 /**
- * A call back object that can be passed to TreeRetriever. 
- * The TreeRetriever will call execute method after fetching the tree and layout. 
+ * A call back object that can be passed to TreeRetriever. The TreeRetriever will call execute method
+ * after fetching the tree and layout.
  * 
  * @author sriram
- *
+ * 
  */
 public abstract class TreeRetrieverCallBack
 {
 
 	private String tree;
-	
+
 	private String layout;
 
 	/**
@@ -46,7 +46,6 @@ public abstract class TreeRetrieverCallBack
 		return tree;
 	}
 
-	
 	/**
 	 * Call back method to be executed
 	 */

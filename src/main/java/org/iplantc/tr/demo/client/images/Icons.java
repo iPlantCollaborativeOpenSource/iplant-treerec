@@ -32,7 +32,6 @@ public interface Icons extends ClientBundle
 	@Source("delete.gif")
 	ImageResource cancel();
 
-
 	/**
 	 * Image resource.
 	 * 
@@ -80,7 +79,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("Stop.png")
 	ImageResource stop();
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -88,7 +87,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("folder.gif")
 	ImageResource folder();
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -96,8 +95,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("file_view.gif")
 	ImageResource fileView();
-	
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -105,7 +103,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("file_rename.gif")
 	ImageResource fileRename();
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -113,8 +111,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("folder_delete.gif")
 	ImageResource folderDelete();
-	
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -122,8 +119,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("file_delete.gif")
 	ImageResource fileDelete();
-	
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -131,7 +127,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("file.gif")
 	ImageResource file();
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -139,7 +135,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("folder_home.gif")
 	ImageResource folderHome();
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -147,7 +143,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("folder_add.gif")
 	ImageResource folderAdd();
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -155,7 +151,7 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("folder_rename.gif")
 	ImageResource folderRename();
-	
+
 	/**
 	 * Image resource.
 	 * 
@@ -163,13 +159,12 @@ public interface Icons extends ClientBundle
 	 */
 	@Source("import.gif")
 	ImageResource importData();
-	
+
 	/**
 	 * Image resource.
 	 * 
 	 * @return image.
 	 */
 	@Source("up.gif")
-	ImageResource goUp();	
+	ImageResource goUp();
 }
-

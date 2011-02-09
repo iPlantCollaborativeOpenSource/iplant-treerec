@@ -12,7 +12,8 @@ import com.google.gwt.event.shared.GwtEvent;
 public class GeneTreeInvestigationNodeSelectEvent extends
 		TreeNodeSelectEvent<GeneTreeInvestigationNodeSelectEventHandler>
 {
-	public static final GwtEvent.Type<GeneTreeInvestigationNodeSelectEventHandler> TYPE = new GwtEvent.Type<GeneTreeInvestigationNodeSelectEventHandler>();
+	public static final GwtEvent.Type<GeneTreeInvestigationNodeSelectEventHandler> TYPE =
+			new GwtEvent.Type<GeneTreeInvestigationNodeSelectEventHandler>();
 
 	/**
 	 * Instantiate from a node id.

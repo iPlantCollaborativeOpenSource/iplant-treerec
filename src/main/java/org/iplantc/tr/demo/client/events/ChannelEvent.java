@@ -10,7 +10,8 @@ import com.google.gwt.event.shared.GwtEvent;
  */
 public class ChannelEvent extends GwtEvent<ChannelEventHandler>
 {
-	public static final GwtEvent.Type<ChannelEventHandler> TYPE = new GwtEvent.Type<ChannelEventHandler>();
+	public static final GwtEvent.Type<ChannelEventHandler> TYPE =
+			new GwtEvent.Type<ChannelEventHandler>();
 
 	private final String idBroadcaster;
 	private final String jsonMsg;

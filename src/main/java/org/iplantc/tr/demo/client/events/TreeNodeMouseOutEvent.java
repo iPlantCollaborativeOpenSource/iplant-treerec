@@ -6,12 +6,12 @@ import com.google.gwt.event.shared.GwtEvent;
 public class TreeNodeMouseOutEvent extends GwtEvent<TreeNodeMouseOutEventHandler>
 {
 
-	public static final GwtEvent.Type<TreeNodeMouseOutEventHandler> TYPE = new GwtEvent.Type<TreeNodeMouseOutEventHandler>();
-	
+	public static final GwtEvent.Type<TreeNodeMouseOutEventHandler> TYPE =
+			new GwtEvent.Type<TreeNodeMouseOutEventHandler>();
+
 	private int idNode;
 	private Point point;
-	
-	
+
 	public TreeNodeMouseOutEvent(int idNode, Point point)
 	{
 		this.idNode = idNode;
@@ -33,7 +33,7 @@ public class TreeNodeMouseOutEvent extends GwtEvent<TreeNodeMouseOutEventHandler
 	{
 		return point;
 	}
-	
+
 	@Override
 	protected void dispatch(TreeNodeMouseOutEventHandler handler)
 	{

@@ -56,7 +56,7 @@ public class TRSearchPanel extends EventBusContainer
 	}
 
 	private Component buildInfoLabel()
-	{		
+	{
 		Hyperlink link = new Hyperlink("Advanced Search Options");
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
 		{
@@ -74,8 +74,8 @@ public class TRSearchPanel extends EventBusContainer
 
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
-		SpeciesTreeInvestigationModeReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
-				eventbus, pnl.getId());
+		SpeciesTreeInvestigationModeReceiver receiverSelect =
+				new SpeciesTreeInvestigationModeReceiver(eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
 

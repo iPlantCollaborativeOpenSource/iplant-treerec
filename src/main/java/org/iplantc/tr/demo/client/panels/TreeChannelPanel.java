@@ -91,12 +91,12 @@ public abstract class TreeChannelPanel extends ContentPanel
 	}
 
 	private final static native JsDocument getDocument(String json) /*-{
-		return eval(json);
-	}-*/;
+																	return eval(json);
+																	}-*/;
 
 	private final static native JsLayoutCladogram getLayout(String json) /*-{
-		return eval(json);
-	}-*/;
+																			return eval(json);
+																			}-*/;
 
 	private DetailView buildTreeView()
 	{

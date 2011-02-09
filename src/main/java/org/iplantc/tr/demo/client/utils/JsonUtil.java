@@ -124,8 +124,8 @@ public class JsonUtil
 	}
 
 	/**
-	 * Creates a JSON object from a string. If the string parses, but doesn't contain a
-	 * JSON object, null is returned.
+	 * Creates a JSON object from a string. If the string parses, but doesn't contain a JSON object, null
+	 * is returned.
 	 * 
 	 * @param json
 	 * @return
@@ -162,7 +162,7 @@ public class JsonUtil
 			if(val != null && val.isNull() == null)
 			{
 				JSONString strVal = val.isString();
-				
+
 				if(strVal != null)
 				{
 					ret = strVal.stringValue();
@@ -195,7 +195,7 @@ public class JsonUtil
 
 		return ret;
 	}
-	
+
 	/**
 	 * 
 	 * @param jsonObj
@@ -218,11 +218,9 @@ public class JsonUtil
 
 		return ret;
 	}
-	
 
 	/**
-	 * Returns the JSONObject at a given array index, or null if there is no JSONObject at
-	 * that index.
+	 * Returns the JSONObject at a given array index, or null if there is no JSONObject at that index.
 	 * 
 	 * @param array
 	 * @param index
@@ -231,7 +229,7 @@ public class JsonUtil
 	public static JSONObject getObjectAt(JSONArray array, int index)
 	{
 		JSONValue element = array.get(index);
-		
+
 		if(element == null)
 		{
 			return null;

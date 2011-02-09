@@ -29,8 +29,7 @@ public class PanelHelper
 
 		return ret;
 	}
-	
-	
+
 	/**
 	 * Construct a toggle button widget.
 	 * 
@@ -39,7 +38,8 @@ public class PanelHelper
 	 * @param listener event listener for button click.
 	 * @return newly allocated button.
 	 */
-	public static ToggleButton buildToggleButton(String id, String text, SelectionListener<ButtonEvent> listener)
+	public static ToggleButton buildToggleButton(String id, String text,
+			SelectionListener<ButtonEvent> listener)
 	{
 		ToggleButton ret = new ToggleButton(text, listener);
 
