@@ -839,15 +839,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Load the summary for each of the matching gene families.
         for my $result_ref ( @{$results_ref} ) {
             my $family_name = $result_ref->{name};
-            my $summary_ref = {};
-            $summary_ref = eval {
-                $info->get_summary( $family_name, $species_tree_name );
-            };
-            if ( my $e = IPlant::TreeRec::TreeNotFoundException->caught() ) {
-            }
-            elsif ( my $exception = Exception::Class->caught() ) {
-                ref $exception ? $exception->rethrow() : croak $exception;
-            }
+            my $summary_ref
+                = $info->get_summary( $family_name, $species_tree_name );
             $result_ref = { %{$result_ref}, %{$summary_ref} };
         }
 
