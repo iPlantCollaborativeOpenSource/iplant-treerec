@@ -30,8 +30,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * @author amuir
  * 
  */
-public class SpeciesTreeChannelPanel extends TreeChannelPanel
+public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 {
+	private String geneFamName;
+	
 	/**
 	 * Instantiate from an event bus, caption, id, tree and layout
 	 * 
@@ -43,9 +45,11 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	 * @param geneFamName gene family Id
 	 */
 	public SpeciesTreeChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
-			String layoutTree, String geneFamId)
+			String layoutTree, String geneFamName)
 	{
-		super(eventbus, caption, id, jsonTree, layoutTree, geneFamId);
+		super(eventbus, caption, id, jsonTree, layoutTree);
+		
+		this.geneFamName = geneFamName;
 	}
 
 	@Override
@@ -204,7 +208,6 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 		public void onFire(SpeciesTreeInvestigationEdgeSelectEvent e)
 		{
 			// TODO implement me!!!			
-		}
-		
+		}		
 	}
 }

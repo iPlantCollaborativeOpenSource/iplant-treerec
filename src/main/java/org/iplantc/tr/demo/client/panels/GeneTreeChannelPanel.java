@@ -19,7 +19,7 @@ import com.google.gwt.event.shared.EventBus;
  * @author amuir
  * 
  */
-public class GeneTreeChannelPanel extends TreeChannelPanel
+public class GeneTreeChannelPanel extends NavTreeChannelPanel
 {
 	/**
 	 * Instantiate from an event bus, caption, id, tree and layout
@@ -32,9 +32,9 @@ public class GeneTreeChannelPanel extends TreeChannelPanel
 	 * @param geneFamName gene family id
 	 */
 	public GeneTreeChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
-			String layoutTree, String geneFamId)
+			String layoutTree)
 	{
-		super(eventbus, caption, id, jsonTree, layoutTree, geneFamId);
+		super(eventbus, caption, id, jsonTree, layoutTree);
 	}
 
 	/**

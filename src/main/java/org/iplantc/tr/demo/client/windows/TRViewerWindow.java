@@ -22,8 +22,8 @@ public class TRViewerWindow extends Window
 			{
 				pnl.cleanup();
 			}
-
 		});
+
 		compose();
 	}
 
