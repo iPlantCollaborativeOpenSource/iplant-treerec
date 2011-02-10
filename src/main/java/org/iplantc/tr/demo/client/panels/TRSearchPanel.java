@@ -32,6 +32,9 @@ public class TRSearchPanel extends EventBusContainer
 	VerticalPanel outerPanel;
 	private ArrayList<Receiver> receiversSelect;
 
+	/**
+	 * Default constructor.
+	 */
 	public TRSearchPanel()
 	{
 		treeRetriever = new TreeRetriever();
@@ -74,8 +77,8 @@ public class TRSearchPanel extends EventBusContainer
 
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
-		SpeciesTreeInvestigationModeReceiver receiverSelect =
-				new SpeciesTreeInvestigationModeReceiver(eventbus, pnl.getId());
+		SpeciesTreeInvestigationModeReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
+				eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
 

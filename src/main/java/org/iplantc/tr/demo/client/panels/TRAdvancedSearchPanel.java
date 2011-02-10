@@ -33,6 +33,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Interface for providing the user advanced search options.
+ * 
+ * @author amuir
+ * 
+ */
 public class TRAdvancedSearchPanel extends ContentPanel
 {
 	private static final String TR_SEARCH_TYPE_LIST_BOX_ID = "idTRSearchTypeSelection";
@@ -55,6 +61,12 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	private SearchServiceAsync searchService;
 	private ClientCommand cmdView;
 
+	/**
+	 * Instantiate from a search service and a view command.
+	 * 
+	 * @param searchService service for searching.
+	 * @param cmdView passed through to the search results window.
+	 */
 	public TRAdvancedSearchPanel(SearchServiceAsync searchService, ClientCommand cmdView)
 	{
 		this.searchService = searchService;
@@ -75,11 +87,6 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		setStyleAttribute("background-color", "#EDEDED");
 	}
 
-	/**
-	 * Removes all search panels from this panel
-	 * 
-	 * @param pnl
-	 */
 	private void removeSearchPanelFromLayoutContainer(LayoutContainer pnl)
 	{
 		List<Component> components = pnl.getItems();
@@ -272,9 +279,8 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		ret.setStyleAttribute("background-color", "#EDEDED");
 
 		pnlSearchGeneName = new SimpleSearchPanel("Gene of interest:");
-		pnlSearchGO =
-				new SimpleSearchPanel(
-						"GO term to query (can be accession number or one or multiple terms):");
+		pnlSearchGO = new SimpleSearchPanel(
+				"GO term to query (can be accession number or one or multiple terms):");
 
 		pnlSearchFamilyId = new SimpleSearchPanel("Gene Family ID (internal identifier):");
 
@@ -316,16 +322,15 @@ public class TRAdvancedSearchPanel extends ContentPanel
 
 		private Button buildSearchButton()
 		{
-			Button btn =
-					PanelHelper.buildButton("idTRSearchBtn", "Search",
-							new SelectionListener<ButtonEvent>()
-							{
-								@Override
-								public void componentSelected(ButtonEvent ce)
-								{
-									performSearch();
-								}
-							});
+			Button btn = PanelHelper.buildButton("idTRSearchBtn", "Search",
+					new SelectionListener<ButtonEvent>()
+					{
+						@Override
+						public void componentSelected(ButtonEvent ce)
+						{
+							performSearch();
+						}
+					});
 
 			btn.setEnabled(false);
 
@@ -608,8 +613,8 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	}
 
 	/**
-	 * Shows the tree viewer if the result contains a non-empty "name" value and a non-empty "gene_count"
-	 * value. Otherwise, an error window is shown.
+	 * Shows the tree viewer if the result contains a non-empty "name" value and a
+	 * non-empty "gene_count" value. Otherwise, an error window is shown.
 	 * 
 	 * @param result
 	 */

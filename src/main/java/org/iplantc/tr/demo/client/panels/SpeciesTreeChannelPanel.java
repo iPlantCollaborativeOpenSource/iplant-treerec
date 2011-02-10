@@ -52,6 +52,9 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 		this.geneFamName = geneFamName;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void initListeners()
 	{
