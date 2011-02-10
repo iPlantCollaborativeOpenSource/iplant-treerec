@@ -93,7 +93,7 @@ public class TRSearchPanel extends EventBusContainer
 		{
 			outerPanel.add(buildAdvSearch());
 			addSpeciesTreePanel(outerPanel, new TRSearchSpeciesChannelPanel(eventbus, "Species Tree",
-					"idSearchSpeciesTree", getTree(), getLayout(), ""));
+					"idSearchSpeciesTree", getTree(), getLayout()));
 
 			outerPanel.add(buildInfoLabel());
 			layout();
