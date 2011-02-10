@@ -98,7 +98,7 @@ public class SpeciesTreeChannelPanel extends TreeChannelPanel
 	private MenuItem buildHighlightAllMenuItem()
 	{
 
-		MenuItem item = new MenuItem("Highlight all descendants (hide unselected species)");
+		MenuItem item = new MenuItem("Highlight all descendants (in gene and species tree)");
 
 		item.addSelectionListener(new SelectionListener<MenuEvent>()
 		{
