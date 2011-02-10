@@ -76,8 +76,8 @@ public class TreeContainerPanel extends EventBusContainer
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		SpeciesTreeNavModeReceiver receiverNav = new SpeciesTreeNavModeReceiver(eventbus, pnl.getId());
-		SpeciesTreeInvestigationModeReceiver receiverSelect =
-				new SpeciesTreeInvestigationModeReceiver(eventbus, pnl.getId());
+		SpeciesTreeInvestigationModeReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
+				eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverNav, buildBroadcastCommand(pnl.getId()));
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
@@ -95,8 +95,8 @@ public class TreeContainerPanel extends EventBusContainer
 	private void addGeneTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		GeneTreeNavModeReceiver receiverNav = new GeneTreeNavModeReceiver(eventbus, pnl.getId());
-		GeneTreeInvestigationModeReceiver receiverSelect =
-				new GeneTreeInvestigationModeReceiver(eventbus, pnl.getId());
+		GeneTreeInvestigationModeReceiver receiverSelect = new GeneTreeInvestigationModeReceiver(
+				eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverNav, buildBroadcastCommand(pnl.getId()));
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
@@ -112,40 +112,38 @@ public class TreeContainerPanel extends EventBusContainer
 
 	private void buildNavButton()
 	{
-		btnNav =
-				PanelHelper.buildToggleButton("idNavBtn", "Navigate",
-						new SelectionListener<ButtonEvent>()
+		btnNav = PanelHelper.buildToggleButton("idNavBtn", "Navigate",
+				new SelectionListener<ButtonEvent>()
+				{
+					@Override
+					public void componentSelected(ButtonEvent ce)
+					{
+						if(btnSelect != null)
 						{
-							@Override
-							public void componentSelected(ButtonEvent ce)
-							{
-								if(btnSelect != null)
-								{
-									btnSelect.toggle(false);
-									toggleMode(Mode.NAVIGATE);
-								}
-							}
-						});
+							btnSelect.toggle(false);
+							toggleMode(Mode.NAVIGATE);
+						}
+					}
+				});
 
 		btnNav.toggle(true);
 	}
 
 	private void buildSelectButton()
 	{
-		btnSelect =
-				PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation",
-						new SelectionListener<ButtonEvent>()
+		btnSelect = PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation",
+				new SelectionListener<ButtonEvent>()
+				{
+					@Override
+					public void componentSelected(ButtonEvent ce)
+					{
+						if(btnNav != null)
 						{
-							@Override
-							public void componentSelected(ButtonEvent ce)
-							{
-								if(btnNav != null)
-								{
-									btnNav.toggle(false);
-									toggleMode(Mode.INVESTIGATION);
-								}
-							}
-						});
+							btnNav.toggle(false);
+							toggleMode(Mode.INVESTIGATION);
+						}
+					}
+				});
 	}
 
 	private Hyperlink buildSummaryLink()
@@ -276,6 +274,7 @@ public class TreeContainerPanel extends EventBusContainer
 		{
 			addSpeciesTreePanel(pnlOuter, new SpeciesTreeChannelPanel(eventbus, "Species Tree",
 					"idSpeciesTree", getTree(), getLayout(), idGeneFamily));
+			
 			treeRetriever.getGeneTree(idGeneFamily, new GeneTreeRetrieverCallBack());
 		}
 	}
@@ -286,7 +285,8 @@ public class TreeContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addGeneTreePanel(pnlOuter, new GeneTreeChannelPanel(eventbus, "Gene Tree", "idGeneTree",
-					getTree(), getLayout(), idGeneFamily));
+					getTree(), getLayout()));
+
 			// set our default mode
 			toggleMode(Mode.NAVIGATE);
 		}

@@ -13,15 +13,9 @@ import org.iplantc.tr.demo.client.events.TreeNodeMouseOutEvent;
 import org.iplantc.tr.demo.client.events.TreeNodeMouseOutEventHandler;
 import org.iplantc.tr.demo.client.events.TreeNodeMouseOverEvent;
 import org.iplantc.tr.demo.client.events.TreeNodeMouseOverEventHandler;
-import org.iplantc.tr.demo.client.utils.PanelHelper;
 
-import com.extjs.gxt.ui.client.event.ButtonEvent;
-import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.util.Point;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.button.Button;
-import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
-import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 
@@ -40,8 +34,6 @@ public abstract class TreeChannelPanel extends ContentPanel
 
 	protected EventBus eventbus;
 
-	protected String geneFamName;
-
 	protected List<HandlerRegistration> handlers;
 
 	/**
@@ -55,12 +47,11 @@ public abstract class TreeChannelPanel extends ContentPanel
 	 * @param geneFamName gene family id
 	 */
 	public TreeChannelPanel(final EventBus eventbus, final String caption, final String id,
-			final String jsonTree, final String layoutTree, String geneFamId)
+			final String jsonTree, final String layoutTree)
 	{
 		this.eventbus = eventbus;
 		this.jsonTree = jsonTree;
 		this.layoutTree = layoutTree;
-		this.geneFamName = geneFamId;
 
 		init(caption, id);
 
@@ -81,12 +72,12 @@ public abstract class TreeChannelPanel extends ContentPanel
 	}
 
 	private final static native JsDocument getDocument(String json) /*-{
-																	return eval(json);
-																	}-*/;
+		return eval(json);
+	}-*/;
 
 	private final static native JsLayoutCladogram getLayout(String json) /*-{
-																			return eval(json);
-																			}-*/;
+		return eval(json);
+	}-*/;
 
 	private DetailView buildTreeView()
 	{
@@ -95,7 +86,7 @@ public abstract class TreeChannelPanel extends ContentPanel
 		// we need at least a tree and a layout for rendering
 		if(jsonTree != null && layoutTree != null)
 		{
-			ret = new DetailView(800, 600, null);
+			ret = new DetailView(800, 600);
 
 			JsDocument doc = getDocument("(" + jsonTree + ") ");
 			JsLayoutCladogram layout = getLayout("(" + layoutTree + ")");
@@ -136,53 +127,8 @@ public abstract class TreeChannelPanel extends ContentPanel
 		return treeView;
 	}
 
-	private Button buildHomeButton()
+	protected void compose()
 	{
-		return PanelHelper.buildButton("idHomeBtn", "Home", new SelectionListener<ButtonEvent>()
-		{
-			@Override
-			public void componentSelected(ButtonEvent ce)
-			{
-				if(treeView != null)
-				{
-					treeView.zoomToFit();
-				}
-			}
-		});
-	}
-
-	private Button buildClearHighlightsButton()
-	{
-		return PanelHelper.buildButton("idClearHighlightsBtn", "Clear Highlights",
-				new SelectionListener<ButtonEvent>()
-				{
-					@Override
-					public void componentSelected(ButtonEvent ce)
-					{
-						if(treeView != null)
-						{
-							treeView.clearHighlights();
-							treeView.requestRender();
-						}
-					}
-				});
-	}
-
-	private ToolBar buildToolbar()
-	{
-		ToolBar ret = new ToolBar();
-
-		ret.add(new FillToolItem());
-
-		ret.add(buildClearHighlightsButton());
-		ret.add(buildHomeButton());
-
-		return ret;
-	}
-
-	private void compose()
-	{
-		setTopComponent(buildToolbar());
 		treeView = buildTreeView();
 
 		if(treeView != null)
@@ -220,7 +166,7 @@ public abstract class TreeChannelPanel extends ContentPanel
 	protected void initListeners()
 	{
 		if(eventbus != null)
-		{			
+		{
 			handlers.add(eventbus.addHandler(TreeNodeMouseOverEvent.TYPE,
 					new TreeNodeMouseOverEventHandler()
 					{
