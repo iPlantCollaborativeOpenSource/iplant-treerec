@@ -26,6 +26,14 @@ memoize( '_count_species' );
 Readonly my @GO_CATEGORIES =>
     ( 'biological_process', 'cellular_component', 'molecular_function' );
 
+# An empty gene family summary.
+Readonly my %EMPTY_SUMMARY => (
+    'gene_count'         => 0,
+    'duplication_events' => 0,
+    'speciation_events'  => 0,
+    'species_count'      => 0,
+    'go_term_count'      => 0,
+);
 
 {
     my %dbh_of;
@@ -97,7 +105,6 @@ Readonly my @GO_CATEGORIES =>
     #
     # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
     #              IPlant::TreeRec::TreeNotFoundException
-    #              IPlant::TreeRec::ReconciliationNotFoundException
     sub get_summary {
         my ( $self, $family_name, $species_tree_name ) = @_;
 
@@ -108,8 +115,8 @@ Readonly my @GO_CATEGORIES =>
         my $family = $dbh->resultset('Family')->for_name($family_name);
         my $species_tree
             = $dbh->resultset('SpeciesTree')->for_name($species_tree_name);
-        my $rec = $dbh->resultset('Reconciliation')
-            ->for_species_tree_and_family( $species_tree_name, $family_name );
+        my $rec_id = $self->_get_reconciliation_id( $species_tree_name,
+            $family_name );
 
         # Get the protein tree identifier.
         my $protein_tree_id = $self->_protein_tree_id_for_family($family);
@@ -117,7 +124,7 @@ Readonly my @GO_CATEGORIES =>
         # Obtain the tree counts.
         my $summary_ref = $self->_get_tree_counts(
             $family->id(), $species_tree->id(),
-            $rec->id(),    $protein_tree_id
+            $rec_id,       $protein_tree_id
         );
 
         # Obtain the first GO term.
@@ -143,7 +150,6 @@ Readonly my @GO_CATEGORIES =>
     #
     # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
     #              IPlant::TreeRec::TreeNotFoundException
-    #              IPlant::TreeRec::ReconciliationNotFoundException
     sub get_details {
         my ( $self, $family_name, $species_tree_name ) = @_;
 
@@ -154,8 +160,8 @@ Readonly my @GO_CATEGORIES =>
         my $family = $dbh->resultset('Family')->for_name($family_name);
         my $species_tree
             = $dbh->resultset('SpeciesTree')->for_name($species_tree_name);
-        my $rec = $dbh->resultset('Reconciliation')
-            ->for_species_tree_and_family( $species_tree_name, $family_name );
+        my $rec_id = $self->_get_reconciliation_id( $species_tree_name,
+            $family_name );
 
         # Get the protein tree identifier.
         my $protein_tree_id = $self->_protein_tree_id_for_family($family);
@@ -163,7 +169,7 @@ Readonly my @GO_CATEGORIES =>
         # Obtain the tree counts.
         my $details_ref = $self->_get_tree_counts(
             $family->id(), $species_tree->id(),
-            $rec->id(),    $protein_tree_id
+            $rec_id,       $protein_tree_id
         );
 
         # Obtain all of the GO terms.
@@ -171,6 +177,38 @@ Readonly my @GO_CATEGORIES =>
             = [ $self->_get_all_go_terms($protein_tree_id) ];
 
         return $details_ref;
+    }
+
+    ##########################################################################
+    # Usage      : $rec_id = $info->_get_reconciliation_id(
+    #                  $species_tree_name, $family_name );
+    #
+    # Purpose    : Obtains the reconciliation ID for the given species tree
+    #              name and family name.
+    #
+    # Returns    : The reconciliation ID or undef if the reconciliation
+    #              couldn't be found.
+    #
+    # Parameters : $species_tree_name - the name of the species tree.
+    #              $family_name       - the name of the gene family.
+    #
+    # Throws     : No exceptions.
+    sub _get_reconciliation_id {
+        my ( $self, $species_tree_name, $family_name ) = @_;
+
+        # Quit early if the required arguments weren't prvided.
+        return if !defined $species_tree_name || !defined $family_name;
+
+        # Get the reconciliation.
+        my $dbh = $dbh_of{ ident $self };
+        my $rec = eval {
+            $dbh->resultset('Reconciliation')
+                ->for_species_tree_and_family( $species_tree_name,
+                $family_name );
+        };
+        return if !defined $rec;
+
+        return $rec->id();
     }
 
     ##########################################################################
@@ -187,14 +225,9 @@ Readonly my @GO_CATEGORIES =>
     sub _protein_tree_id_for_family {
         my ( $self, $family ) = @_;
 
-        # Extract the family name.
-        my $family_name = $family->stable_id();
-
         # Get the protein tree.
         my $protein_tree = $family->protein_tree();
-        IPlant::TreeRec::TreeNotFoundException(
-            error => "no protein tree found for $family_name" )
-            if !defined $protein_tree;
+        return if !defined $protein_tree;
 
         return $protein_tree->id();
     }
@@ -348,6 +381,7 @@ Readonly my @GO_CATEGORIES =>
     # Throws     : No exceptions.
     sub _count_go_terms {
         my ( $self, $protein_tree_id ) = @_;
+        return 0 if !defined $protein_tree_id;
         return scalar $self->_get_all_go_terms($protein_tree_id);
     }
 
@@ -363,6 +397,9 @@ Readonly my @GO_CATEGORIES =>
     # Throws     : No exceptions.
     sub _count_genes {
         my ( $self, $family_id ) = @_;
+
+        # Don't count genes if no family ID was provided.
+        return 0 if !defined $family_id;
 
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
@@ -389,6 +426,9 @@ Readonly my @GO_CATEGORIES =>
     sub _count_duplications {
         my ( $self, $reconciliation_id ) = @_;
 
+        # Don't count duplications if no reconciliation ID was provided.
+        return 0 if !defined $reconciliation_id;
+
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
 
@@ -414,6 +454,9 @@ Readonly my @GO_CATEGORIES =>
     sub _count_speciations {
         my ( $self, $reconciliation_id ) = @_;
 
+        # Don't count speciations if no reconciliation ID was provided.
+        return 0 if !defined $reconciliation_id;
+
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
 
@@ -437,6 +480,9 @@ Readonly my @GO_CATEGORIES =>
     # Throws     : No exceptions.
     sub _count_species {
         my ( $self, $species_tree_id ) = @_;
+
+        # Don't count species if no species tree ID was provided.
+        return 0 if !defined $species_tree_id;
 
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
