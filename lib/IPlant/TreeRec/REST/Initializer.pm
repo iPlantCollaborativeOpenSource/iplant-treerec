@@ -19,9 +19,11 @@ use IPlant::TreeRec::DatabaseTreeLoader;
 use IPlant::TreeRec::FileRetriever;
 use IPlant::TreeRec::FileTreeLoader;
 use IPlant::TreeRec::GeneFamilyInfo;
+use IPlant::TreeRec::GeneTreeEvents;
 use IPlant::TreeRec::X;
 use IPlant::TreeRec;
 use Readonly;
+
 
 Readonly my $TREE_FILE_EXTENSION  => '_genetree.nhx';
 Readonly my $TREE_FILE_FORMAT     => 'nhx';
@@ -70,6 +72,13 @@ sub get_tree_rec {
             database_dir   => $blast_db_dir,
         }
     );
+    
+    # Create the gene tree event list.
+    my $gene_tree_events = IPlant::TreeRec::GeneTreeEvents->new(
+        {   dbh                  => $dbh,
+        }
+    );
+    
 
     # Create the tree reconciliation object.
     my $treerec = IPlant::TreeRec->new(
@@ -78,6 +87,7 @@ sub get_tree_rec {
             gene_family_info => $gene_family_info,
             file_retriever   => $file_retriever,
             blast_searcher   => $blast_searcher,
+            gene_tree_events => $gene_tree_events,
         }
     );
 

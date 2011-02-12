@@ -36,6 +36,9 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     my %file_retriever_of;
     my %blast_searcher_of;
     my %default_species_tree_of;
+    my %gene_tree_decorations_of;
+
+
 
     ##########################################################################
     # Usage      : $treerec = IPlant::TreeRec->new(
@@ -71,6 +74,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $file_retriever       = $args_ref->{file_retriever};
         my $blast_searcher       = $args_ref->{blast_searcher};
         my $default_species_tree = $args_ref->{default_species_tree};
+        my $gene_tree_decorations= $args_ref->{gene_tree_decorations};
+ 
 
         # Use the default default species tree if one wasn't provided.
         if ( !defined $default_species_tree ) {
@@ -87,9 +92,10 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         $file_retriever_of{ ident $self }       = $file_retriever;
         $blast_searcher_of{ ident $self }       = $blast_searcher;
         $default_species_tree_of{ ident $self } = $default_species_tree;
-
+		$gene_tree_decorations_of{ ident $self }   = $gene_tree_decorations;
         return $self;
     }
+
 
     ##########################################################################
     # Usage      : N/A
@@ -112,6 +118,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         delete $file_retriever_of{ ident $self };
         delete $blast_searcher_of{ ident $self };
         delete $default_species_tree_of{ ident $self };
+        delete $gene_tree_decorations_of { ident $self };
 
         return;
     }
@@ -285,6 +292,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         return \@families;
     }
 
+
     ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_family_details(
     #                  $family_name, $species_tree_name );
@@ -324,6 +332,38 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
             fileFormat  => 'TEXT',
         };
         $details_ref->{relative_urls} = $suffixes_ref;
+
+        return camel_case_keys($details_ref);
+    }
+       ##########################################################################
+    # Usage      : $results_ref = $treerec->get_gene_tree_events(
+    #                  $family_name, $species_tree_name );
+    #
+    # Purpose    : Retrieves the evolutionary events on the given gene family
+    #              name.
+    #
+    # Returns    : Events.
+    #
+    # Parameters : $family_name       - the gene family name.
+    #              $species_tree_name - the name of the species tree.
+    #
+    # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
+    #              IPlant::TreeRec::TreeNotFoundException
+    sub get_gene_tree_events {
+        my ( $self, $family_name, $species_tree_name ) = @_;
+
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
+
+        # Fetch the tree loader and family info retreiver.
+        my $info = $gene_tree_decorations_of{ ident $self };
+
+        # Load the events information for the gene family.
+        my $details_ref
+            = $info->get_events( $family_name, $species_tree_name );
+	
 
         return camel_case_keys($details_ref);
     }
@@ -923,7 +963,10 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         return $results_ref;
     }
+    
 }
+
+
 
 1;
 __END__
