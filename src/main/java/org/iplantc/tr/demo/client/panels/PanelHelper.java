@@ -4,6 +4,12 @@ import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.button.Button;
 
+/**
+ * Utility class for common panel operations.
+ * 
+ * @author amuir
+ * 
+ */
 public class PanelHelper
 {
 	/**

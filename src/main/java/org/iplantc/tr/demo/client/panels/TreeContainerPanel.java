@@ -35,6 +35,13 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+/**
+ * Outer tree container panel. This class contains the functionality for switching between
+ * navigate and investigation modes.
+ * 
+ * @author amuir
+ * 
+ */
 public class TreeContainerPanel extends EventBusContainer
 {
 	private ToggleButton btnNav;
@@ -58,6 +65,11 @@ public class TreeContainerPanel extends EventBusContainer
 		NAVIGATE, INVESTIGATION
 	}
 
+	/**
+	 * Instantiate from a gene family.
+	 * 
+	 * @param idGeneFamily gene family.
+	 */
 	public TreeContainerPanel(String idGeneFamily)
 	{
 		this.idGeneFamily = idGeneFamily;
@@ -257,6 +269,9 @@ public class TreeContainerPanel extends EventBusContainer
 		add(pnlOuter);
 	}
 
+	/**
+	 * Release unneeded resources.
+	 */
 	public void cleanup()
 	{
 		for(TreeChannelPanel pnl : treePanels)
@@ -274,7 +289,7 @@ public class TreeContainerPanel extends EventBusContainer
 		{
 			addSpeciesTreePanel(pnlOuter, new SpeciesTreeChannelPanel(eventbus, "Species Tree",
 					"idSpeciesTree", getTree(), getLayout(), idGeneFamily));
-			
+
 			treeRetriever.getGeneTree(idGeneFamily, new GeneTreeRetrieverCallBack());
 		}
 	}

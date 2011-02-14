@@ -9,12 +9,27 @@ import com.extjs.gxt.ui.client.widget.toolbar.FillToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.google.gwt.event.shared.EventBus;
 
+/**
+ * Navigation tree panel (contains 'Home' and 'Clear Highlights' buttons)
+ * 
+ * @author amuir
+ * 
+ */
 public class NavTreeChannelPanel extends TreeChannelPanel
 {
+	/**
+	 * Instantiate from an event bus, caption, id, tree and layout
+	 * 
+	 * @param eventbus event bus for firing/receiving events.
+	 * @param caption text to display in panel heading.
+	 * @param id unique id for this panel.
+	 * @param jsonTree tree data.
+	 * @param layoutTree layout data.
+	 */
 	public NavTreeChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
 			String layoutTree)
 	{
-		super(eventbus, caption, id, jsonTree, layoutTree);		
+		super(eventbus, caption, id, jsonTree, layoutTree);
 	}
 
 	private Button buildHomeButton()
@@ -60,11 +75,15 @@ public class NavTreeChannelPanel extends TreeChannelPanel
 
 		return ret;
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	protected void compose()
 	{
 		setTopComponent(buildToolbar());
-		
+
 		super.compose();
 	}
 }

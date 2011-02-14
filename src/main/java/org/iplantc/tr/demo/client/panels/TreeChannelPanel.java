@@ -20,7 +20,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
- * Abstract tree channel panel.
+ * Basic tree channel panel.
  * 
  * @author amuir
  * 
@@ -44,7 +44,6 @@ public abstract class TreeChannelPanel extends ContentPanel
 	 * @param id unique id for this panel.
 	 * @param jsonTree tree data.
 	 * @param layoutTree layout data.
-	 * @param geneFamName gene family id
 	 */
 	public TreeChannelPanel(final EventBus eventbus, final String caption, final String id,
 			final String jsonTree, final String layoutTree)
@@ -127,6 +126,9 @@ public abstract class TreeChannelPanel extends ContentPanel
 		return treeView;
 	}
 
+	/**
+	 * Display our tree view.
+	 */
 	protected void compose()
 	{
 		treeView = buildTreeView();
@@ -191,6 +193,9 @@ public abstract class TreeChannelPanel extends ContentPanel
 		}
 	}
 
+	/**
+	 * Release unneeded resources.
+	 */
 	public void cleanup()
 	{
 		// unregister
