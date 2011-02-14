@@ -6,7 +6,7 @@ package IPlant::DB::TreeRec::Result::Cvtermsynonym;
 use strict;
 use warnings;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 use base 'DBIx::Class::Core';
 

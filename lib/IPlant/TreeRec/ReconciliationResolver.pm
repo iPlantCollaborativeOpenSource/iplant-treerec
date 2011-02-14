@@ -5,7 +5,7 @@ use 5.008000;
 use warnings;
 use strict;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 use Carp;
 use Class::Std::Utils;

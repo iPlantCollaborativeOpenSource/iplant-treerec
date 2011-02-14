@@ -5,7 +5,7 @@ use 5.008000;
 use strict;
 use warnings;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 use base 'DBIx::Class::Core';
 

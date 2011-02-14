@@ -11,7 +11,7 @@ our @ISA = qw(Exporter);
 
 our @EXPORT_OK = qw( camel_case_keys camel_case_phrase );
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 ##########################################################################
 # Usage      : $new_hash_ref = camel_case_keys( $hash_ref );

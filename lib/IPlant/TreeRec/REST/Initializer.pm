@@ -11,7 +11,7 @@ our @ISA = qw(Exporter);
 
 our @EXPORT_OK = qw(get_tree_rec);
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastSearcher;
