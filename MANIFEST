@@ -11,6 +11,7 @@ lib/IPlant/DB/TreeRec/Result/Db.pm
 lib/IPlant/DB/TreeRec/Result/Dbxref.pm
 lib/IPlant/DB/TreeRec/Result/Dbxrefprop.pm
 lib/IPlant/DB/TreeRec/Result/DuplicationCount.pm
+lib/IPlant/DB/TreeRec/Result/Duplications.pm
 lib/IPlant/DB/TreeRec/Result/DuplicationSearch.pm
 lib/IPlant/DB/TreeRec/Result/Family.pm
 lib/IPlant/DB/TreeRec/Result/FamilyMember.pm
@@ -30,6 +31,7 @@ lib/IPlant/DB/TreeRec/Result/Reconciliation.pm
 lib/IPlant/DB/TreeRec/Result/ReconciliationNode.pm
 lib/IPlant/DB/TreeRec/Result/Sequence.pm
 lib/IPlant/DB/TreeRec/Result/SpeciationCount.pm
+lib/IPlant/DB/TreeRec/Result/Speciations.pm
 lib/IPlant/DB/TreeRec/Result/SpeciesCount.pm
 lib/IPlant/DB/TreeRec/Result/SpeciesTree.pm
 lib/IPlant/DB/TreeRec/Result/SpeciesTreeAttribute.pm
@@ -40,6 +42,7 @@ lib/IPlant/DB/TreeRec/ResultSet/Family.pm
 lib/IPlant/DB/TreeRec/ResultSet/ProteinTree.pm
 lib/IPlant/DB/TreeRec/ResultSet/Reconciliation.pm
 lib/IPlant/DB/TreeRec/ResultSet/SpeciesTree.pm
+lib/IPlant/DB/TreeRec/ResultSet/SpeciesTreeNode.pm
 lib/IPlant/TreeRec.pm
 lib/IPlant/TreeRec/BlastArgs.pm
 lib/IPlant/TreeRec/BlastSearcher.pm
@@ -48,6 +51,7 @@ lib/IPlant/TreeRec/DuplicationEventFinder.pm
 lib/IPlant/TreeRec/FileRetriever.pm
 lib/IPlant/TreeRec/FileTreeLoader.pm
 lib/IPlant/TreeRec/GeneFamilyInfo.pm
+lib/IPlant/TreeRec/GeneTreeEvents.pm
 lib/IPlant/TreeRec/ReconciliationLoader.pm
 lib/IPlant/TreeRec/ReconciliationResolver.pm
 lib/IPlant/TreeRec/REST.pm
