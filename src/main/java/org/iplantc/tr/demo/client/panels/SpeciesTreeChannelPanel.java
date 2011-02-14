@@ -2,7 +2,7 @@ package org.iplantc.tr.demo.client.panels;
 
 import java.util.ArrayList;
 
-import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEvent;
+import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightSpeciesSubTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightSpeciesSubTreeEventHandler;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEvent;
@@ -109,7 +109,10 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 			@Override
 			public void componentSelected(MenuEvent ce)
 			{
-				// TODO implement me!!!
+				Menu m = (Menu)ce.getSource();
+				fireHighlightSubTreeEvent(m);
+				int idNode = Integer.parseInt(m.getData("idNode").toString());
+				getGeneDescendants(idNode,true);
 			}
 		});
 
@@ -124,14 +127,18 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 			@Override
 			public void componentSelected(MenuEvent ce)
 			{
-				Menu m = (Menu)ce.getSource();
-				int idNode = Integer.parseInt(m.getData("idNode").toString());
-				HighlightSpeciesSubTreeEvent event = new HighlightSpeciesSubTreeEvent(idNode);
-				eventbus.fireEvent(event);
+				fireHighlightSubTreeEvent((Menu)ce.getSource());
 			}
 		});
 
 		return item;
+	}
+	
+	private void fireHighlightSubTreeEvent(Menu m)
+	{
+		int idNode = Integer.parseInt(m.getData("idNode").toString());
+		HighlightSpeciesSubTreeEvent event = new HighlightSpeciesSubTreeEvent(idNode);
+		eventbus.fireEvent(event);
 	}
 
 	private class HighlightSpeciesSubTreeEventHandlerImpl implements HighlightSpeciesSubTreeEventHandler
@@ -151,37 +158,41 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 		{
 			Menu m = (Menu)ce.getSource();
 			int idNode = Integer.parseInt(m.getData("idNode").toString());
-			TreeServices.getRelatedGeneEdgeNode("{\"familyName\":\"" + geneFamName
-					+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + false + "}",
-					new AsyncCallback<String>()
-					{
-						@Override
-						public void onSuccess(String result)
-						{
-							ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
-							JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
-							if(o1 != null)
-							{
-								JSONArray gene_nodes = JsonUtil.getArray(o1, "item");
-								for(int i = 0;i < gene_nodes.size();i++)
-								{
-									nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes
-											.get(i).isObject().get("geneTreeNode").toString())));
-								}
-							}
-
-							HighlightSpeciationInGeneTreeEvent event =
-									new HighlightSpeciationInGeneTreeEvent(nodesToHighlight);
-							eventbus.fireEvent(event);
-						}
-
-						@Override
-						public void onFailure(Throwable arg0)
-						{
-							System.out.println(arg0.toString());
-						}
-					});
+			getGeneDescendants(idNode,false);
 		}
+	}
+	
+	private void getGeneDescendants(final int idNode, boolean includeSubtree)
+	{
+		TreeServices.getRelatedGeneEdgeNode("{\"familyName\":\"" + geneFamName
+				+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + false + ",\"includeSubtree\":"+ includeSubtree  + "}",
+				new AsyncCallback<String>()
+				{
+					@Override
+					public void onSuccess(String result)
+					{
+						ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
+						JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+						if(o1 != null)
+						{
+							JSONArray gene_nodes = JsonUtil.getArray(o1, "item");
+							for(int i = 0;i < gene_nodes.size();i++)
+							{
+								nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes
+										.get(i).isObject().get("geneTreeNode").toString())));
+							}
+						}
+
+						HighlightNodesInGeneTreeEvent event = new HighlightNodesInGeneTreeEvent(nodesToHighlight);
+						eventbus.fireEvent(event);
+					}
+
+					@Override
+					public void onFailure(Throwable arg0)
+					{
+						System.out.println(arg0.toString());
+					}
+				});
 	}
 	
 	private class SpeciesTreeInvestigationNodeSelectEventHandlerImpl implements SpeciesTreeInvestigationNodeSelectEventHandler

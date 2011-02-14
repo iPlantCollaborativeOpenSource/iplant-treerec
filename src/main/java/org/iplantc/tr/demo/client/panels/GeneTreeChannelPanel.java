@@ -6,8 +6,8 @@ import org.iplantc.tr.demo.client.events.GeneTreeInvestigationNodeSelectEvent;
 import org.iplantc.tr.demo.client.events.GeneTreeInvestigationNodeSelectEventHandler;
 import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEvent;
 import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEventHandler;
-import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEvent;
-import org.iplantc.tr.demo.client.events.HighlightSpeciationInGeneTreeEventHandler;
+import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEvent;
+import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEventHandler;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEventHandler;
 
@@ -45,8 +45,8 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 	{
 		super.initListeners();
 
-		handlers.add(eventbus.addHandler(HighlightSpeciationInGeneTreeEvent.TYPE,
-				new HighlightSpeciationInGeneTreeEventHandlerImpl()));
+		handlers.add(eventbus.addHandler(HighlightNodesInGeneTreeEvent.TYPE,
+				new HighlightNodesInGeneTreeEventHandlerImpl()));
 		
 		handlers.add(eventbus.addHandler(SpeciesTreeInvestigationLeafSelectEvent.TYPE,
 				new SpeciesTreeInvestigationLeafSelectEventHandlerImpl()));
@@ -58,11 +58,11 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 				new GeneTreeNavNodeSelectEventHandlerImpl()));
 	}
 
-	private class HighlightSpeciationInGeneTreeEventHandlerImpl implements
-			HighlightSpeciationInGeneTreeEventHandler
+	private class HighlightNodesInGeneTreeEventHandlerImpl implements
+			HighlightNodesInGeneTreeEventHandler
 	{
 		@Override
-		public void onFire(HighlightSpeciationInGeneTreeEvent event)
+		public void onFire(HighlightNodesInGeneTreeEvent event)
 		{
 			ArrayList<Integer> idNodes = event.getNodesToHighlight();
 			highlightNodes(idNodes);

@@ -9,7 +9,7 @@ import com.google.gwt.event.shared.EventHandler;
  * @author sriram
  * 
  */
-public interface HighlightSpeciationInGeneTreeEventHandler extends EventHandler
+public interface HighlightNodesInGeneTreeEventHandler extends EventHandler
 {
-	void onFire(HighlightSpeciationInGeneTreeEvent event);
+	void onFire(HighlightNodesInGeneTreeEvent event);
 }
