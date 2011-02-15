@@ -37,17 +37,18 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     my %blast_searcher_of;
     my %default_species_tree_of;
     my %gene_tree_decorations_of;
-
-
+    my %go_cloud_generator_of;
 
     ##########################################################################
     # Usage      : $treerec = IPlant::TreeRec->new(
-    #                  {   dbh                  => $dbh,
-    #                      gene_tree_loader     => $tree_loader,
-    #                      gene_family_info     => $info,
-    #                      file_retreiver       => $file_retriever,
-    #                      blast_searcher       => $blast_searcher,
-    #                      default_species_tree => $species_tree_name,
+    #                  {   dbh                   => $dbh,
+    #                      gene_tree_loader      => $tree_loader,
+    #                      gene_family_info      => $info,
+    #                      file_retreiver        => $file_retriever,
+    #                      blast_searcher        => $blast_searcher,
+    #                      default_species_tree  => $species_tree_name,
+    #                      gene_tree_decorations => $tree_decorations,
+    #                      go_cloud_generator_of => $go_cloud_generator,
     #                  }
     #              );
     #
@@ -56,26 +57,28 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #
     # Returns    : The new object.
     #
-    # Parameters : dbh                  - the database handle.
-    #              gene_tree_loader     - used to load gene trees.
-    #              gene_family_info     - used to get gene family summaries.
-    #              file_retriever       - used to retrieve data files.
-    #              blast_searcher       - used to perform BLAST searches.
-    #              default_species_tree - the default species tree.
+    # Parameters : dbh                   - the database handle.
+    #              gene_tree_loader      - used to load gene trees.
+    #              gene_family_info      - used to get gene family summaries.
+    #              file_retriever        - used to retrieve data files.
+    #              blast_searcher        - used to perform BLAST searches.
+    #              default_species_tree  - the default species tree.
+    #              gene_tree_decorations - used to add gene tree decorations.
+    #              go_cloud_generator    - used to generate GO clouds.
     #
     # Throws     : IPlant::TreeRec::DatabaseException
     sub new {
         my ( $class, $args_ref ) = @_;
 
         # Extract the arguments.
-        my $dbh                  = $args_ref->{dbh};
-        my $gene_tree_loader     = $args_ref->{gene_tree_loader};
-        my $gene_family_info     = $args_ref->{gene_family_info};
-        my $file_retriever       = $args_ref->{file_retriever};
-        my $blast_searcher       = $args_ref->{blast_searcher};
-        my $default_species_tree = $args_ref->{default_species_tree};
-        my $gene_tree_decorations= $args_ref->{gene_tree_decorations};
- 
+        my $dbh                   = $args_ref->{dbh};
+        my $gene_tree_loader      = $args_ref->{gene_tree_loader};
+        my $gene_family_info      = $args_ref->{gene_family_info};
+        my $file_retriever        = $args_ref->{file_retriever};
+        my $blast_searcher        = $args_ref->{blast_searcher};
+        my $default_species_tree  = $args_ref->{default_species_tree};
+        my $gene_tree_decorations = $args_ref->{gene_tree_decorations};
+        my $go_cloud_generator    = $args_ref->{go_cloud_generator};
 
         # Use the default default species tree if one wasn't provided.
         if ( !defined $default_species_tree ) {
@@ -86,16 +89,17 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $self = bless anon_scalar, $class;
 
         # Initialize the properties.
-        $dbh_of{ ident $self }                  = $dbh;
-        $gene_tree_loader_of{ ident $self }     = $gene_tree_loader;
-        $gene_family_info_of{ ident $self }     = $gene_family_info;
-        $file_retriever_of{ ident $self }       = $file_retriever;
-        $blast_searcher_of{ ident $self }       = $blast_searcher;
-        $default_species_tree_of{ ident $self } = $default_species_tree;
-		$gene_tree_decorations_of{ ident $self }   = $gene_tree_decorations;
+        $dbh_of{ ident $self }                   = $dbh;
+        $gene_tree_loader_of{ ident $self }      = $gene_tree_loader;
+        $gene_family_info_of{ ident $self }      = $gene_family_info;
+        $file_retriever_of{ ident $self }        = $file_retriever;
+        $blast_searcher_of{ ident $self }        = $blast_searcher;
+        $default_species_tree_of{ ident $self }  = $default_species_tree;
+        $gene_tree_decorations_of{ ident $self } = $gene_tree_decorations;
+        $go_cloud_generator_of{ ident $self }    = $go_cloud_generator;
+
         return $self;
     }
-
 
     ##########################################################################
     # Usage      : N/A
@@ -118,11 +122,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         delete $file_retriever_of{ ident $self };
         delete $blast_searcher_of{ ident $self };
         delete $default_species_tree_of{ ident $self };
-        delete $gene_tree_decorations_of { ident $self };
+        delete $gene_tree_decorations_of{ ident $self };
+        delete $go_cloud_generator_of{ ident $self };
 
         return;
     }
-
 
     ##########################################################################
     # Usage      : $results_ref = $treerec->go_search( $search_string,
@@ -139,54 +143,48 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     # Throws     : No exceptions.
     sub general_go_search {
         my ( $self, $search_string, $species_tree_name ) = @_;
-	my $results_ref;
+        my $results_ref;
 
-	# Remove whitespaces from the beginning and end of search string
-	# This will take care of minor copy and paste errors.
-	$search_string =~ s/^\s+//;
-	$search_string =~ s/\s+$//;
+        # Remove whitespaces from the beginning and end of search string
+        # This will take care of minor copy and paste errors.
+        $search_string =~ s/^\s+//;
+        $search_string =~ s/\s+$//;
 
-	# This is the case where users uses GO:#######	
-	if ($search_string =~ m/GO\:(\d*)/xms) {
+        # This is the case where users uses GO:#######
+        if ( $search_string =~ m/GO\:(\d*)/xms ) {
 
-	    $search_string = $1;
+            $search_string = $1;
 
-	    # Pad with zeros to catch cases where the user did not
-	    # enter the full GO value with leading zeros.
-	    $search_string = sprintf("%07d", $search_string);
-	    
-	    $results_ref 
-		= $self->_do_gene_family_search('GoAccessionSearch',
-						$search_string, 
-						$species_tree_name );
-	    return $results_ref;
-	}
+            # Pad with zeros to catch cases where the user did not
+            # enter the full GO value with leading zeros.
+            $search_string = sprintf( "%07d", $search_string );
 
-	# This is the case where users enter #####
-	elsif ($search_string =~ m/(^\d+)/xms ) {
-	    # This will only return the first complete digit if there is 
-	    # a longer list of digits
+            $results_ref = $self->_do_gene_family_search( 'GoAccessionSearch',
+                $search_string, $species_tree_name );
+            return $results_ref;
+        }
 
-	    # Pad with zeros to catch cases where the user did not
-	    # enter the full GO value with leading zeros.
-	    $search_string = sprintf("%07d", $search_string);
-	    $results_ref 
-		= $self->_do_gene_family_search('GoAccessionSearch',
-						$search_string, 
-						$species_tree_name );
-	    return $results_ref;
-	}
+        # This is the case where users enter #####
+        elsif ( $search_string =~ m/(^\d+)/xms ) {
 
-	# The default is to assume the string is a text search
-	else {
-	    $results_ref
-		= $self->_do_gene_family_search( 'GoSearch', 
-						 "\%$search_string\%",
-						 $species_tree_name );
-	    return $results_ref;
+            # This will only return the first complete digit if there is
+            # a longer list of digits
 
-	}
-	
+            # Pad with zeros to catch cases where the user did not
+            # enter the full GO value with leading zeros.
+            $search_string = sprintf( "%07d", $search_string );
+            $results_ref = $self->_do_gene_family_search( 'GoAccessionSearch',
+                $search_string, $species_tree_name );
+            return $results_ref;
+        }
+
+        # The default is to assume the string is a text search
+        else {
+            $results_ref = $self->_do_gene_family_search( 'GoSearch',
+                "\%$search_string\%", $species_tree_name );
+            return $results_ref;
+
+        }
 
     }
 
@@ -209,9 +207,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
             $species_tree_name );
         return $results_ref;
     }
-
-
-
 
     ##########################################################################
     # Usage      : $results_ref = $treerec->go_accession_search(
@@ -292,7 +287,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         return \@families;
     }
 
-
     ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_family_details(
     #                  $family_name, $species_tree_name );
@@ -335,7 +329,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         return camel_case_keys($details_ref);
     }
-       ##########################################################################
+    ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_tree_events(
     #                  $family_name, $species_tree_name );
     #
@@ -363,7 +357,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Load the events information for the gene family.
         my $details_ref
             = $info->get_events( $family_name, $species_tree_name );
-	
 
         return camel_case_keys($details_ref);
     }
@@ -956,10 +949,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         return $results_ref;
     }
-    
+
 }
-
-
 
 1;
 __END__

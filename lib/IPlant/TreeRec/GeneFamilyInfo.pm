@@ -38,11 +38,13 @@ Readonly my %EMPTY_SUMMARY => (
 {
     my %dbh_of;
     my %go_term_length_limit_of;
+    my %go_categories_of;
 
     ##########################################################################
     # Usage      : $info = IPlant::TreeRec::GeneFamilyInfo->new(
     #                  {   dbh                  => $dbh,
     #                      go_term_length_limit => $limit,
+    #                      go_categories        => \@categories,
     #                  }
     #              );
     #
@@ -52,6 +54,7 @@ Readonly my %EMPTY_SUMMARY => (
     #
     # Parameters : dbh                  - the database handle.
     #              go_term_length_limit - the length limit for the GO term.
+    #              go_categories        - the list of GO term categories.
     #
     # Throws     : No exceptions.
     sub new {
@@ -60,6 +63,7 @@ Readonly my %EMPTY_SUMMARY => (
         # Extract the arguments.
         my $dbh                  = $args_ref->{dbh};
         my $go_term_length_limit = $args_ref->{go_term_length_limit};
+        my $go_categories        = $args_ref->{go_categories};
 
         # Create the new object.
         my $self = bless anon_scalar(), $class;
@@ -67,6 +71,7 @@ Readonly my %EMPTY_SUMMARY => (
         # Initialize the object properties.
         $dbh_of{ ident $self }                  = $dbh;
         $go_term_length_limit_of{ ident $self } = $go_term_length_limit;
+        $go_categories_of{ ident $self }        = $go_categories;
 
         return $self;
     }
@@ -88,6 +93,7 @@ Readonly my %EMPTY_SUMMARY => (
         # Clean up.
         delete $dbh_of{ ident $self };
         delete $go_term_length_limit_of{ ident $self };
+        delete $go_categories_of{ ident $self };
 
         return;
     }
@@ -248,10 +254,13 @@ Readonly my %EMPTY_SUMMARY => (
     sub _get_representative_go_term {
         my ( $self, $protein_tree_id ) = @_;
 
+        # Extract the GO term categories.
+        my $go_categories_ref = $go_categories_of{ ident $self };
+
         # Fetch the most common GO term in the first category that has terms.
         my $go_term;
         CATEGORY:
-        for my $category (@GO_CATEGORIES) {
+        for my $category ( @{$go_categories_ref} ) {
             my $category_id = $self->_get_go_category_id($category);
             next CATEGORY if !defined $category_id;
             $go_term = $self->_get_go_term( $protein_tree_id, $category_id );
