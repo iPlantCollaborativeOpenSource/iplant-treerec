@@ -3,7 +3,7 @@ package IPlant::TreeRec::DuplicationEventFinder;
 use warnings;
 use strict;
 
-our $version = '0.0.1';
+our $version = '0.0.2';
 
 use Carp;
 use Class::Std::Utils;

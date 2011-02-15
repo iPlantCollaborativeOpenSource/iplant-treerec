@@ -5,7 +5,7 @@ use 5.008000;
 use strict;
 use warnings;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 use Exception::Class (
 
@@ -39,6 +39,11 @@ use Exception::Class (
 
     # Thrown when a gene family can't be located.
     'IPlant::TreeRec::GeneFamilyNotFoundException' => {
+        'isa' => 'IPlant::TreeRec::Exception',
+    },
+
+    # Thrown when a tree node can't be located.
+    'IPlant::TreeRec::NodeNotFoundException' => {
         'isa' => 'IPlant::TreeRec::Exception',
     },
 
@@ -84,6 +89,9 @@ This documentation refers to IPlant::TreeRec::X version 0.0.1.
     # An exception that is thrown when a gene family can't be located.
     IPlant::TreeRec::GeneFamilyNotFoundException->throw( error => $message );
 
+    # An exception that is thrown when a node can't be located.
+    IPlant::TreeRec::NodeNotFoundException->throw( error => $message );
+
     # An exception that is thrown when a reconciliation can't be located.
     IPlant::TreeRec::ReconciliationNotFoundException->throw(
         error => $message );
@@ -120,6 +128,10 @@ Thrown when either a gene tree or a species tree can't be found.
 =head2 IPlant::TreeRec::GeneFamilyNotFoundException
 
 Thrown when a gene family can't be found.
+
+=head2 IPlant::TreeRec::NodeNotFoundException
+
+Thrown when a node in either a species tree or a gene tree can't be found.
 
 =head2 IPlant::TreeRec::ReconciliationNotFoundException
 
