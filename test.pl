@@ -60,7 +60,7 @@ my $blast_searcher = IPlant::TreeRec::BlastSearcher->new(
 );
 
 # Create the gene tree decorations
-my $gene_tree_decorations = IPlant::TreeRec::GeneTreeEvents->new(
+my $gene_tree_events = IPlant::TreeRec::GeneTreeEvents->new(
 	{	  dbh                  => $dbh,		
 	}
 );
@@ -73,7 +73,7 @@ my $treerec = IPlant::TreeRec->new(
         gene_family_info => $gene_family_info,
         file_retriever   => $file_retriever,
         blast_searcher   => $blast_searcher,
-        gene_tree_decorations =>$gene_tree_decorations,
+        gene_tree_events =>$gene_tree_events,
     }
 );
 
