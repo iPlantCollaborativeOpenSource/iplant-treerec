@@ -122,7 +122,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         delete $file_retriever_of{ ident $self };
         delete $blast_searcher_of{ ident $self };
         delete $default_species_tree_of{ ident $self };
-        delete $gene_tree_events_of { ident $self };
+        delete $gene_tree_events_of{ ident $self };
         delete $go_cloud_generator_of{ ident $self };
 
         return;
@@ -329,6 +329,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         return camel_case_keys($details_ref);
     }
+
     ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_tree_events(
     #                  $family_name, $species_tree_name );
@@ -952,7 +953,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         return $results_ref;
     }
-    
+
     ##########################################################################
     # Usage      : $data = $treerec->_format_tree_events( $events, $style );
     #
