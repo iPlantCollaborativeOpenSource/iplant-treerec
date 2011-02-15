@@ -36,19 +36,19 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     my %file_retriever_of;
     my %blast_searcher_of;
     my %default_species_tree_of;
-    my %gene_tree_decorations_of;
+    my %gene_tree_events_of;
     my %go_cloud_generator_of;
 
     ##########################################################################
     # Usage      : $treerec = IPlant::TreeRec->new(
-    #                  {   dbh                   => $dbh,
-    #                      gene_tree_loader      => $tree_loader,
-    #                      gene_family_info      => $info,
-    #                      file_retreiver        => $file_retriever,
-    #                      blast_searcher        => $blast_searcher,
-    #                      default_species_tree  => $species_tree_name,
-    #                      gene_tree_decorations => $tree_decorations,
-    #                      go_cloud_generator_of => $go_cloud_generator,
+    #                  {   dbh                  => $dbh,
+    #                      gene_tree_loader     => $tree_loader,
+    #                      gene_family_info     => $info,
+    #                      file_retreiver       => $file_retriever,
+    #                      blast_searcher       => $blast_searcher,
+    #                      default_species_tree => $species_tree_name,
+    #                      gene_tree_events     => $tree_decorations,
+    #                      go_cloud_generator   => $go_cloud_generator,
     #                  }
     #              );
     #
@@ -63,7 +63,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #              file_retriever        - used to retrieve data files.
     #              blast_searcher        - used to perform BLAST searches.
     #              default_species_tree  - the default species tree.
-    #              gene_tree_decorations - used to add gene tree decorations.
+    #              gene_tree_events      - used to note events in gene trees.
     #              go_cloud_generator    - used to generate GO clouds.
     #
     # Throws     : IPlant::TreeRec::DatabaseException
@@ -71,14 +71,14 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my ( $class, $args_ref ) = @_;
 
         # Extract the arguments.
-        my $dbh                   = $args_ref->{dbh};
-        my $gene_tree_loader      = $args_ref->{gene_tree_loader};
-        my $gene_family_info      = $args_ref->{gene_family_info};
-        my $file_retriever        = $args_ref->{file_retriever};
-        my $blast_searcher        = $args_ref->{blast_searcher};
-        my $default_species_tree  = $args_ref->{default_species_tree};
-        my $gene_tree_decorations = $args_ref->{gene_tree_decorations};
-        my $go_cloud_generator    = $args_ref->{go_cloud_generator};
+        my $dbh                  = $args_ref->{dbh};
+        my $gene_tree_loader     = $args_ref->{gene_tree_loader};
+        my $gene_family_info     = $args_ref->{gene_family_info};
+        my $file_retriever       = $args_ref->{file_retriever};
+        my $blast_searcher       = $args_ref->{blast_searcher};
+        my $default_species_tree = $args_ref->{default_species_tree};
+        my $gene_tree_events     = $args_ref->{gene_tree_events};
+        my $go_cloud_generator   = $args_ref->{go_cloud_generator};
 
         # Use the default default species tree if one wasn't provided.
         if ( !defined $default_species_tree ) {
@@ -89,14 +89,14 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $self = bless anon_scalar, $class;
 
         # Initialize the properties.
-        $dbh_of{ ident $self }                   = $dbh;
-        $gene_tree_loader_of{ ident $self }      = $gene_tree_loader;
-        $gene_family_info_of{ ident $self }      = $gene_family_info;
-        $file_retriever_of{ ident $self }        = $file_retriever;
-        $blast_searcher_of{ ident $self }        = $blast_searcher;
-        $default_species_tree_of{ ident $self }  = $default_species_tree;
-        $gene_tree_decorations_of{ ident $self } = $gene_tree_decorations;
-        $go_cloud_generator_of{ ident $self }    = $go_cloud_generator;
+        $dbh_of{ ident $self }                  = $dbh;
+        $gene_tree_loader_of{ ident $self }     = $gene_tree_loader;
+        $gene_family_info_of{ ident $self }     = $gene_family_info;
+        $file_retriever_of{ ident $self }       = $file_retriever;
+        $blast_searcher_of{ ident $self }       = $blast_searcher;
+        $default_species_tree_of{ ident $self } = $default_species_tree;
+        $gene_tree_events_of{ ident $self }     = $gene_tree_events;
+        $go_cloud_generator_of{ ident $self }   = $go_cloud_generator;
 
         return $self;
     }
@@ -122,7 +122,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         delete $file_retriever_of{ ident $self };
         delete $blast_searcher_of{ ident $self };
         delete $default_species_tree_of{ ident $self };
-        delete $gene_tree_decorations_of{ ident $self };
+        delete $gene_tree_events_of { ident $self };
         delete $go_cloud_generator_of{ ident $self };
 
         return;
@@ -352,11 +352,14 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         }
 
         # Fetch the tree loader and family info retreiver.
-        my $info = $gene_tree_decorations_of{ ident $self };
+        my $info = $gene_tree_events_of{ ident $self };
 
         # Load the events information for the gene family.
         my $details_ref
             = $info->get_events( $family_name, $species_tree_name );
+
+        # Formats for outputs
+        $details_ref = $self->_format_tree_events( $details_ref, 'd_and_s' );
 
         return camel_case_keys($details_ref);
     }
@@ -948,6 +951,91 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         }
 
         return $results_ref;
+    }
+    
+    ##########################################################################
+    # Usage      : $data = $treerec->_format_tree_events( $events, $style );
+    #
+    # Purpose    : Formats the visual object to be displayed
+    #
+    # Returns    : The formatted representation of the visual object.
+    #
+    # Parameters : $style - name of the style for the metadata that needs to
+    #                       be represented.
+    #
+    # Events	 : $events  - the list of speciation and duplication events.
+    #
+    # Throws     : No exceptions.
+    sub _format_tree_events {
+        my ( $self, $events, $style ) = @_;
+        my $results = {
+            styles            => $self->_retrieve_decorations($style),
+            nodeStyleMappings => $events
+        };
+        return $results;
+
+    }
+
+    ##########################################################################
+    # Usage      : $data = $treerec->_retrieve_decorations( $style );
+    #
+    # Purpose    : Produces a representation of the visual style
+    #
+    # Returns    : The visual styles of the tree.
+    #
+    # Parameters : $style - name of the style for the metadata that needs to
+    #                       be represented.
+    #
+    #
+    # Throws     : No exceptions.
+    sub _retrieve_decorations {
+        my ( $self, $style ) = @_;
+
+        #This part will be replaced by database calls
+        #
+        #
+        my $deco = {
+            d_and_s => {
+                duplication => {
+                    nodeStyle => {
+                        color     => '#ff0000',
+                        pointSize => 3,
+                        nodeShape => 'circle'
+                    },
+                    labelStyle  => { color => '#000000' },
+                    branchStyle => {
+                        strokeColor => '#000000',
+                        lineWidth   => 1
+                    },
+                    glyphStyle => {
+                        fillColor   => '#000000',
+                        strokeColor => '#000000',
+                        lineWidth   => 1
+                    }
+                },
+                speciation => {
+                    nodeStyle => {
+                        color     => '#0000ff',
+                        pointSize => 3,
+                        nodeShape => 'square'
+                    },
+                    labelStyle  => { color => '#000000' },
+                    branchStyle => {
+                        strokeColor => '#000000',
+                        lineWidth   => 1
+                    },
+                    glyphStyle => {
+                        fillColor   => '#000000',
+                        strokeColor => '#000000',
+                        lineWidth   => 1
+                    }
+                }
+                }
+
+        };
+
+        return $deco->{$style};
+
     }
 
 }

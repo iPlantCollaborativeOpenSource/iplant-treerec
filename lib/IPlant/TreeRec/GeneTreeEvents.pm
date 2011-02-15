@@ -118,12 +118,12 @@ memoize( '_get_speciations' );
         my $dbh = $dbh_of{ ident $self };
 
         # Get all the events.
-        my %events = (
-            'duplication_events' => $self->_get_duplications($rec_id),
-            'speciation_events'  => $self->_get_speciations($rec_id),
-        );
+        my $events = { 
+        	%{$self->_get_duplications($rec_id)}, 
+        	%{$self->_get_speciations($rec_id)} 
+        };
 
-        return \%events;
+        return $events;
     }
 
     ##########################################################################
