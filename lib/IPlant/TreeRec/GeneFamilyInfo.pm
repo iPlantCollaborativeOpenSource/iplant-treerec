@@ -22,10 +22,6 @@ memoize( '_count_duplications' );
 memoize( '_count_speciations' );
 memoize( '_count_species' );
 
-# The list of GO term categories we're interested in, in order.
-Readonly my @GO_CATEGORIES =>
-    ( 'biological_process', 'cellular_component', 'molecular_function' );
-
 # An empty gene family summary.
 Readonly my %EMPTY_SUMMARY => (
     'gene_count'         => 0,
