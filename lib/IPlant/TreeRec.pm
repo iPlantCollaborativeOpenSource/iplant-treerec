@@ -246,6 +246,26 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     }
 
     ##########################################################################
+    # Usage      : $go_cloud = $treerec->generate_go_cloud($family_name);
+    #
+    # Purpose    : Generates the GO term cloud for the given gene family name.
+    #
+    # Returns    : The GO term cloud as an HTML fragment.
+    #
+    # Parameters : $family_name - the name of the gene family.
+    #
+    # Throws     : No exceptions.
+    sub get_go_cloud {
+        my ( $self, $family_name ) = @_;
+
+        # Generate and return the GO cloud.
+        my $go_cloud_generator = $go_cloud_generator_of{ ident $self };
+        my $cloud = $go_cloud_generator->generate_go_cloud($family_name);
+
+        return { cloud => $cloud };
+    }
+
+    ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_family_summary(
     #                  $family_name, $species_tree_name );
     #

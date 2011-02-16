@@ -55,6 +55,9 @@ sub get_tree_rec {
     my @go_categories    = $request->dir_config('TreeRecGoCategories');
     my $go_cloud_levels  = $request->dir_config('TreeRecGoCloudLevels');
 
+    use Data::Dumper;
+    $request->log( Dumper \@go_categories );
+
     # Establish the database connection.
     my $dbh = IPlant::DB::TreeRec->connect( $dsn, $user, $password );
     IPlant::TreeRec::DatabaseException->throw() if !defined $dbh;
@@ -71,11 +74,11 @@ sub get_tree_rec {
     );
 
     # Create the GO cloud generator.
-    my $go_cloud_generator = IPlant::TreeRec::GoCloud(
+    my $go_cloud_generator = IPlant::TreeRec::GoCloud->new(
         {   dbh           => $dbh,
             go_categories => \@go_categories,
             cloud_levels  => $go_cloud_levels,
-            location      => $request->location();
+            location      => $request->location(),
         }
     );
 
