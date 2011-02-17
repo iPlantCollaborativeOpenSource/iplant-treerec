@@ -7,8 +7,9 @@ import java.util.ArrayList;
 
 import org.iplantc.tr.demo.client.EventBusContainer;
 import org.iplantc.tr.demo.client.Hyperlink;
+import org.iplantc.tr.demo.client.receivers.EventBusReceiver;
 import org.iplantc.tr.demo.client.receivers.Receiver;
-import org.iplantc.tr.demo.client.receivers.SpeciesTreeInvestigationModeReceiver;
+import org.iplantc.tr.demo.client.receivers.SpeciesTreeSearchModeReceiver;
 import org.iplantc.tr.demo.client.utils.TreeRetriever;
 import org.iplantc.tr.demo.client.utils.TreeRetrieverCallBack;
 import org.iplantc.tr.demo.client.windows.TRSearchWindow;
@@ -77,7 +78,7 @@ public class TRSearchPanel extends EventBusContainer
 
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
-		SpeciesTreeInvestigationModeReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
+		EventBusReceiver receiverSelect = new SpeciesTreeSearchModeReceiver(
 				eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));

@@ -80,4 +80,9 @@ public abstract class EventBusReceiver extends Receiver
 	 * @param jsonMsg event message in JSON.
 	 */
 	protected abstract void processChannelMessage(final String idBroadcaster, final String jsonMsg);
+
+	protected boolean isOurEvent(final String idBroadcaster)
+	{
+		return id.equals(idBroadcaster);
+	}
 }

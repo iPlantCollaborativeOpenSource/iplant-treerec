@@ -98,6 +98,7 @@ public abstract class TreeChannelPanel extends ContentPanel
 
 			// set the document - if you don't do this TREES WONT APPEAR!
 			ret.setDocument(document);
+			ret.addEventFilter(DetailView.DrawableType.Line);
 		}
 
 		return ret;

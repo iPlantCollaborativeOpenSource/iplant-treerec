@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.iplantc.tr.demo.client.EventBusContainer;
 import org.iplantc.tr.demo.client.Hyperlink;
+import org.iplantc.tr.demo.client.receivers.EventBusReceiver;
 import org.iplantc.tr.demo.client.receivers.GeneTreeInvestigationModeReceiver;
 import org.iplantc.tr.demo.client.receivers.GeneTreeNavModeReceiver;
 import org.iplantc.tr.demo.client.receivers.Receiver;
@@ -88,7 +89,7 @@ public class TreeContainerPanel extends EventBusContainer
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		SpeciesTreeNavModeReceiver receiverNav = new SpeciesTreeNavModeReceiver(eventbus, pnl.getId());
-		SpeciesTreeInvestigationModeReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
+		EventBusReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
 				eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverNav, buildBroadcastCommand(pnl.getId()));
@@ -300,7 +301,7 @@ public class TreeContainerPanel extends EventBusContainer
 		public void execute()
 		{
 			addGeneTreePanel(pnlOuter, new GeneTreeChannelPanel(eventbus, "Gene Tree", "idGeneTree",
-					getTree(), getLayout()));
+					getTree(), getLayout(), idGeneFamily));
 
 			// set our default mode
 			toggleMode(Mode.NAVIGATE);

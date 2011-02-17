@@ -8,10 +8,21 @@ import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEvent;
 import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEventHandler;
 import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEventHandler;
+import org.iplantc.tr.demo.client.events.HighlightNodesInSpeciesTreeEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEventHandler;
+import org.iplantc.tr.demo.client.services.TreeServices;
+import org.iplantc.tr.demo.client.utils.JsonUtil;
 
+import com.extjs.gxt.ui.client.event.MenuEvent;
+import com.extjs.gxt.ui.client.event.SelectionListener;
+import com.extjs.gxt.ui.client.util.Point;
+import com.extjs.gxt.ui.client.widget.menu.Menu;
+import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Channel panel containing gene tree.
@@ -21,6 +32,9 @@ import com.google.gwt.event.shared.EventBus;
  */
 public class GeneTreeChannelPanel extends NavTreeChannelPanel
 {
+	
+	private String geneFamName;
+	
 	/**
 	 * Instantiate from an event bus, caption, id, tree and layout
 	 * 
@@ -32,9 +46,10 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 	 * @param geneFamName gene family id
 	 */
 	public GeneTreeChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
-			String layoutTree)
+			String layoutTree, String geneFamName)
 	{
 		super(eventbus, caption, id, jsonTree, layoutTree);
+		this.geneFamName = geneFamName;
 	}
 
 	/**
@@ -56,6 +71,36 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 
 		handlers.add(eventbus.addHandler(GeneTreeNavNodeSelectEvent.TYPE,
 				new GeneTreeNavNodeSelectEventHandlerImpl()));
+	}
+	
+	
+	private void displayMenu(Point p, int idNode)
+	{
+		Menu menu = new Menu();
+
+		menu.setData("idNode", idNode);
+		menu.add(buildHighlightSpeciesMenuItem());
+		menu.add(buildSelectSubTreeMenuItem());
+
+		menu.showAt(p.x, p.y);
+	}
+
+	private MenuItem buildSelectSubTreeMenuItem()
+	{
+		MenuItem item = new MenuItem("Highlight gene tree descendants");
+
+		item.addSelectionListener(new HighlightDescendantsSelectionListenerImpl());
+
+		return item;
+	}
+
+	private MenuItem buildHighlightSpeciesMenuItem()
+	{
+		MenuItem item = new MenuItem("Highlight duplication event in species tree");
+
+		item.addSelectionListener(new HighlightDupSelectionListenerImpl());
+
+		return item;
 	}
 
 	private class HighlightNodesInGeneTreeEventHandlerImpl implements
@@ -79,15 +124,13 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 			highlightNodes(idNodes);
 		}
 	}
-
+	
 	private class GeneTreeInvestigationNodeSelectEventHandlerImpl implements GeneTreeInvestigationNodeSelectEventHandler
 	{
 		@Override
 		public void onFire(GeneTreeInvestigationNodeSelectEvent event)
 		{
-			treeView.clearHighlights();
-			treeView.highlightNode(event.getNodeId());
-			treeView.requestRender();			
+			displayMenu(event.getPoint(),event.getNodeId());
 		}		
 	}
 	
@@ -106,5 +149,64 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 		{
 			treeView.highlightNode(idNodes.get(i));
 		}
+	}
+	
+	private class HighlightDescendantsSelectionListenerImpl extends SelectionListener<MenuEvent>
+	{
+
+		@Override
+		public void componentSelected(MenuEvent ce)
+		{
+			Menu m = (Menu)ce.getSource();
+			int idNode = Integer.parseInt(m.getData("idNode").toString());
+			treeView.highlightSubtree(idNode);
+		}
+		
+	}
+	
+	private class HighlightDupSelectionListenerImpl extends SelectionListener<MenuEvent>
+	{
+
+		@Override
+		public void componentSelected(MenuEvent ce)
+		{
+			Menu m = (Menu)ce.getSource();
+			int idNode = Integer.parseInt(m.getData("idNode").toString());
+			getSpeciesDescendants(idNode,false,false);
+		}
+		
+	}
+	
+	private void getSpeciesDescendants(final int idNode, boolean edgeSelected , boolean includeSubtree)
+	{
+		TreeServices.getRelatedSpeciesEdgeNode("{\"familyName\":\"" + geneFamName
+				+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + edgeSelected + ",\"includeSubtree\":"+ includeSubtree  + "}",
+				new AsyncCallback<String>()
+				{
+					@Override
+					public void onSuccess(String result)
+					{
+						ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
+						JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+						if(o1 != null)
+						{
+							JSONArray gene_nodes = JsonUtil.getArray(o1, "item");
+							for(int i = 0;i < gene_nodes.size();i++)
+							{
+								nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes
+										.get(i).isObject().get("geneTreeNode").toString())));
+							}
+						}
+
+						HighlightNodesInSpeciesTreeEvent event = new HighlightNodesInSpeciesTreeEvent(nodesToHighlight);
+						eventbus.fireEvent(event);
+					}
+
+					@Override
+					public void onFailure(Throwable arg0)
+					{
+						System.out.println(arg0.toString());
+					}
+				});
 	}
 }

@@ -2,8 +2,6 @@ package org.iplantc.tr.demo.client.receivers;
 
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationNodeSelectEvent;
-import org.iplantc.tr.demo.client.events.TreeNodeMouseOutEvent;
-import org.iplantc.tr.demo.client.events.TreeNodeMouseOverEvent;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 
 import com.google.gwt.event.shared.EventBus;
@@ -15,7 +13,7 @@ import com.google.gwt.json.client.JSONObject;
  * @author amuir
  * 
  */
-public class SpeciesTreeInvestigationModeReceiver extends EventBusReceiver
+public class SpeciesTreeInvestigationModeReceiver extends TreeReceiver
 {
 	/**
 	 * Instantiate from an event bus and id.
@@ -47,11 +45,6 @@ public class SpeciesTreeInvestigationModeReceiver extends EventBusReceiver
 		eventbus.fireEvent(event);
 	}
 
-	private boolean isOurEvent(final String idBroadcaster)
-	{
-		return id.equals(idBroadcaster);
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -78,12 +71,12 @@ public class SpeciesTreeInvestigationModeReceiver extends EventBusReceiver
 					handleEdgeClick(objJson);
 				}
 
-				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over"))
+				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over") || event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
 				{
 					handleNodeMouseOver(objJson);
 				}
 
-				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out"))
+				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out") || event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
 				{
 					handleNodeMouseOut(objJson);
 				}
@@ -103,20 +96,6 @@ public class SpeciesTreeInvestigationModeReceiver extends EventBusReceiver
 
 	}
 
-	private void handleNodeMouseOut(JSONObject objJson)
-	{
-		String id = JsonUtil.getString(objJson, "id");
-		TreeNodeMouseOutEvent event =
-				new TreeNodeMouseOutEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
-		eventbus.fireEvent(event);
-	}
 
-	private void handleNodeMouseOver(JSONObject objJson)
-	{
-		String id = JsonUtil.getString(objJson, "id");
-		TreeNodeMouseOverEvent event =
-				new TreeNodeMouseOverEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
-		eventbus.fireEvent(event);
-	}
 
 }
