@@ -37,6 +37,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     my %blast_searcher_of;
     my %default_species_tree_of;
     my %gene_tree_events_of;
+    my %species_tree_events_of;
 
 
 
@@ -75,7 +76,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $blast_searcher       = $args_ref->{blast_searcher};
         my $default_species_tree = $args_ref->{default_species_tree};
         my $gene_tree_events 	 = $args_ref->{gene_tree_events};
- 
+ 		my $species_tree_events  = $args_ref->{species_tree_events};
 
         # Use the default default species tree if one wasn't provided.
         if ( !defined $default_species_tree ) {
@@ -93,6 +94,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         $blast_searcher_of{ ident $self }       = $blast_searcher;
         $default_species_tree_of{ ident $self } = $default_species_tree;
 		$gene_tree_events_of{ ident $self }     = $gene_tree_events;
+		$species_tree_events_of{ ident $self }  = $species_tree_events;
+
         return $self;
     }
 
@@ -119,6 +122,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         delete $blast_searcher_of{ ident $self };
         delete $default_species_tree_of{ ident $self };
         delete $gene_tree_events_of { ident $self };
+        delete $species_tree_events_of{ ident $self };
 
         return;
     }
@@ -364,8 +368,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $details_ref
             = $info->get_events( $family_name, $species_tree_name );
 
-		#Forats for outputs
-		$details_ref=$self->_format_tree_events($details_ref,'d_and_s');
+		#Format for outputs
+		$details_ref=$self->_format_gene_tree_events($details_ref,'d_and_s');
 
         return camel_case_keys($details_ref);
     }
@@ -452,9 +456,29 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
             $reconciliation
                 = $rec_loader->load( $species_tree_name, $family_name );
         }
+        
+        #Load the gene tree decorations
+        my$gene_tree_decorations=$self->get_gene_tree_events($family_name);
+
+        #transform them into events
+        my@nodes=$tree->get_nodes;
+#TODO Add metadata
+#        for(@nodes){
+#        	print keys %{$_->{_tags}},"\n";	
+#        }
+#        my%state_id=%{$gene_tree_decorations->{'nodeStyleMappings'}};
+#        my%id_state = reverse %state_id;
+        	        
+        #Load the species tree decorations
+        my$species_tree_decorations=$self->get_species_tree_events($family_name);
 
         # Format the result.
         my %result = ( 'gene-tree' => $formatter->format_tree($tree) );
+        $result{'gene-tree'}->{'styleMap'}=$gene_tree_decorations;
+      
+        if ( defined $species_tree_decorations ) {
+            $result{'gene-tree'}->{'styleMap'}->{'branchDecorations'} = $species_tree_decorations;
+        }
         if ( defined $reconciliation ) {
             $result{'reconciliation'} = $reconciliation;
         }
@@ -534,11 +558,94 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $formatter   = IPlant::TreeRec::TreeDataFormatter->new();
 
         # Load the tree.
-        my $tree = $tree_loader->load_species_tree($species_tree_name);
+        my$tree = $tree_loader->load_species_tree($species_tree_name);
+
+		my%results;
+        
+        $results{tree} = $formatter->format_tree($tree);
+        
+        $results{styleMap}->{branchDecorations}=$self->get_species_tree_events($species_tree_name);
 
         # Format and return the tree.
-        return $formatter->format_tree($tree);
+        return \%results;
     }
+    
+    ##########################################################################
+    # Usage      : $data_ref = $treerec->get_species_tree_data($json)
+    #
+    # Purpose    : Retrieves species tree data in NHX format.
+    #
+    # Returns    : The species tree data.
+    #
+    # Parameters : speciesTreeName - the name of the species tree.
+    #              familyName      - the name of the related gene tree.
+    #
+    # Throws     : IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::IllegalArgumentException
+    sub get_species_tree_events {
+        my ( $self, $family_name, $species_tree_name ) = @_;
+
+        # Use the default species tree if one wasn't provided.
+        if ( !defined $species_tree_name ) {
+            $species_tree_name = $default_species_tree_of{ ident $self };
+        }
+        # Fetch the tree loader and family info retreiver.
+        my $info = $species_tree_events_of{ ident $self };
+
+        # Load the events information for the gene family.
+        my $details_ref;
+        if( !defined $family_name || $family_name eq $species_tree_name){
+            $details_ref = $info->get_all_duplications($species_tree_name );
+        }
+        else{
+        	$details_ref = $info->get_duplications( $family_name, $species_tree_name );
+        }
+
+		#Format for outputs
+		$details_ref=$self->_format_species_tree_events($details_ref,'species_tree');
+
+        return camel_case_keys($details_ref);
+
+    }
+    
+#    ##########################################################################
+#    # Usage      : $data_ref = $treerec->get_species_tree_data($json)
+#    #
+#    # Purpose    : Retrieves species tree data in NHX format.
+#    #
+#    # Returns    : The species tree data.
+#    #
+#    # Parameters : speciesTreeName - the name of the species tree.
+#    #              familyName      - the name of the related gene tree.
+#    #
+#    # Throws     : IPlant::TreeRec::TreeNotFoundException
+#    #              IPlant::TreeRec::IllegalArgumentException
+#    sub get_all_species_tree_events {
+#        my ( $self, $json ) = @_;
+#
+#        # Extract the arguments.
+#        my ($species_tree_name )
+#            = $self->_extract_tree_args($json);
+#
+#        # Use the default species tree if one wasn't provided.
+#        if ( !defined $species_tree_name ) {
+#            $species_tree_name = $default_species_tree_of{ ident $self };
+#        }
+#                # Fetch the tree loader and family info retreiver.
+#        my $info = $species_tree_events_of{ ident $self };
+#
+#        # Load the events information for the gene family.
+#        my $details_ref
+#            = $info->_get_all_duplications( $species_tree_name );
+#
+#		#Format for outputs
+#		$details_ref=$self->_format_species_tree_events($details_ref,'species_tree');
+#
+#        return camel_case_keys($details_ref);
+#
+#    }
+    
+    
 
     ##########################################################################
     # Usage      : @families = $treerec->find_duplication_events($json);
@@ -960,7 +1067,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     }
     
     ##########################################################################
-    # Usage      : $data = $treerec->_format_tree_events( $events, $style );
+    # Usage      : $data = $treerec->_format_gene_tree_events( $events, $style );
     #
     # Purpose    : Formats the visual object to be displayed
     #              
@@ -971,12 +1078,41 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     # Events	 : $events  - the list of speciation and duplication events.             
     #
     # Throws     : No exceptions.
-	sub _format_tree_events{
+	sub _format_gene_tree_events{
 		my ( $self, $events, $style ) = @_;
 		my$results={
 			styles=>$self->_retrieve_decorations($style),
 			nodeStyleMappings=>$events
 		};
+		return $results;	
+				
+		
+	}
+
+    ##########################################################################
+    # Usage      : $data = $treerec->_format_species_tree_events( $events, $style );
+    #
+    # Purpose    : Formats the visual object to be displayed
+    #              
+    # Returns    : The formatted representation of the visual object.
+    #
+    # Parameters : $style   - name of the style for the metadata that needs to be represented.
+    #
+    # Events	 : $events  - the list of speciation and duplication events.             
+    #
+    # Throws     : No exceptions.
+	sub _format_species_tree_events{
+		my ( $self, $events, $style ) = @_;
+		my$stylemap=$self->_retrieve_decorations($style);
+		my$results;
+		for my$key (keys %{$events}){
+			if(!$key || $key eq '00'){
+				$results->{2}=$stylemap->{function}($events->{$key});
+			}
+			else{	
+				$results->{$key}=$stylemap->{function}($events->{$key});
+			}		
+		}
 		return $results;	
 				
 		
@@ -995,7 +1131,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     # Throws     : No exceptions.
     sub _retrieve_decorations {
         my ( $self, $style ) = @_;
-
 		#This part will be replaced by database calls
 		#
 		#
@@ -1004,7 +1139,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     		   		duplication => {
     		       		nodeStyle=> {
                				color => '#ff0000',
-               				pointSize => 3,
+               				pointSize => 6,
                				nodeShape=> 'circle'
          				},
           	 			labelStyle => {
@@ -1023,7 +1158,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
        				speciation => {
     		       		nodeStyle=> {
                				color => '#0000ff',
-               				pointSize => 3,
+               				pointSize => 6,
                				nodeShape=> 'square'
          				},
           	 			labelStyle => {
@@ -1039,9 +1174,15 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
                				lineWidth => 1
            				}
           			}
+       		},
+       		species_tree => {
+       			function => \&_species_tree			
        		}
 			
    		};
+   	sub _species_tree{
+   		return "triangle";	
+   	}
 			
    	return $deco->{$style};
 

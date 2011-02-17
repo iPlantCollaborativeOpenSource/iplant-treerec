@@ -14,7 +14,7 @@ __PACKAGE__->table_class('DBIx::Class::ResultSource::View');
 __PACKAGE__->table("reconciliation_node");
 __PACKAGE__->add_columns(
     "speciations",
-    {   data_type     => "list",
+    {   data_type     => "VARCHAR",
         default_value => undef,
         is_nullable   => 0,
         size          => 10

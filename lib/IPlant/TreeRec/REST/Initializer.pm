@@ -20,6 +20,7 @@ use IPlant::TreeRec::FileRetriever;
 use IPlant::TreeRec::FileTreeLoader;
 use IPlant::TreeRec::GeneFamilyInfo;
 use IPlant::TreeRec::GeneTreeEvents;
+use IPlant::TreeRec::SpeciesTreeEvents;
 use IPlant::TreeRec::X;
 use IPlant::TreeRec;
 use Readonly;
@@ -73,8 +74,14 @@ sub get_tree_rec {
         }
     );
     
-    # Create the gene tree event list.
+    # Create the gene tree event lister.
     my $gene_tree_events = IPlant::TreeRec::GeneTreeEvents->new(
+        {   dbh                  => $dbh,
+        }
+    );
+    
+    # Create the species tree event lister.
+    my $species_tree_events = IPlant::TreeRec::SpeciesTreeEvents->new(
         {   dbh                  => $dbh,
         }
     );
@@ -88,6 +95,7 @@ sub get_tree_rec {
             file_retriever   => $file_retriever,
             blast_searcher   => $blast_searcher,
             gene_tree_events => $gene_tree_events,
+            species_tree_events => $species_tree_events,
         }
     );
 
