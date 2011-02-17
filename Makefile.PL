@@ -21,6 +21,7 @@ WriteMakefile(
         'Exception::Class'       => 0,
         'File::Path'             => 0,
         'File::Spec'             => 0,
+        'HTML::TagList'          => 0.35,
         'IO::Handle'             => 0,
         'IPC::Run'               => 0,
         'JSON'                   => 0,

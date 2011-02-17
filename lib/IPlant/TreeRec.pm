@@ -37,9 +37,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     my %blast_searcher_of;
     my %default_species_tree_of;
     my %gene_tree_events_of;
+    my %go_cloud_generator_of;
     my %species_tree_events_of;
-
-
 
     ##########################################################################
     # Usage      : $treerec = IPlant::TreeRec->new(
@@ -49,6 +48,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #                      file_retreiver       => $file_retriever,
     #                      blast_searcher       => $blast_searcher,
     #                      default_species_tree => $species_tree_name,
+    #                      gene_tree_events     => $tree_decorations,
+    #                      go_cloud_generator   => $go_cloud_generator,
     #                  }
     #              );
     #
@@ -57,12 +58,14 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #
     # Returns    : The new object.
     #
-    # Parameters : dbh                  - the database handle.
-    #              gene_tree_loader     - used to load gene trees.
-    #              gene_family_info     - used to get gene family summaries.
-    #              file_retriever       - used to retrieve data files.
-    #              blast_searcher       - used to perform BLAST searches.
-    #              default_species_tree - the default species tree.
+    # Parameters : dbh                   - the database handle.
+    #              gene_tree_loader      - used to load gene trees.
+    #              gene_family_info      - used to get gene family summaries.
+    #              file_retriever        - used to retrieve data files.
+    #              blast_searcher        - used to perform BLAST searches.
+    #              default_species_tree  - the default species tree.
+    #              gene_tree_events      - used to note events in gene trees.
+    #              go_cloud_generator    - used to generate GO clouds.
     #
     # Throws     : IPlant::TreeRec::DatabaseException
     sub new {
@@ -77,6 +80,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $default_species_tree = $args_ref->{default_species_tree};
         my $gene_tree_events 	 = $args_ref->{gene_tree_events};
  		my $species_tree_events  = $args_ref->{species_tree_events};
+        my $go_cloud_generator   = $args_ref->{go_cloud_generator};
 
         # Use the default default species tree if one wasn't provided.
         if ( !defined $default_species_tree ) {
@@ -93,12 +97,12 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         $file_retriever_of{ ident $self }       = $file_retriever;
         $blast_searcher_of{ ident $self }       = $blast_searcher;
         $default_species_tree_of{ ident $self } = $default_species_tree;
-		$gene_tree_events_of{ ident $self }     = $gene_tree_events;
+        $gene_tree_events_of{ ident $self }     = $gene_tree_events;
+        $go_cloud_generator_of{ ident $self }   = $go_cloud_generator;
 		$species_tree_events_of{ ident $self }  = $species_tree_events;
 
         return $self;
     }
-
 
     ##########################################################################
     # Usage      : N/A
@@ -121,12 +125,12 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         delete $file_retriever_of{ ident $self };
         delete $blast_searcher_of{ ident $self };
         delete $default_species_tree_of{ ident $self };
-        delete $gene_tree_events_of { ident $self };
+        delete $gene_tree_events_of{ ident $self };
+        delete $go_cloud_generator_of{ ident $self };
         delete $species_tree_events_of{ ident $self };
 
         return;
     }
-
 
     ##########################################################################
     # Usage      : $results_ref = $treerec->go_search( $search_string,
@@ -143,54 +147,48 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     # Throws     : No exceptions.
     sub general_go_search {
         my ( $self, $search_string, $species_tree_name ) = @_;
-	my $results_ref;
+        my $results_ref;
 
-	# Remove whitespaces from the beginning and end of search string
-	# This will take care of minor copy and paste errors.
-	$search_string =~ s/^\s+//;
-	$search_string =~ s/\s+$//;
+        # Remove whitespaces from the beginning and end of search string
+        # This will take care of minor copy and paste errors.
+        $search_string =~ s/^\s+//;
+        $search_string =~ s/\s+$//;
 
-	# This is the case where users uses GO:#######	
-	if ($search_string =~ m/GO\:(\d*)/xms) {
+        # This is the case where users uses GO:#######
+        if ( $search_string =~ m/GO\:(\d*)/xms ) {
 
-	    $search_string = $1;
+            $search_string = $1;
 
-	    # Pad with zeros to catch cases where the user did not
-	    # enter the full GO value with leading zeros.
-	    $search_string = sprintf("%07d", $search_string);
-	    
-	    $results_ref 
-		= $self->_do_gene_family_search('GoAccessionSearch',
-						$search_string, 
-						$species_tree_name );
-	    return $results_ref;
-	}
+            # Pad with zeros to catch cases where the user did not
+            # enter the full GO value with leading zeros.
+            $search_string = sprintf( "%07d", $search_string );
 
-	# This is the case where users enter #####
-	elsif ($search_string =~ m/(^\d+)/xms ) {
-	    # This will only return the first complete digit if there is 
-	    # a longer list of digits
+            $results_ref = $self->_do_gene_family_search( 'GoAccessionSearch',
+                $search_string, $species_tree_name );
+            return $results_ref;
+        }
 
-	    # Pad with zeros to catch cases where the user did not
-	    # enter the full GO value with leading zeros.
-	    $search_string = sprintf("%07d", $search_string);
-	    $results_ref 
-		= $self->_do_gene_family_search('GoAccessionSearch',
-						$search_string, 
-						$species_tree_name );
-	    return $results_ref;
-	}
+        # This is the case where users enter #####
+        elsif ( $search_string =~ m/(^\d+)/xms ) {
 
-	# The default is to assume the string is a text search
-	else {
-	    $results_ref
-		= $self->_do_gene_family_search( 'GoSearch', 
-						 "\%$search_string\%",
-						 $species_tree_name );
-	    return $results_ref;
+            # This will only return the first complete digit if there is
+            # a longer list of digits
 
-	}
-	
+            # Pad with zeros to catch cases where the user did not
+            # enter the full GO value with leading zeros.
+            $search_string = sprintf( "%07d", $search_string );
+            $results_ref = $self->_do_gene_family_search( 'GoAccessionSearch',
+                $search_string, $species_tree_name );
+            return $results_ref;
+        }
+
+        # The default is to assume the string is a text search
+        else {
+            $results_ref = $self->_do_gene_family_search( 'GoSearch',
+                "\%$search_string\%", $species_tree_name );
+            return $results_ref;
+
+        }
 
     }
 
@@ -213,9 +211,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
             $species_tree_name );
         return $results_ref;
     }
-
-
-
 
     ##########################################################################
     # Usage      : $results_ref = $treerec->go_accession_search(
@@ -252,6 +247,26 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my ( $self, $search_string, $species_tree_name ) = @_;
         return $self->_do_gene_family_search( 'GeneIdSearch', $search_string,
             $species_tree_name );
+    }
+
+    ##########################################################################
+    # Usage      : $go_cloud = $treerec->generate_go_cloud($family_name);
+    #
+    # Purpose    : Generates the GO term cloud for the given gene family name.
+    #
+    # Returns    : The GO term cloud as an HTML fragment.
+    #
+    # Parameters : $family_name - the name of the gene family.
+    #
+    # Throws     : No exceptions.
+    sub get_go_cloud {
+        my ( $self, $family_name ) = @_;
+
+        # Generate and return the GO cloud.
+        my $go_cloud_generator = $go_cloud_generator_of{ ident $self };
+        my $cloud = $go_cloud_generator->generate_go_cloud($family_name);
+
+        return { cloud => $cloud };
     }
 
     ##########################################################################
@@ -296,7 +311,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         return \@families;
     }
 
-
     ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_family_details(
     #                  $family_name, $species_tree_name );
@@ -339,7 +353,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         return camel_case_keys($details_ref);
     }
-       ##########################################################################
+
+    ##########################################################################
     # Usage      : $results_ref = $treerec->get_gene_tree_events(
     #                  $family_name, $species_tree_name );
     #
@@ -367,9 +382,10 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Load the events information for the gene family.
         my $details_ref
             = $info->get_events( $family_name, $species_tree_name );
+            
 
-		#Format for outputs
-		$details_ref=$self->_format_gene_tree_events($details_ref,'d_and_s');
+        # Formats for output
+        $details_ref = $self->_format_gene_tree_events( $details_ref, 'd_and_s' );
 
         return camel_case_keys($details_ref);
     }
@@ -571,14 +587,17 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     }
     
     ##########################################################################
-    # Usage      : $data_ref = $treerec->get_species_tree_data($json)
+    # Usage      : $data_ref = $treerec->get_species_tree_event(
+    #			   $family_name, $species_tree_name)
     #
-    # Purpose    : Retrieves species tree data in NHX format.
+    # Purpose    : Retrieves duplication events along the species tree.
     #
-    # Returns    : The species tree data.
+    # Returns    : The duplication events.
     #
     # Parameters : speciesTreeName - the name of the species tree.
     #              familyName      - the name of the related gene tree.
+    #			   If no family name is provided the duplications across 
+    #			   all gene families are returned	
     #
     # Throws     : IPlant::TreeRec::TreeNotFoundException
     #              IPlant::TreeRec::IllegalArgumentException
@@ -592,8 +611,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Fetch the tree loader and family info retreiver.
         my $info = $species_tree_events_of{ ident $self };
 
-        # Load the events information for the gene family.
+		#The output file
         my $details_ref;
+
+        # Load the events information for the gene family.
+        
         if( !defined $family_name || $family_name eq $species_tree_name){
             $details_ref = $info->get_all_duplications($species_tree_name );
         }
@@ -601,50 +623,12 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         	$details_ref = $info->get_duplications( $family_name, $species_tree_name );
         }
 
-		#Format for outputs
+		#Format for output
 		$details_ref=$self->_format_species_tree_events($details_ref,'species_tree');
 
         return camel_case_keys($details_ref);
 
-    }
-    
-#    ##########################################################################
-#    # Usage      : $data_ref = $treerec->get_species_tree_data($json)
-#    #
-#    # Purpose    : Retrieves species tree data in NHX format.
-#    #
-#    # Returns    : The species tree data.
-#    #
-#    # Parameters : speciesTreeName - the name of the species tree.
-#    #              familyName      - the name of the related gene tree.
-#    #
-#    # Throws     : IPlant::TreeRec::TreeNotFoundException
-#    #              IPlant::TreeRec::IllegalArgumentException
-#    sub get_all_species_tree_events {
-#        my ( $self, $json ) = @_;
-#
-#        # Extract the arguments.
-#        my ($species_tree_name )
-#            = $self->_extract_tree_args($json);
-#
-#        # Use the default species tree if one wasn't provided.
-#        if ( !defined $species_tree_name ) {
-#            $species_tree_name = $default_species_tree_of{ ident $self };
-#        }
-#                # Fetch the tree loader and family info retreiver.
-#        my $info = $species_tree_events_of{ ident $self };
-#
-#        # Load the events information for the gene family.
-#        my $details_ref
-#            = $info->_get_all_duplications( $species_tree_name );
-#
-#		#Format for outputs
-#		$details_ref=$self->_format_species_tree_events($details_ref,'species_tree');
-#
-#        return camel_case_keys($details_ref);
-#
-#    }
-    
+    }   
     
 
     ##########################################################################
@@ -1065,40 +1049,40 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         return $results_ref;
     }
-    
+
     ##########################################################################
     # Usage      : $data = $treerec->_format_gene_tree_events( $events, $style );
     #
-    # Purpose    : Formats the visual object to be displayed
-    #              
+    # Purpose    : Generates the visual properties for the gene tree
+    #
     # Returns    : The formatted representation of the visual object.
     #
-    # Parameters : $style   - name of the style for the metadata that needs to be represented.
-    #
-    # Events	 : $events  - the list of speciation and duplication events.             
+    # Parameters : $style - name of the style for the data that needs to
+    #                       be represented.
+    # 			   $events  - the list of speciation and duplication events.
     #
     # Throws     : No exceptions.
-	sub _format_gene_tree_events{
-		my ( $self, $events, $style ) = @_;
-		my$results={
-			styles=>$self->_retrieve_decorations($style),
-			nodeStyleMappings=>$events
-		};
-		return $results;	
-				
-		
-	}
+    sub _format_gene_tree_events {
+        my ( $self, $events, $style ) = @_;
+        my $results = {
+            styles            => $self->_retrieve_decorations($style),
+            nodeStyleMappings => $events
+        };
+        return $results;
+
+    }
+
 
     ##########################################################################
     # Usage      : $data = $treerec->_format_species_tree_events( $events, $style );
     #
-    # Purpose    : Formats the visual object to be displayed
-    #              
+    # Purpose    : Generates the visual properties for the species tree
+    #
     # Returns    : The formatted representation of the visual object.
     #
-    # Parameters : $style   - name of the style for the metadata that needs to be represented.
-    #
-    # Events	 : $events  - the list of speciation and duplication events.             
+    # Parameters : $style - name of the style for the data that needs to
+    #                       be represented.
+    # 			   $events  - the list of speciation and duplication events.
     #
     # Throws     : No exceptions.
 	sub _format_species_tree_events{
@@ -1106,6 +1090,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 		my$stylemap=$self->_retrieve_decorations($style);
 		my$results;
 		for my$key (keys %{$events}){
+#### BUGFIX			
+#### TO MAKE THE DUPLICATION ON THE BRANCH TO NULL OCCUR ON THE BRANCH TO 2 (GRAPE)
 			if(!$key || $key eq '00'){
 				$results->{2}=$stylemap->{function}($events->{$key});
 			}
@@ -1117,6 +1103,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 				
 		
 	}
+	
 
     ##########################################################################
     # Usage      : $data = $treerec->_retrieve_decorations( $style );
@@ -1125,8 +1112,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #
     # Returns    : The visual styles of the tree.
     #
-    # Parameters : $style   - name of the style for the metadata that needs to be represented.
-    #              
+    # Parameters : $style - name of the style for the metadata that needs to
+    #                       be represented.
     #
     # Throws     : No exceptions.
     sub _retrieve_decorations {
@@ -1150,8 +1137,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
               				lineWidth => 1
            				},
            				glyphStyle => {
-               				fillColor => '#000000',
-               				strokeColor => '#000000',
+               				fillColor => '#99FF99',
+               				strokeColor => '#19B319',
                				lineWidth => 1
            				}
        				},
@@ -1169,8 +1156,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
                				lineWidth => 1
            				},
            				glyphStyle => {
-               				fillColor => '#000000',
-               				strokeColor => '#000000',
+               				fillColor => '#99FF99',
+               				strokeColor => '#19B319',
                				lineWidth => 1
            				}
           			}
@@ -1185,11 +1172,9 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
    	}
 			
    	return $deco->{$style};
-
-	} 
+    }
 
 }
-
 
 1;
 __END__

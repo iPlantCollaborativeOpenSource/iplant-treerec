@@ -42,6 +42,7 @@ Readonly my %GETTER_FOR => (
     'species-data'  => sub { $_[0]->get_species_tree_data( $_[2] ) },
     'gene-tree'     => sub { $_[0]->get_gene_tree_file( $_[2] ) },
     'gene-data'     => sub { $_[0]->get_gene_tree_data( $_[2] ) },
+    'go-cloud'      => sub { $_[0]->get_go_cloud( $_[2] ) },
     'default'       => sub { $_[0]->get_file( $_[1], "" ) },
 );
 
