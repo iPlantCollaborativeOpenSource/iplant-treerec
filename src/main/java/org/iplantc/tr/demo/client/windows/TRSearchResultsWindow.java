@@ -6,6 +6,8 @@ import java.util.List;
 import org.iplantc.tr.demo.client.JsTRSearchResult;
 import org.iplantc.tr.demo.client.TRSearchResult;
 import org.iplantc.tr.demo.client.commands.ClientCommand;
+import org.iplantc.tr.demo.client.services.SearchServiceAsync;
+import org.iplantc.tr.demo.client.utils.JsonUtil;
 import org.iplantc.tr.demo.client.utils.TRUtil;
 
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
@@ -19,6 +21,7 @@ import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
@@ -31,6 +34,9 @@ import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 
 public class TRSearchResultsWindow extends Window
@@ -42,6 +48,7 @@ public class TRSearchResultsWindow extends Window
 	private ArrayList<Button> buttons;
 	private ContentPanel pnlGrid;
 	private PagingToolBar pageBar;
+	private SearchServiceAsync searchService;
 
 	private static TRSearchResultsWindow instance;
 
@@ -56,10 +63,11 @@ public class TRSearchResultsWindow extends Window
 	}
 
 	public void init(String searchTerms, String results, boolean showBlastColumns,
-			ClientCommand cmdViewFamily)
+			ClientCommand cmdViewFamily, SearchServiceAsync searchService)
 	{
 		this.showBlastColumns = showBlastColumns;
 		this.cmdViewFamily = cmdViewFamily;
+		this.searchService = searchService;
 
 		init(searchTerms, results);
 	}
@@ -268,8 +276,41 @@ public class TRSearchResultsWindow extends Window
 
 		private void showWordCloud(TRSearchResult result)
 		{
-			new WordCloudWindow().show();
+			String geneFamily = result.getName();
+			searchService.getGoCloud(geneFamily, getCallback(geneFamily));
 		}
+		
+		private AsyncCallback<String> getCallback(final String geneFamily)
+		{
+			return new AsyncCallback<String>()
+			{
+				@Override
+				public void onFailure(Throwable arg0)
+				{
+					String err = "GO term cloud creation failed.";
+					MessageBox.alert("Error", err, null);
+				}
+
+				@Override
+				public void onSuccess(String result)
+				{
+					JSONValue html = TRUtil.parseItem(result);
+					if (html != null)
+					{
+						JSONObject htmlObj = html.isObject();
+						String cloud = JsonUtil.getString(htmlObj, "cloud");
+						if (cloud != null)
+						{
+							WordCloudWindow window = WordCloudWindow.getInstance();
+							window.setContents(cloud, geneFamily);
+							window.show();
+							window.toFront();
+						}
+					}
+				}
+			};
+		}
+
 	}
 
 }

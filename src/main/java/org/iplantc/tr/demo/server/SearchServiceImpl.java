@@ -224,4 +224,24 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
 		return ret;
 	}
+
+	// retrieve a GO term cloud as HTML
+	public String getGoCloud(String idGeneFamily) throws IllegalArgumentException
+	{
+		String ret = "";
+
+		try
+		{
+			URLConnection connection =
+					get(HOSTNAME + "treereconciliation/get/go-cloud/" + idGeneFamily);
+
+			ret = retrieveResult(connection);
+		}
+		catch(IOException e)
+		{
+			throw new IllegalArgumentException("Search failed.", e);
+		}
+
+		return ret;
+	}
 }
