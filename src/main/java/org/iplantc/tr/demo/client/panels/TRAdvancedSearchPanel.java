@@ -596,7 +596,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{
 		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
 
-		window.init(heading, results, isBlast, cmdView);
+		window.init(heading, results, isBlast, cmdView, searchService);
 
 		window.show();
 		window.toFront();
