@@ -133,10 +133,13 @@ use Readonly;
     sub _go_cloud_for_category {
         my ( $self, $protein_tree_id, $go_category ) = @_;
 
+        # Get the GO category ID.
+        my $category_id = $self->_get_go_category_id($go_category);
+
         # Get the list of GO terms for the category.
         my $dbh   = $dbh_of{ ident $self };
         my @terms = $dbh->resultset('GoTermsForFamilyAndCategory')
-            ->search( {}, { 'bind' => [ $go_category, $protein_tree_id ] } );
+            ->search( {}, { 'bind' => [ $category_id, $protein_tree_id ] } );
 
         # Generate the GO cloud.
         my $levels = $cloud_levels_of{ ident $self };
@@ -149,6 +152,31 @@ use Readonly;
         }
 
         return $cloud->html();
+    }
+
+    ##########################################################################
+    # Usage      : $cvterm_id
+    #                  = $cloud_generator->_get_go_category_id($category);
+    #
+    # Purpose    : Get the cvterm ID for the GO category with the given name.
+    #
+    # Returns    : The ID.
+    #
+    # Parameters : $category - the name of the GO category.
+    #
+    # Throws     : No exceptions.
+    sub _get_go_category_id {
+        my ( $self, $category ) = @_;
+
+        # Get the database handle.
+        my $dbh = $dbh_of{ ident $self };
+
+        # Get the cvterm for the GO category.
+        my $cvterm
+            = $dbh->resultset('Cvterm')->find( { 'name' => $category } );
+        return if !defined $cvterm;
+
+        return $cvterm->id();
     }
 }
 
