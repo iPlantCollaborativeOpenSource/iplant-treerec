@@ -45,18 +45,18 @@ sub get_tree_rec {
     my ($request) = @_;
 
     # Extract the configuraiton parameters.
-    my $dsn              = $request->dir_config('TreeRecDsn');
-    my $user             = $request->dir_config('TreeRecUser');
-    my $password         = $request->dir_config('TreeRecPassword');
-    my $data_dir         = $request->dir_config('TreeRecDataDir');
-    my $blast_exe_dir    = $request->dir_config('TreeRecBlastExeDir');
-    my $blast_db_dir     = $request->dir_config('TreeRecBlastDbDir');
-    my $def_species_tree = $request->dir_config('TreeRecDefaultSpeciesTree');
-    my @go_categories    = $request->dir_config('TreeRecGoCategories');
-    my $go_cloud_levels  = $request->dir_config('TreeRecGoCloudLevels');
+    my $dsn               = $request->dir_config('TreeRecDsn');
+    my $user              = $request->dir_config('TreeRecUser');
+    my $password          = $request->dir_config('TreeRecPassword');
+    my $data_dir          = $request->dir_config('TreeRecDataDir');
+    my $blast_exe_dir     = $request->dir_config('TreeRecBlastExeDir');
+    my $blast_db_dir      = $request->dir_config('TreeRecBlastDbDir');
+    my $def_species_tree  = $request->dir_config('TreeRecDefaultSpeciesTree');
+    my $go_categories_str = $request->dir_config('TreeRecGoCategories');
+    my $go_cloud_levels   = $request->dir_config('TreeRecGoCloudLevels');
 
-    use Data::Dumper;
-    $request->log( Dumper \@go_categories );
+    # Extract the GO categories from the string.
+    my @go_categories = split m/,/xms, $go_categories_str;
 
     # Establish the database connection.
     my $dbh = IPlant::DB::TreeRec->connect( $dsn, $user, $password );
