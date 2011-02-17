@@ -134,15 +134,18 @@ use Readonly;
         my ( $self, $protein_tree_id, $go_category ) = @_;
 
         # Get the list of GO terms for the category.
-        my $dbh = $dbh_of{ ident $self };
+        my $dbh   = $dbh_of{ ident $self };
         my @terms = $dbh->resultset('GoTermsForFamilyAndCategory')
             ->search( {}, { 'bind' => [ $go_category, $protein_tree_id ] } );
 
         # Generate the GO cloud.
         my $levels = $cloud_levels_of{ ident $self };
-        my $cloud = HTML::TagCloud->new( levels => $levels );
+        my $cloud  = HTML::TagCloud->new(
+            levels                    => $levels,
+            distinguish_adjacent_tags => 1
+        );
         for my $term (@terms) {
-            $cloud->add_static( $term->go_term(), $term->count());
+            $cloud->add_static( $term->go_term(), $term->count() );
         }
 
         return $cloud->html();
