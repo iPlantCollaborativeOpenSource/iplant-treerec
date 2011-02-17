@@ -116,6 +116,7 @@ sub get_tree_rec {
             gene_tree_events     => $gene_tree_events,
             default_species_tree => $def_species_tree,
             go_cloud_generator   => $go_cloud_generator,
+            species_tree_events     => $species_tree_events,
         }
     );
 
