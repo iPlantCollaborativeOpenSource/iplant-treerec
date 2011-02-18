@@ -148,7 +148,9 @@ use Readonly;
             distinguish_adjacent_tags => 1
         );
         for my $term (@terms) {
-            $cloud->add_static( $term->go_term(), $term->count() );
+            my $name = $term->go_term();
+            my $count = $term->count();
+            $cloud->add_static( "$name ($count)", $count );
         }
 
         return $cloud->html();
