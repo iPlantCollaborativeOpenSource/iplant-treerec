@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-public class HighlightNodesInSpeciesTreeEvent extends
-		GwtEvent<HighlightNodesInSpeciesTreeEventHandler>
+public class HighlightNodesInSpeciesTreeEvent extends GwtEvent<HighlightNodesInSpeciesTreeEventHandler>
 {
 
 	private ArrayList<Integer> nodesToHighlight;

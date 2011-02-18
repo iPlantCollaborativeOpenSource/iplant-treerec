@@ -42,21 +42,10 @@ public class WordCloudWindow extends Window
 		compose();
 	}
 
-	public void setContents(String html, String geneFamily) {
+	public void setContents(String html, String geneFamily)
+	{
 		panel.setHtml(html);
 		setHeading("GO terms for " + geneFamily);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onShow()
-	{
-		setSize(500, 460);
-		super.onShow();
-		layout(true);
-		setSize(500, 460);
 	}
 	
 	private void compose()

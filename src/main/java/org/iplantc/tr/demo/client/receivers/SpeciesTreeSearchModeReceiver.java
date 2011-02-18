@@ -42,17 +42,18 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 					handleBranchClick(objJson);
 				}
 
-				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over") || event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
+				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over")
+						|| event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
 				{
 					handleNodeMouseOver(objJson);
 				}
 
-				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out") || event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
+				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out")
+						|| event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
 				{
 					handleNodeMouseOut(objJson);
 				}
-				
-				
+
 			}
 		}
 
@@ -104,6 +105,7 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 
 		window.show();
 		window.toFront();
+>>>>>>> 05b920e23bbc535fdf3ca7cde0555799b0b83d33:src/main/java/org/iplantc/tr/demo/client/receivers/SpeciesTreeSearchModeReceiver.java
 	}
 
 }

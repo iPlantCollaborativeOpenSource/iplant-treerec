@@ -37,8 +37,8 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
- * Outer tree container panel. This class contains the functionality for switching between
- * navigate and investigation modes.
+ * Outer tree container panel. This class contains the functionality for switching between navigate and
+ * investigation modes.
  * 
  * @author amuir
  * 
@@ -89,8 +89,8 @@ public class TreeContainerPanel extends EventBusContainer
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		SpeciesTreeNavModeReceiver receiverNav = new SpeciesTreeNavModeReceiver(eventbus, pnl.getId());
-		EventBusReceiver receiverSelect = new SpeciesTreeInvestigationModeReceiver(
-				eventbus, pnl.getId());
+		EventBusReceiver receiverSelect =
+				new SpeciesTreeInvestigationModeReceiver(eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverNav, buildBroadcastCommand(pnl.getId()));
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
@@ -108,8 +108,8 @@ public class TreeContainerPanel extends EventBusContainer
 	private void addGeneTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
 		GeneTreeNavModeReceiver receiverNav = new GeneTreeNavModeReceiver(eventbus, pnl.getId());
-		GeneTreeInvestigationModeReceiver receiverSelect = new GeneTreeInvestigationModeReceiver(
-				eventbus, pnl.getId());
+		GeneTreeInvestigationModeReceiver receiverSelect =
+				new GeneTreeInvestigationModeReceiver(eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverNav, buildBroadcastCommand(pnl.getId()));
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
@@ -125,38 +125,40 @@ public class TreeContainerPanel extends EventBusContainer
 
 	private void buildNavButton()
 	{
-		btnNav = PanelHelper.buildToggleButton("idNavBtn", "Navigate",
-				new SelectionListener<ButtonEvent>()
-				{
-					@Override
-					public void componentSelected(ButtonEvent ce)
-					{
-						if(btnSelect != null)
+		btnNav =
+				PanelHelper.buildToggleButton("idNavBtn", "Navigate",
+						new SelectionListener<ButtonEvent>()
 						{
-							btnSelect.toggle(false);
-							toggleMode(Mode.NAVIGATE);
-						}
-					}
-				});
+							@Override
+							public void componentSelected(ButtonEvent ce)
+							{
+								if(btnSelect != null)
+								{
+									btnSelect.toggle(false);
+									toggleMode(Mode.NAVIGATE);
+								}
+							}
+						});
 
 		btnNav.toggle(true);
 	}
 
 	private void buildSelectButton()
 	{
-		btnSelect = PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation",
-				new SelectionListener<ButtonEvent>()
-				{
-					@Override
-					public void componentSelected(ButtonEvent ce)
-					{
-						if(btnNav != null)
+		btnSelect =
+				PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation",
+						new SelectionListener<ButtonEvent>()
 						{
-							btnNav.toggle(false);
-							toggleMode(Mode.INVESTIGATION);
-						}
-					}
-				});
+							@Override
+							public void componentSelected(ButtonEvent ce)
+							{
+								if(btnNav != null)
+								{
+									btnNav.toggle(false);
+									toggleMode(Mode.INVESTIGATION);
+								}
+							}
+						});
 	}
 
 	private Hyperlink buildSummaryLink()

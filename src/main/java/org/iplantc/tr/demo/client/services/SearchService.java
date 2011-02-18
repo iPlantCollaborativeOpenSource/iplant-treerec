@@ -20,7 +20,7 @@ public interface SearchService extends RemoteService
 	String getDetails(String idGeneFamily) throws IllegalArgumentException;
 
 	String getSummary(String idGeneFamily) throws IllegalArgumentException;
-	
+
 	String getGoCloud(String idGeneFamily) throws IllegalArgumentException;
 	
 	String doDuplicationSearch(String nodeId) throws IllegalArgumentException;

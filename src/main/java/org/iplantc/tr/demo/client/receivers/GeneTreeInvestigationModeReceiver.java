@@ -28,10 +28,17 @@ public class GeneTreeInvestigationModeReceiver extends TreeReceiver
 	private void handleNodeClick(final JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		GeneTreeInvestigationNodeSelectEvent event =
-				new GeneTreeInvestigationNodeSelectEvent(Integer.parseInt(id),
-						getAbsoluteCoordinates(objJson));
-		eventbus.fireEvent(event);
+		JSONObject obj = JsonUtil.getObject(objJson, "metadata");
+		if(obj != null)
+		{
+			GeneTreeInvestigationNodeSelectEvent event =
+					new GeneTreeInvestigationNodeSelectEvent(Integer.parseInt(id),
+							getAbsoluteCoordinates(objJson), obj.get("isSpeciation").isBoolean()
+									.booleanValue());
+			eventbus.fireEvent(event);
+
+		}
+
 	}
 
 	/**
@@ -47,24 +54,26 @@ public class GeneTreeInvestigationModeReceiver extends TreeReceiver
 			if(isOurEvent(idBroadcaster))
 			{
 				String event = JsonUtil.getString(objJson, "event");
-				System.out.println("event-->" + event.toString());
+				System.out.println("event-->" + event.toString() + "json->" + jsonMsg);
 
 				if(event.equals("node_clicked"))
 				{
 					handleNodeClick(objJson);
 				}
 
-				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over") || event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
+				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over")
+						|| event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
 				{
 					handleNodeMouseOver(objJson);
 				}
 
-				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out") || event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
+				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out")
+						|| event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
 				{
 					handleNodeMouseOut(objJson);
 				}
 			}
 		}
-		
+
 	}
 }

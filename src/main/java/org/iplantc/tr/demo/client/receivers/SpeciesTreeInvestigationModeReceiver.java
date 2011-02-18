@@ -72,12 +72,14 @@ public class SpeciesTreeInvestigationModeReceiver extends TreeReceiver
 					handleEdgeClick(objJson);
 				}
 
-				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over") || event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
+				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over")
+						|| event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
 				{
 					handleNodeMouseOver(objJson);
 				}
 
-				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out") || event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
+				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out")
+						|| event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
 				{
 					handleNodeMouseOut(objJson);
 				}
@@ -93,10 +95,9 @@ public class SpeciesTreeInvestigationModeReceiver extends TreeReceiver
 	private void handleLabelClick(JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		SpeciesTreeInvestigationLeafSelectEvent event = new SpeciesTreeInvestigationLeafSelectEvent(Integer.parseInt(id));
+		SpeciesTreeInvestigationLeafSelectEvent event =
+				new SpeciesTreeInvestigationLeafSelectEvent(Integer.parseInt(id));
 		eventbus.fireEvent(event);
 	}
-
-
 
 }

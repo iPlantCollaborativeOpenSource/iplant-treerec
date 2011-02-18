@@ -13,9 +13,8 @@ public abstract class TreeReceiver extends EventBusReceiver
 	public TreeReceiver(EventBus eventbus, String id)
 	{
 		super(eventbus, id);
-		
-	}
 
+	}
 
 	protected void handleNodeMouseOut(JSONObject objJson)
 	{
@@ -32,5 +31,5 @@ public abstract class TreeReceiver extends EventBusReceiver
 				new TreeNodeMouseOverEvent(Integer.parseInt(id), getAbsoluteCoordinates(objJson));
 		eventbus.fireEvent(event);
 	}
-	
+
 }

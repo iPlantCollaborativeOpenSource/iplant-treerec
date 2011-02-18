@@ -58,8 +58,8 @@ public class TRDetailsPanel extends VerticalPanel
 
 	private Html buildAminoAcidMSASelection(final JSONObject jsonObj)
 	{
-		final TRUrlInfo downloadInfo = TRUrlInfo.extractUrlInfo(jsonObj,
-				"downloadAminoAcidMultipleSequenceAlignment");
+		final TRUrlInfo downloadInfo =
+				TRUrlInfo.extractUrlInfo(jsonObj, "downloadAminoAcidMultipleSequenceAlignment");
 
 		return new Html("<a href=\"" + downloadInfo.getUrl()
 				+ "\"> Multiple Sequence Alignment for Gene Tree (Amino Acid)</a>");
@@ -75,8 +75,8 @@ public class TRDetailsPanel extends VerticalPanel
 
 	private Html buildMultipleSequenceSelection(final JSONObject jsonObj)
 	{
-		final TRUrlInfo downloadInfo = TRUrlInfo.extractUrlInfo(jsonObj,
-				"downloadDnaMultipleSequenceAlignment");
+		final TRUrlInfo downloadInfo =
+				TRUrlInfo.extractUrlInfo(jsonObj, "downloadDnaMultipleSequenceAlignment");
 
 		return new Html("<a href=\"" + downloadInfo.getUrl()
 				+ "\"> Multiple Sequence Alignment for Gene Tree (DNA)</a>");
