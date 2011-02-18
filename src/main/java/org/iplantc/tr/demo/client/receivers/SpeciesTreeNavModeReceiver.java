@@ -52,12 +52,14 @@ public class SpeciesTreeNavModeReceiver extends TreeReceiver
 					handleNodeClick(objJson);
 				}
 
-				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over") || event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
+				if(event.equals("node_mouse_over") || event.equals("leaf_mouse_over")
+						|| event.equals("branch_mouse_over") || event.equals("label_mouse_over"))
 				{
 					handleNodeMouseOver(objJson);
 				}
 
-				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out") || event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
+				if(event.equals("node_mouse_out") || event.equals("leaf_mouse_out")
+						|| event.equals("branch_mouse_out") || event.equals("label_mouse_out"))
 				{
 					handleNodeMouseOut(objJson);
 				}

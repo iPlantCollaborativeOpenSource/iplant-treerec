@@ -3,6 +3,8 @@ package org.iplantc.tr.demo.client.panels;
 import java.util.ArrayList;
 
 import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEvent;
+import org.iplantc.tr.demo.client.events.HighlightBranchesInSpeciesTreeEvent;
+import org.iplantc.tr.demo.client.events.HighlightBranchesInSpeciesTreeEventHandler;
 import org.iplantc.tr.demo.client.events.HighlightNodesInSpeciesTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightNodesInSpeciesTreeEventHandler;
 import org.iplantc.tr.demo.client.events.HighlightSpeciesSubTreeEvent;
@@ -74,6 +76,8 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 		handlers.add(eventbus.addHandler(SpeciesTreeInvestigationEdgeSelectEvent.TYPE,
 				new SpeciesTreeInvestigationEdgeSelectEventHandlerImpl()));
 
+		handlers.add(eventbus.addHandler(HighlightBranchesInSpeciesTreeEvent.TYPE,
+				new HighlightBranchesInSpeciesTreeEventHandlerImpl()));
 		handlers.add(eventbus.addHandler(HighlightNodesInSpeciesTreeEvent.TYPE,
 				new HighlightNodesInSpeciesTreeEventHandlerImpl()));
 	}
@@ -98,7 +102,7 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 		menu.showAt(p.x, p.y);
 	}
 
-	private void highlightNodes(ArrayList<Integer> idNodes)
+	private void highlighBranchs(ArrayList<Integer> idNodes)
 	{
 		for(int i = 0;i < idNodes.size();i++)
 		{
@@ -180,9 +184,9 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 
 	private void getGeneDescendants(final int idNode, boolean edgeSelected, boolean includeSubtree)
 	{
-		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName
-				+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + edgeSelected
-				+ ",\"includeSubtree\":" + includeSubtree + "}", new AsyncCallback<String>()
+		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName + "\",\"speciesTreeNode\":"
+				+ idNode + ",\"edgeSelected\":" + edgeSelected + ",\"includeSubtree\":" + includeSubtree
+				+ "}", new AsyncCallback<String>()
 		{
 			@Override
 			public void onSuccess(String result)
@@ -243,14 +247,36 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 		}
 	}
 
+	private class HighlightBranchesInSpeciesTreeEventHandlerImpl implements
+			HighlightBranchesInSpeciesTreeEventHandler
+	{
+		@Override
+		public void onFire(HighlightBranchesInSpeciesTreeEvent event)
+		{
+			treeView.clearHighlights();
+			ArrayList<Integer> idNodes = event.getNodesToHighlight();
+			highlighBranchs(idNodes);
+		}
+	}
+
 	private class HighlightNodesInSpeciesTreeEventHandlerImpl implements
 			HighlightNodesInSpeciesTreeEventHandler
 	{
 		@Override
 		public void onFire(HighlightNodesInSpeciesTreeEvent event)
 		{
+			treeView.clearHighlights();
 			ArrayList<Integer> idNodes = event.getNodesToHighlight();
-			highlightNodes(idNodes);
+			highlighNodes(idNodes);
 		}
+	}
+
+	private void highlighNodes(ArrayList<Integer> idNodes)
+	{
+		for(int i = 0;i < idNodes.size();i++)
+		{
+			treeView.highlightNode(idNodes.get(i));
+		}
+
 	}
 }

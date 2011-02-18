@@ -10,8 +10,7 @@ public class SpeciesTreeInvestigationLeafSelectEvent extends
 			new GwtEvent.Type<SpeciesTreeInvestigationLeafSelectEventHandler>();
 
 	private int idNode;
-	
-	
+
 	public SpeciesTreeInvestigationLeafSelectEvent(int nodeId)
 	{
 		idNode = nodeId;

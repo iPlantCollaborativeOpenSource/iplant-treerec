@@ -30,11 +30,12 @@ public class WordCloudWindow extends Window
 		compose();
 	}
 
-	public void setContents(String html, String geneFamily) {
+	public void setContents(String html, String geneFamily)
+	{
 		panel.setHtml(html);
 		setHeading("GO terms for " + geneFamily);
 	}
-	
+
 	private void compose()
 	{
 		add(panel);

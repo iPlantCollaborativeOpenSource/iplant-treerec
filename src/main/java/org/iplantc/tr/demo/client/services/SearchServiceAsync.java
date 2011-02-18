@@ -19,6 +19,6 @@ public interface SearchServiceAsync
 	void getDetails(String idGeneFamily, AsyncCallback<String> callback) throws IllegalArgumentException;
 
 	void getSummary(String idGeneFamily, AsyncCallback<String> callback) throws IllegalArgumentException;
-	
+
 	void getGoCloud(String idGeneFamily, AsyncCallback<String> callback) throws IllegalArgumentException;
 }

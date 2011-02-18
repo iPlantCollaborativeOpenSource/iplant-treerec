@@ -8,6 +8,7 @@ import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEvent;
 import org.iplantc.tr.demo.client.events.GeneTreeNavNodeSelectEventHandler;
 import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightNodesInGeneTreeEventHandler;
+import org.iplantc.tr.demo.client.events.HighlightBranchesInSpeciesTreeEvent;
 import org.iplantc.tr.demo.client.events.HighlightNodesInSpeciesTreeEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEventHandler;
@@ -32,9 +33,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class GeneTreeChannelPanel extends NavTreeChannelPanel
 {
-	
+
 	private String geneFamName;
-	
+
 	/**
 	 * Instantiate from an event bus, caption, id, tree and layout
 	 * 
@@ -62,18 +63,17 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 
 		handlers.add(eventbus.addHandler(HighlightNodesInGeneTreeEvent.TYPE,
 				new HighlightNodesInGeneTreeEventHandlerImpl()));
-		
+
 		handlers.add(eventbus.addHandler(SpeciesTreeInvestigationLeafSelectEvent.TYPE,
 				new SpeciesTreeInvestigationLeafSelectEventHandlerImpl()));
-		
+
 		handlers.add(eventbus.addHandler(GeneTreeInvestigationNodeSelectEvent.TYPE,
 				new GeneTreeInvestigationNodeSelectEventHandlerImpl()));
 
 		handlers.add(eventbus.addHandler(GeneTreeNavNodeSelectEvent.TYPE,
 				new GeneTreeNavNodeSelectEventHandlerImpl()));
 	}
-	
-	
+
 	private void displayMenu(Point p, int idNode)
 	{
 		Menu menu = new Menu();
@@ -124,25 +124,33 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 			getGenesForSpecies(event.getIdNode());
 		}
 	}
-	
-	private class GeneTreeInvestigationNodeSelectEventHandlerImpl implements GeneTreeInvestigationNodeSelectEventHandler
+
+	private class GeneTreeInvestigationNodeSelectEventHandlerImpl implements
+			GeneTreeInvestigationNodeSelectEventHandler
 	{
 		@Override
 		public void onFire(GeneTreeInvestigationNodeSelectEvent event)
 		{
-			displayMenu(event.getPoint(),event.getNodeId());
-		}		
+			if(!event.isSpeciation())
+			{
+				displayMenu(event.getPoint(), event.getNodeId());
+			}
+			else
+			{
+				getSpeciesDescendants(event.getNodeId(), false, false, false);
+			}
+		}
 	}
-	
+
 	private class GeneTreeNavNodeSelectEventHandlerImpl implements GeneTreeNavNodeSelectEventHandler
 	{
 		@Override
 		public void onFire(GeneTreeNavNodeSelectEvent event)
 		{
-			treeView.zoomToFitSubtree(event.getNodeId());			
-		}		
+			treeView.zoomToFitSubtree(event.getNodeId());
+		}
 	}
-	
+
 	private void highlightNodes(ArrayList<Integer> idNodes)
 	{
 		for(int i = 0;i < idNodes.size();i++)
@@ -150,7 +158,7 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 			treeView.highlightNode(idNodes.get(i));
 		}
 	}
-	
+
 	private class HighlightDescendantsSelectionListenerImpl extends SelectionListener<MenuEvent>
 	{
 
@@ -161,9 +169,9 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 			int idNode = Integer.parseInt(m.getData("idNode").toString());
 			treeView.highlightSubtree(idNode);
 		}
-		
+
 	}
-	
+
 	private class HighlightDupSelectionListenerImpl extends SelectionListener<MenuEvent>
 	{
 
@@ -172,76 +180,90 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 		{
 			Menu m = (Menu)ce.getSource();
 			int idNode = Integer.parseInt(m.getData("idNode").toString());
-			getSpeciesDescendants(idNode,false,false);
+			getSpeciesDescendants(idNode, false, false, true);
 		}
-		
+
 	}
-	
-	private void getSpeciesDescendants(final int idNode, boolean edgeSelected , boolean includeSubtree)
+
+	private void getSpeciesDescendants(final int idNode, boolean edgeSelected, boolean includeSubtree,
+			final boolean highlightBranchs)
 	{
-		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName
-				+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + edgeSelected + ",\"includeSubtree\":"+ includeSubtree  + "}",
-				new AsyncCallback<String>()
+		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName + "\",\"speciesTreeNode\":"
+				+ idNode + ",\"edgeSelected\":" + edgeSelected + ",\"includeSubtree\":" + includeSubtree
+				+ "}", new AsyncCallback<String>()
+		{
+			@Override
+			public void onSuccess(String result)
+			{
+				ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
+				JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+				if(o1 != null)
 				{
-					@Override
-					public void onSuccess(String result)
+					JSONArray gene_nodes = JsonUtil.getArray(o1, "item");
+					for(int i = 0;i < gene_nodes.size();i++)
 					{
-						ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
-						JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
-						if(o1 != null)
-						{
-							JSONArray gene_nodes = JsonUtil.getArray(o1, "item");
-							for(int i = 0;i < gene_nodes.size();i++)
-							{
-								nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes
-										.get(i).isObject().get("geneTreeNode").toString())));
-							}
-						}
-
-						HighlightNodesInSpeciesTreeEvent event = new HighlightNodesInSpeciesTreeEvent(nodesToHighlight);
-						eventbus.fireEvent(event);
+						nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes.get(i).isObject()
+								.get("geneTreeNode").toString())));
 					}
+				}
 
-					@Override
-					public void onFailure(Throwable arg0)
-					{
-						System.out.println(arg0.toString());
-					}
-				});
+				if(highlightBranchs)
+				{
+					HighlightBranchesInSpeciesTreeEvent event =
+							new HighlightBranchesInSpeciesTreeEvent(nodesToHighlight);
+					eventbus.fireEvent(event);
+				}
+				else
+				{
+					HighlightNodesInSpeciesTreeEvent event =
+							new HighlightNodesInSpeciesTreeEvent(nodesToHighlight);
+					eventbus.fireEvent(event);
+				}
+
+			}
+
+			@Override
+			public void onFailure(Throwable arg0)
+			{
+				System.out.println(arg0.toString());
+			}
+		});
 	}
-	
-	
-	private void getGenesForSpecies (final int idNode)
+
+	private void getGenesForSpecies(final int idNode)
 	{
-		TreeServices.getGeneForSpecies("{\"familyName\":\"" + geneFamName + "\",\"speciesTreeNode\":" + idNode + "}", new AsyncCallback<String>()
+		TreeServices.getGeneForSpecies("{\"familyName\":\"" + geneFamName + "\",\"speciesTreeNode\":"
+				+ idNode + "}", new AsyncCallback<String>()
+		{
+
+			@Override
+			public void onFailure(Throwable arg0)
+			{
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onSuccess(String result)
+			{
+				ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
+				JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+				if(o1 != null)
 				{
-
-					@Override
-					public void onFailure(Throwable arg0)
+					JSONObject gene_nodes_obj = JsonUtil.getObject(o1, "item");
+					JSONArray gene_nodes = JsonUtil.getArray(gene_nodes_obj, "geneTreeNodes");
+					for(int i = 0;i < gene_nodes.size();i++)
 					{
-						// TODO Auto-generated method stub
-						
+						nodesToHighlight.add(Integer.parseInt(JsonUtil
+								.trim(gene_nodes.get(i).toString())));
 					}
+				}
 
-					@Override
-					public void onSuccess(String result)
-					{
-						ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
-						JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
-						if(o1 != null)
-						{
-							JSONObject gene_nodes_obj = JsonUtil.getObject(o1, "item");
-							JSONArray gene_nodes = JsonUtil.getArray(gene_nodes_obj, "geneTreeNodes");
-							for(int i = 0;i < gene_nodes.size();i++)
-							{
-								nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes.get(i).toString())));
-							}
-						}
+				HighlightNodesInGeneTreeEvent event =
+						new HighlightNodesInGeneTreeEvent(nodesToHighlight);
+				eventbus.fireEvent(event);
 
-						HighlightNodesInGeneTreeEvent event = new HighlightNodesInGeneTreeEvent(nodesToHighlight);
-						eventbus.fireEvent(event);
-						
-					}
-				});
+			}
+		});
 	}
 }

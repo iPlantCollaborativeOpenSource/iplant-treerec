@@ -78,8 +78,7 @@ public class TRSearchPanel extends EventBusContainer
 
 	private void addSpeciesTreePanel(LayoutContainer containerOuter, TreeChannelPanel pnl)
 	{
-		EventBusReceiver receiverSelect = new SpeciesTreeSearchModeReceiver(
-				eventbus, pnl.getId());
+		EventBusReceiver receiverSelect = new SpeciesTreeSearchModeReceiver(eventbus, pnl.getId());
 
 		addBroadcaster(pnl.getBroadcaster(), receiverSelect, buildBroadcastCommand(pnl.getId()));
 

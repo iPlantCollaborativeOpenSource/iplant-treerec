@@ -279,7 +279,7 @@ public class TRSearchResultsWindow extends Window
 			String geneFamily = result.getName();
 			searchService.getGoCloud(geneFamily, getCallback(geneFamily));
 		}
-		
+
 		private AsyncCallback<String> getCallback(final String geneFamily)
 		{
 			return new AsyncCallback<String>()
@@ -295,11 +295,11 @@ public class TRSearchResultsWindow extends Window
 				public void onSuccess(String result)
 				{
 					JSONValue html = TRUtil.parseItem(result);
-					if (html != null)
+					if(html != null)
 					{
 						JSONObject htmlObj = html.isObject();
 						String cloud = JsonUtil.getString(htmlObj, "cloud");
-						if (cloud != null)
+						if(cloud != null)
 						{
 							WordCloudWindow window = WordCloudWindow.getInstance();
 							window.setContents(cloud, geneFamily);

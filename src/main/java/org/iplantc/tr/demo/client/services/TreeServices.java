@@ -34,7 +34,7 @@ public class TreeServices
 		ServiceCallWrapper wrapper = new ServiceCallWrapper(ServiceCallWrapper.Type.POST, url, body);
 		SharedServiceFacade.getInstance().getServiceData(wrapper, callback);
 	}
-	
+
 	public static void getGeneForSpecies(String body, AsyncCallback<String> callback)
 	{
 		String url = HOSTNAME + "treereconciliation/get/genes-for-species";

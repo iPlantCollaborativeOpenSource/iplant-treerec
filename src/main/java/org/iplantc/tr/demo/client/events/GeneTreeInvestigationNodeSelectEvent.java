@@ -15,15 +15,26 @@ public class GeneTreeInvestigationNodeSelectEvent extends
 	public static final GwtEvent.Type<GeneTreeInvestigationNodeSelectEventHandler> TYPE =
 			new GwtEvent.Type<GeneTreeInvestigationNodeSelectEventHandler>();
 
+	private boolean isSpeciation;
+
+	/**
+	 * @return the isSpeciation
+	 */
+	public boolean isSpeciation()
+	{
+		return isSpeciation;
+	}
+
 	/**
 	 * Instantiate from a node id.
 	 * 
 	 * @param idNode unique id associated with the selected node.
 	 * @param point x,y coordinate in which user clicked
 	 */
-	public GeneTreeInvestigationNodeSelectEvent(int idNode, Point p)
+	public GeneTreeInvestigationNodeSelectEvent(int idNode, Point p, boolean isSpeciation)
 	{
 		super(idNode, p);
+		this.isSpeciation = isSpeciation;
 	}
 
 	/**
