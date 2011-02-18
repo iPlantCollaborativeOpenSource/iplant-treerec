@@ -1137,14 +1137,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $stylemap = $self->_retrieve_decorations($style);
         my $results;
         for my $key ( keys %{$events} ) {
-#### BUGFIX
-#### TO MAKE THE DUPLICATION ON THE BRANCH TO NULL OCCUR ON THE BRANCH TO 2 (GRAPE)
-            if ( !$key || $key eq '00' ) {
-                $results->{2} = $stylemap->{function}( $events->{$key} );
-            }
-            else {
-                $results->{$key} = $stylemap->{function}( $events->{$key} );
-            }
+               $results->{$key} = $stylemap->{function}( $events->{$key} );
+            
         }
         return $results;
 
