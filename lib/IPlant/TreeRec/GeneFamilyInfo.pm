@@ -471,7 +471,7 @@ Readonly my %EMPTY_SUMMARY => (
             $dbh->resultset('ReconciliationAttribute')
                 ->get_values( $reconciliation_id, 'speciation' );
         };
-        return scalar @results > 0 ? $results[0]->speciation_count() : 0;
+        return scalar @results > 0 ? $results[0] : 0;
     }
 
     ##########################################################################
