@@ -438,10 +438,11 @@ Readonly my %EMPTY_SUMMARY => (
         my $dbh = $dbh_of{ ident $self };
 
         # Get the number of duplications.
-        my @results = eval { $dbh->resultset('DuplicationCount')
-            ->search( {}, { 'bind' => [ $reconciliation_id ] } ) };
-        warn $EVAL_ERROR if $EVAL_ERROR;
-        return scalar @results > 0 ? $results[0]->duplication_count() : 0;
+        my @results = eval {
+            $dbh->resultset('ReconciliationAttribute')
+                ->get_values( $reconciliation_id, 'duplication' );
+        };
+        return scalar @results > 0 ? $results[0] : 0;
     }
 
     ##########################################################################
@@ -466,9 +467,10 @@ Readonly my %EMPTY_SUMMARY => (
         my $dbh = $dbh_of{ ident $self };
 
         # Get the number of speciations.
-        my @results = eval { $dbh->resultset('SpeciationCount')
-            ->search( {}, { 'bind' => [ $reconciliation_id ] } ) };
-        warn $EVAL_ERROR if $EVAL_ERROR;
+        my @results = eval {
+            $dbh->resultset('ReconciliationAttribute')
+                ->get_values( $reconciliation_id, 'speciation' );
+        };
         return scalar @results > 0 ? $results[0]->speciation_count() : 0;
     }
 
