@@ -19,6 +19,7 @@ import com.extjs.gxt.ui.client.data.PagingModelMemoryProxy;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.event.WindowEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.MessageBox;
@@ -36,7 +37,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 
@@ -65,6 +65,17 @@ public class TRSearchResultsWindow extends Window
 		return instance;
 	}
 
+	private TRSearchResultsWindow() {
+		addListener(Events.Show, new Listener<WindowEvent>() {
+
+			@Override
+			public void handleEvent(WindowEvent be)
+			{
+				init(searchTerms, results);
+			}
+		});
+	}
+	
 	public void init(String searchTerms, String results, boolean showBlastColumns,
 			ClientCommand cmdViewFamily, SearchServiceAsync searchService)
 	{
@@ -100,16 +111,6 @@ public class TRSearchResultsWindow extends Window
 			setSize(640, 300);
 		}
 		layout(true);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onRender(Element parent, int pos)
-	{
-		super.onRender(parent, pos);
-		init(searchTerms, results);
 	}
 
 	private void compose()
