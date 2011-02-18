@@ -50,7 +50,13 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 
 	private void handleBranchClick(JSONObject objJson)
 	{
-		System.out.println("event received");
+		String event = JsonUtil.getString(objJson, "event");
+		
+		String id = JsonUtil.getString(objJson, "id");
+		
+		System.out.println("event received" + event + "->" + id);
+		
+
 		
 	}
 

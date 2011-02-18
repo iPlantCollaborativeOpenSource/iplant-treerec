@@ -1,6 +1,7 @@
 package org.iplantc.tr.demo.client.receivers;
 
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationEdgeSelectEvent;
+import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationLeafSelectEvent;
 import org.iplantc.tr.demo.client.events.SpeciesTreeInvestigationNodeSelectEvent;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 
@@ -81,19 +82,19 @@ public class SpeciesTreeInvestigationModeReceiver extends TreeReceiver
 					handleNodeMouseOut(objJson);
 				}
 
-				if(event.equals("leaf_clicked"))
+				if(event.equals("label_clicked") || event.equals("leaf_clicked"))
 				{
-					handleLeafClick(objJson);
+					handleLabelClick(objJson);
 				}
 			}
 		}
 	}
 
-	private void handleLeafClick(JSONObject objJson)
+	private void handleLabelClick(JSONObject objJson)
 	{
 		String id = JsonUtil.getString(objJson, "id");
-		// TODO: make service call to retrieve genes for this species and fire event
-
+		SpeciesTreeInvestigationLeafSelectEvent event = new SpeciesTreeInvestigationLeafSelectEvent(Integer.parseInt(id));
+		eventbus.fireEvent(event);
 	}
 
 

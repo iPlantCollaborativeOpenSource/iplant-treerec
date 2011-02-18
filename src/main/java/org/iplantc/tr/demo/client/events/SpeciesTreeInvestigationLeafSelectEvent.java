@@ -1,7 +1,5 @@
 package org.iplantc.tr.demo.client.events;
 
-import java.util.ArrayList;
-
 import com.google.gwt.event.shared.GwtEvent;
 
 public class SpeciesTreeInvestigationLeafSelectEvent extends
@@ -11,21 +9,25 @@ public class SpeciesTreeInvestigationLeafSelectEvent extends
 	public static final GwtEvent.Type<SpeciesTreeInvestigationLeafSelectEventHandler> TYPE =
 			new GwtEvent.Type<SpeciesTreeInvestigationLeafSelectEventHandler>();
 
-	private ArrayList<Integer> geneTreeNodesToSelect;
+	private int idNode;
+	
+	
+	public SpeciesTreeInvestigationLeafSelectEvent(int nodeId)
+	{
+		idNode = nodeId;
+	}
+
+	/**
+	 * @return the idNode
+	 */
+	public int getIdNode()
+	{
+		return idNode;
+	}
 
 	/**
 	 * @return the geneTreeNodesToSelect
 	 */
-	public ArrayList<Integer> getGeneTreeNodesToSelect()
-	{
-		return geneTreeNodesToSelect;
-	}
-
-	public SpeciesTreeInvestigationLeafSelectEvent(ArrayList<Integer> geneTreeNodesToSelect)
-	{
-		this.geneTreeNodesToSelect = geneTreeNodesToSelect;
-	}
-
 	@Override
 	protected void dispatch(SpeciesTreeInvestigationLeafSelectEventHandler handler)
 	{

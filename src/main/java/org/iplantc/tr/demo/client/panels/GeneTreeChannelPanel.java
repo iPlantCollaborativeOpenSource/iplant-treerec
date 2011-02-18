@@ -109,6 +109,7 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 		@Override
 		public void onFire(HighlightNodesInGeneTreeEvent event)
 		{
+			treeView.clearHighlights();
 			ArrayList<Integer> idNodes = event.getNodesToHighlight();
 			highlightNodes(idNodes);
 		}
@@ -120,8 +121,7 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 		@Override
 		public void onFire(SpeciesTreeInvestigationLeafSelectEvent event)
 		{
-			ArrayList<Integer> idNodes = event.getGeneTreeNodesToSelect();
-			highlightNodes(idNodes);
+			getGenesForSpecies(event.getIdNode());
 		}
 	}
 	
@@ -179,7 +179,7 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 	
 	private void getSpeciesDescendants(final int idNode, boolean edgeSelected , boolean includeSubtree)
 	{
-		TreeServices.getRelatedSpeciesEdgeNode("{\"familyName\":\"" + geneFamName
+		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName
 				+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + edgeSelected + ",\"includeSubtree\":"+ includeSubtree  + "}",
 				new AsyncCallback<String>()
 				{
@@ -206,6 +206,41 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 					public void onFailure(Throwable arg0)
 					{
 						System.out.println(arg0.toString());
+					}
+				});
+	}
+	
+	
+	private void getGenesForSpecies (final int idNode)
+	{
+		TreeServices.getGeneForSpecies("{\"familyName\":\"" + geneFamName + "\",\"speciesTreeNode\":" + idNode + "}", new AsyncCallback<String>()
+				{
+
+					@Override
+					public void onFailure(Throwable arg0)
+					{
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void onSuccess(String result)
+					{
+						ArrayList<Integer> nodesToHighlight = new ArrayList<Integer>();
+						JSONObject o1 = JsonUtil.getObject(JsonUtil.getObject(result), "data");
+						if(o1 != null)
+						{
+							JSONObject gene_nodes_obj = JsonUtil.getObject(o1, "item");
+							JSONArray gene_nodes = JsonUtil.getArray(gene_nodes_obj, "geneTreeNodes");
+							for(int i = 0;i < gene_nodes.size();i++)
+							{
+								nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes.get(i).toString())));
+							}
+						}
+
+						HighlightNodesInGeneTreeEvent event = new HighlightNodesInGeneTreeEvent(nodesToHighlight);
+						eventbus.fireEvent(event);
+						
 					}
 				});
 	}

@@ -180,7 +180,7 @@ public class SpeciesTreeChannelPanel extends NavTreeChannelPanel
 
 	private void getGeneDescendants(final int idNode, boolean edgeSelected, boolean includeSubtree)
 	{
-		TreeServices.getRelatedGeneEdgeNode("{\"familyName\":\"" + geneFamName
+		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName
 				+ "\",\"speciesTreeNode\":" + idNode + ",\"edgeSelected\":" + edgeSelected
 				+ ",\"includeSubtree\":" + includeSubtree + "}", new AsyncCallback<String>()
 		{

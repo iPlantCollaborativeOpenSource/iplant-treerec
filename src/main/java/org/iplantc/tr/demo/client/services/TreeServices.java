@@ -28,16 +28,16 @@ public class TreeServices
 		SharedServiceFacade.getInstance().getServiceData(wrapper, callback);
 	}
 
-	public static void getRelatedGeneEdgeNode(String body, AsyncCallback<String> callback)
+	public static void getRelationship(String body, AsyncCallback<String> callback)
 	{
 		String url = HOSTNAME + "treereconciliation/get/related-nodes";
 		ServiceCallWrapper wrapper = new ServiceCallWrapper(ServiceCallWrapper.Type.POST, url, body);
 		SharedServiceFacade.getInstance().getServiceData(wrapper, callback);
 	}
-
-	public static void getRelatedSpeciesEdgeNode(String body, AsyncCallback<String> callback)
+	
+	public static void getGeneForSpecies(String body, AsyncCallback<String> callback)
 	{
-		String url = HOSTNAME + "treereconciliation/get/related-nodes";
+		String url = HOSTNAME + "treereconciliation/get/genes-for-species";
 		ServiceCallWrapper wrapper = new ServiceCallWrapper(ServiceCallWrapper.Type.POST, url, body);
 		SharedServiceFacade.getInstance().getServiceData(wrapper, callback);
 	}
