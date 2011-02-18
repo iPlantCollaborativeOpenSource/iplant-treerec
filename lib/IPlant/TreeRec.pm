@@ -17,6 +17,7 @@ use IO::Scalar;
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastArgs;
 use IPlant::TreeRec::DuplicationEventFinder;
+use IPlant::TreeRec::ProteinTreeNodeFinder;
 use IPlant::TreeRec::ReconciliationLoader;
 use IPlant::TreeRec::ReconciliationResolver;
 use IPlant::TreeRec::TreeDataFormatter;
@@ -618,7 +619,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
     }   
     
-
     ##########################################################################
     # Usage      : @families = $treerec->find_duplication_events($json);
     #
@@ -855,6 +855,41 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         # Resolve the nodes.
         return $resolver->resolve($search_params_ref);
+    }
+
+    ##########################################################################
+    # Usage      : $results_ref = $treerec->genes_for_species($json);
+    #
+    # Purpose    : Gets the list of gene tree nodes for the given gene family
+    #              name and species tree node ID.
+    #
+    # Returns    : A reference to a hash containing a reference to a list of
+    #              gene tree node IDs.
+    #
+    # Parameters : familyName      - the gene family name.
+    #              speciesTreeNode - the species tree node ID.
+    #
+    # Throws     : IPlant::TreeRec::TreeNotFoundException
+    #              IPlant::TreeRec::NodeNotFoundException
+    sub genes_for_species {
+        my ( $self, $json ) = @_;
+
+        # Parse the JSON that was provided to us.
+        my $search_params_ref = JSON->new()->decode($json);
+
+        # Create a protein tree node finder.
+        my $dbh    = $dbh_of{ ident $self };
+        my $finder = IPlant::TreeRec::ProteinTreeNodeFinder->new($dbh);
+
+        # Extract the search parameters.
+        my $family_name          = $search_params_ref->{familyName};
+        my $species_tree_node_id = $search_params_ref->{speciesTreeNode};
+
+        # Get the list of gene tree node IDs.
+        my @gene_tree_nodes
+            = $finder->for_species( $family_name, $species_tree_node_id );
+        
+        return { geneTreeNodes => \@gene_tree_nodes };
     }
 
     ##########################################################################
@@ -1216,5 +1251,5 @@ gene families.
 
 Dennis Roberts (dennis@iplantcollaborative.org)
 James Estill
-
+Naim Matasci
 

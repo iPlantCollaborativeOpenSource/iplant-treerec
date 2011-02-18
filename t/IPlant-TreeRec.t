@@ -5,7 +5,7 @@ use strict;
 
 #########################
 
-use Test::More tests => 67;
+use Test::More tests => 68;
 BEGIN { use_ok('IPlant::DB::TreeRec') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cv') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvterm') };
@@ -56,6 +56,7 @@ BEGIN { use_ok('IPlant::TreeRec::DuplicationEventFinder') };
 BEGIN { use_ok('IPlant::TreeRec::FileRetriever') };
 BEGIN { use_ok('IPlant::TreeRec::FileTreeLoader') };
 BEGIN { use_ok('IPlant::TreeRec::GeneFamilyInfo') };
+BEGIN { use_ok('IPlant::TreeRec::ProteinTreeNodeFinder') };
 BEGIN { use_ok('IPlant::TreeRec::REST') };
 BEGIN { use_ok('IPlant::TreeRec::REST::API') };
 BEGIN { use_ok('IPlant::TreeRec::REST::API::download') };
