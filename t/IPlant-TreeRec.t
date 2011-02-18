@@ -5,7 +5,7 @@ use strict;
 
 #########################
 
-use Test::More tests => 69;
+use Test::More tests => 71;
 BEGIN { use_ok('IPlant::DB::TreeRec') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cv') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Cvterm') };
@@ -20,6 +20,7 @@ BEGIN { use_ok('IPlant::DB::TreeRec::Result::Dbxrefprop') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::DuplicationCount') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::DuplicationSearch') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Family') };
+BEGIN { use_ok('IPlant::DB::TreeRec::Result::FamilyAttribute') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::FamilyMember') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::GeneIdSearch') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::GoAccessionSearch') };
@@ -32,6 +33,7 @@ BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTree') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTreeAttribute') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTreeMember') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTreeNode') };
+BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTreeNodePath') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::ProteinTreeNodeAttribute') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::Reconciliation') };
 BEGIN { use_ok('IPlant::DB::TreeRec::Result::ReconciliationAttribute') };

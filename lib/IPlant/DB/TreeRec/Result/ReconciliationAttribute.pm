@@ -6,8 +6,6 @@ package IPlant::DB::TreeRec::Result::ReconciliationAttribute;
 use strict;
 use warnings;
 
-our $VERSION = '0.0.2';
-
 use base 'DBIx::Class::Core';
 
 
@@ -44,6 +42,7 @@ __PACKAGE__->table("reconciliation_attribute");
 =head2 rank
 
   data_type: 'smallint'
+  default_value: 0
   is_nullable: 0
 
 =head2 source_id
@@ -63,15 +62,17 @@ __PACKAGE__->add_columns(
   "value",
   { data_type => "text", is_nullable => 0 },
   "rank",
-  { data_type => "smallint", is_nullable => 0 },
+  { data_type => "smallint", default_value => 0, is_nullable => 0 },
   "source_id",
   { data_type => "integer", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("reconciliation_attribute_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-10-25 09:42:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KkKWUNe7O3FrEDYm475Pfw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2011-02-18 13:06:49
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8q3Q+tBQxaRVyTYbBSjsnA
+
+our $VERSION = '0.0.2';
 
 __PACKAGE__->belongs_to(
     reconciliation => "IPlant::DB::TreeRec::Result::Reconciliation",
