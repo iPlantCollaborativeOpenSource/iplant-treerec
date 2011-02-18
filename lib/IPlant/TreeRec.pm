@@ -79,8 +79,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $file_retriever       = $args_ref->{file_retriever};
         my $blast_searcher       = $args_ref->{blast_searcher};
         my $default_species_tree = $args_ref->{default_species_tree};
-        my $gene_tree_events 	 = $args_ref->{gene_tree_events};
- 		my $species_tree_events  = $args_ref->{species_tree_events};
+        my $gene_tree_events     = $args_ref->{gene_tree_events};
+        my $species_tree_events  = $args_ref->{species_tree_events};
         my $go_cloud_generator   = $args_ref->{go_cloud_generator};
 
         # Use the default default species tree if one wasn't provided.
@@ -100,7 +100,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         $default_species_tree_of{ ident $self } = $default_species_tree;
         $gene_tree_events_of{ ident $self }     = $gene_tree_events;
         $go_cloud_generator_of{ ident $self }   = $go_cloud_generator;
-		$species_tree_events_of{ ident $self }  = $species_tree_events;
+        $species_tree_events_of{ ident $self }  = $species_tree_events;
 
         return $self;
     }
@@ -383,10 +383,10 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Load the events information for the gene family.
         my $details_ref
             = $info->get_events( $family_name, $species_tree_name );
-            
 
         # Formats for output
-        $details_ref = $self->_format_gene_tree_events( $details_ref, 'd_and_s' );
+        $details_ref
+            = $self->_format_gene_tree_events( $details_ref, 'd_and_s' );
 
         return camel_case_keys($details_ref);
     }
@@ -461,29 +461,36 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Get the objects we need.
         my $dbh         = $dbh_of{ ident $self };
         my $tree_loader = $gene_tree_loader_of{ ident $self };
-        my $formatter   = IPlant::TreeRec::TreeDataFormatter->new();
         my $rec_loader  = IPlant::TreeRec::ReconciliationLoader->new($dbh);
+
+        # Load the reconciliation data if we're supposed to.
+        my $reconciliation;
+        my $reconciliation_data;
+        if ( defined $species_tree_name ) {
+            $reconciliation = $self->_get_reconciliation( $species_tree_name,
+                $family_name );
+            $reconciliation_data = $rec_loader->load($reconciliation);
+        }
 
         # Load the tree.
         my $tree = $tree_loader->load_gene_tree($family_name);
 
-        # Load the reconciliation if we're supposed to.
-        my $reconciliation;
-        if ( defined $species_tree_name ) {
-            $reconciliation
-                = $rec_loader->load( $species_tree_name, $family_name );
-        }
-        
         #Load the gene tree decorations
-        my$gene_tree_decorations=$self->get_gene_tree_events($family_name);
-
+        my $gene_tree_decorations = $self->get_gene_tree_events($family_name);
 
         # Format the result.
-        my %result = ( 'gene-tree' => $formatter->format_tree($tree) );
-        $result{'gene-tree'}->{'styleMap'}=$gene_tree_decorations;
-      
-        if ( defined $reconciliation ) {
-            $result{'reconciliation'} = $reconciliation;
+        my $formatter = IPlant::TreeRec::TreeDataFormatter->new(
+            {   'dbh'            => $dbh,
+                'tree'           => $tree,
+                'tree_type'      => 'protein',
+                'reconciliation' => $reconciliation,
+            }
+        );
+        my %result = ( 'gene-tree' => $formatter->format_tree() );
+        $result{'gene-tree'}{'styleMap'} = $gene_tree_decorations;
+
+        if ( defined $reconciliation_data ) {
+            $result{'reconciliation'} = $reconciliation_data;
         }
 
         return \%result;
@@ -546,9 +553,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #              IPlant::TreeRec::IllegalArgumentException
     sub get_species_tree_data {
         my ( $self, $json ) = @_;
-		
 
-        
         # Extract the arguments.
         my ( $family_name, $species_tree_name )
             = $self->_extract_tree_args($json);
@@ -558,23 +563,38 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
             $species_tree_name = $default_species_tree_of{ ident $self };
         }
 
-        # Fetch the tree loader and create a tree formatter.
+        # Fetch the properties we need.
+        my $dbh         = $dbh_of{ ident $self };
         my $tree_loader = $gene_tree_loader_of{ ident $self };
-        my $formatter   = IPlant::TreeRec::TreeDataFormatter->new();
 
         # Load the tree.
-        my$tree = $tree_loader->load_species_tree($species_tree_name);
-        my%results = %{$formatter->format_tree($tree)};
-        
-        		
-        #Load the species tree decorations
-        $results{styleMap}->{branchDecorations}=$self->get_species_tree_events($family_name, $species_tree_name);
-        
+        my $tree = $tree_loader->load_species_tree($species_tree_name);
 
-        #Returns the tree.
+        # Get the reconciliation if we're supposed to.
+        my $reconciliation;
+        if ( defined $family_name ) {
+            $reconciliation = $self->_get_reconciliation( $species_tree_name,
+                $family_name );
+        }
+
+        # Format the tree.
+        my $formatter = IPlant::TreeRec::TreeDataFormatter->new(
+            {   'dbh'            => $dbh,
+                'tree'           => $tree,
+                'tree_type'      => 'species',
+                'reconciliation' => $reconciliation,
+            }
+        );
+        my %results = %{ $formatter->format_tree() };
+
+        # Load the species tree decorations
+        $results{styleMap}->{branchDecorations}
+            = $self->get_species_tree_events( $family_name,
+            $species_tree_name );
+
         return \%results;
     }
-    
+
     ##########################################################################
     # Usage      : $data_ref = $treerec->get_species_tree_event(
     #			   $family_name, $species_tree_name)
@@ -585,8 +605,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #
     # Parameters : speciesTreeName - the name of the species tree.
     #              familyName      - the name of the related gene tree.
-    #			   If no family name is provided the duplications across 
-    #			   all gene families are returned	
+    #			   If no family name is provided the duplications across
+    #			   all gene families are returned
     #
     # Throws     : IPlant::TreeRec::TreeNotFoundException
     #              IPlant::TreeRec::IllegalArgumentException
@@ -597,28 +617,31 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         if ( !defined $species_tree_name ) {
             $species_tree_name = $default_species_tree_of{ ident $self };
         }
+
         # Fetch the tree loader and family info retreiver.
         my $info = $species_tree_events_of{ ident $self };
 
-		#The output file
+        #The output file
         my $details_ref;
 
         # Load the events information for the gene family.
-        
-        if( !defined $family_name || $family_name eq $species_tree_name){
-            $details_ref = $info->get_all_duplications($species_tree_name );
+
+        if ( !defined $family_name || $family_name eq $species_tree_name ) {
+            $details_ref = $info->get_all_duplications($species_tree_name);
         }
-        else{
-        	$details_ref = $info->get_duplications( $family_name, $species_tree_name );
+        else {
+            $details_ref
+                = $info->get_duplications( $family_name, $species_tree_name );
         }
 
-		#Format for output
-		$details_ref=$self->_format_species_tree_events($details_ref,'species_tree');
+        #Format for output
+        $details_ref = $self->_format_species_tree_events( $details_ref,
+            'species_tree' );
 
         return camel_case_keys($details_ref);
 
-    }   
-    
+    }
+
     ##########################################################################
     # Usage      : @families = $treerec->find_duplication_events($json);
     #
@@ -888,7 +911,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Get the list of gene tree node IDs.
         my @gene_tree_nodes
             = $finder->for_species( $family_name, $species_tree_node_id );
-        
+
         return { geneTreeNodes => \@gene_tree_nodes };
     }
 
@@ -1074,7 +1097,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     }
 
     ##########################################################################
-    # Usage      : $data = $treerec->_format_gene_tree_events( $events, $style );
+    # Usage      : $data = $treerec->_format_gene_tree_events( $events,
+    #                  $style );
     #
     # Purpose    : Generates the visual properties for the gene tree
     #
@@ -1082,7 +1106,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #
     # Parameters : $style - name of the style for the data that needs to
     #                       be represented.
-    # 			   $events  - the list of speciation and duplication events.
+    #              $events  - the list of speciation and duplication events.
     #
     # Throws     : No exceptions.
     sub _format_gene_tree_events {
@@ -1095,9 +1119,9 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
     }
 
-
     ##########################################################################
-    # Usage      : $data = $treerec->_format_species_tree_events( $events, $style );
+    # Usage      : $data = $treerec->_format_species_tree_events( $events,
+    #                  $style );
     #
     # Purpose    : Generates the visual properties for the species tree
     #
@@ -1105,28 +1129,26 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #
     # Parameters : $style - name of the style for the data that needs to
     #                       be represented.
-    # 			   $events  - the list of speciation and duplication events.
+    #              $events  - the list of speciation and duplication events.
     #
     # Throws     : No exceptions.
-	sub _format_species_tree_events{
-		my ( $self, $events, $style ) = @_;
-		my$stylemap=$self->_retrieve_decorations($style);
-		my$results;
-		for my$key (keys %{$events}){
-#### BUGFIX			
+    sub _format_species_tree_events {
+        my ( $self, $events, $style ) = @_;
+        my $stylemap = $self->_retrieve_decorations($style);
+        my $results;
+        for my $key ( keys %{$events} ) {
+#### BUGFIX
 #### TO MAKE THE DUPLICATION ON THE BRANCH TO NULL OCCUR ON THE BRANCH TO 2 (GRAPE)
-			if(!$key || $key eq '00'){
-				$results->{2}=$stylemap->{function}($events->{$key});
-			}
-			else{	
-				$results->{$key}=$stylemap->{function}($events->{$key});
-			}		
-		}
-		return $results;	
-				
-		
-	}
-	
+            if ( !$key || $key eq '00' ) {
+                $results->{2} = $stylemap->{function}( $events->{$key} );
+            }
+            else {
+                $results->{$key} = $stylemap->{function}( $events->{$key} );
+            }
+        }
+        return $results;
+
+    }
 
     ##########################################################################
     # Usage      : $data = $treerec->_retrieve_decorations( $style );
@@ -1141,62 +1163,80 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     # Throws     : No exceptions.
     sub _retrieve_decorations {
         my ( $self, $style ) = @_;
-		#This part will be replaced by database calls
-		#
-		#
-		my$deco={
-			d_and_s =>  {
-    		   		duplication => {
-    		       		nodeStyle=> {
-               				color => '#ff0000',
-               				pointSize => 6,
-               				nodeShape=> 'circle'
-         				},
-          	 			labelStyle => {
-               				color => '#000000'
-           				},
-           				branchStyle => {
-              				strokeColor => '#000000',
-              				lineWidth => 1
-           				},
-           				glyphStyle => {
-               				fillColor => '#99FF99',
-               				strokeColor => '#19B319',
-               				lineWidth => 1
-           				}
-       				},
-       				speciation => {
-    		       		nodeStyle=> {
-               				color => '#0000ff',
-               				pointSize => 6,
-               				nodeShape=> 'square'
-         				},
-          	 			labelStyle => {
-               				color => '#000000'
-           				},
-           				branchStyle => {
-               				strokeColor => '#000000',
-               				lineWidth => 1
-           				},
-           				glyphStyle => {
-               				fillColor => '#99FF99',
-               				strokeColor => '#19B319',
-               				lineWidth => 1
-           				}
-          			}
-       		},
-       		species_tree => {
-       			function => \&_species_tree			
-       		}
-			
-   		};
-   	sub _species_tree{
-   		return "triangle";	
-   	}
-			
-   	return $deco->{$style};
+
+        #This part will be replaced by database calls
+        #
+        #
+        my $deco = {
+            d_and_s => {
+                duplication => {
+                    nodeStyle => {
+                        color     => '#ff0000',
+                        pointSize => 6,
+                        nodeShape => 'circle'
+                    },
+                    labelStyle  => { color => '#000000' },
+                    branchStyle => {
+                        strokeColor => '#000000',
+                        lineWidth   => 1
+                    },
+                    glyphStyle => {
+                        fillColor   => '#99FF99',
+                        strokeColor => '#19B319',
+                        lineWidth   => 1
+                    }
+                },
+                speciation => {
+                    nodeStyle => {
+                        color     => '#0000ff',
+                        pointSize => 6,
+                        nodeShape => 'square'
+                    },
+                    labelStyle  => { color => '#000000' },
+                    branchStyle => {
+                        strokeColor => '#000000',
+                        lineWidth   => 1
+                    },
+                    glyphStyle => {
+                        fillColor   => '#99FF99',
+                        strokeColor => '#19B319',
+                        lineWidth   => 1
+                    }
+                }
+            },
+            species_tree => { function => \&_species_tree }
+
+        };
+
+        sub _species_tree {
+            return "triangle";
+        }
+
+        return $deco->{$style};
     }
 
+    ##########################################################################
+    # Usage      : $reconciliation - $treerec->_get_reconciliation(
+    #                  $species_tree_name, $family_name );
+    #
+    # Purpose    : Fetches a reconciliation object from the database.
+    #
+    # Returns    : The reconciliation.
+    #
+    # Parameters : $species_tree_name - the name of the species tree.
+    #              $family_name       - the name of the gene family.
+    #
+    # Throws     : IPlant::TreeRec::TreeNotFoundException
+    sub _get_reconciliation {
+        my ( $self, $species_tree_name, $family_name ) = @_;
+
+        # Load the reconciliation.
+        my $dbh            = $dbh_of{ ident $self };
+        my $reconciliation = $dbh->resultset('Reconciliation')
+            ->for_species_tree_and_family( $species_tree_name, $family_name );
+
+        return $reconciliation;
+    }
 }
 
 1;

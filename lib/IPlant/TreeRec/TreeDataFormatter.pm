@@ -11,41 +11,71 @@ use Bio::Tree::NodeNHX;
 use Bio::TreeIO;
 use Carp;
 use Class::Std::Utils;
+use JSON;
 use Readonly;
 
 {
+    my %dbh_of;
+    my %tree_of;
+    my %tree_type_of;
+    my %reconciliation_of;
+
     ##########################################################################
-    # Usage      : $formatter = $IPlant::TreeRec::TreeDataFormatter->new();
+    # Usage      : $formatter = $IPlant::TreeRec::TreeDataFormatter->new(
+    #                  {   'dbh'            => $dbh,
+    #                      'tree'           => $tree,
+    #                      'tree_type'      => $tree_type,
+    #                      'reconciliation' => $reconciliation,
+    #                  }
+    #              );
     #
     # Purpose    : Initializes a new tree data formatter.
     #
     # Returns    : The new formatter.
     #
-    # Parameters : None.
+    # Parameters : $dbh            - the database handle.
+    #              $tree           - the tree.
+    #              $tree_type      - the type of the tree.
+    #              $reconciliation - the reconciliation.
     #
     # Throws     : No exceptions.
     sub new {
-        my ($class) = @_;
+        my ( $class, $args_ref ) = @_;
+
+        # Extract the arguments.
+        my $dbh            = $args_ref->{dbh};
+        my $tree           = $args_ref->{tree};
+        my $tree_type      = $args_ref->{tree_type};
+        my $reconciliation = $args_ref->{reconciliation};
 
         # Create the new object.
         my $self = bless anon_scalar, $class;
+
+        # Initialize the object properties.
+        $dbh_of{ ident $self }            = $dbh;
+        $tree_of{ ident $self }           = $tree;
+        $tree_type_of{ ident $self }      = $tree_type;
+        $reconciliation_of{ ident $self } = $reconciliation;
 
         return $self;
     }
 
     ##########################################################################
-    # Usage      : $data_ref = $formatter->format_tree($tree);
+    # Usage      : $data_ref = $formatter->format_tree();
     #
     # Purpose    : Formats the tree as a Perl data structure consisting of
     #              nested hashes.
     #
     # Returns    : The data structure representing the tree.
     #
-    # Parameters : $tree - the tree to format.
+    # Parameters : None.
     #
     # Throws     : No exceptions.
     sub format_tree {
-        my ( $self, $tree ) = @_;
+        my ($self) = @_;
+
+        # Extract the tree.
+        my $tree = $tree_of{ ident $self };
 
         # Build and return the tree.
         return {
@@ -90,7 +120,91 @@ use Readonly;
         # Add the values of any NHX tags that we support.
         $self->_add_supported_tags( $node, $formatted_node );
 
+        # Add the node metadata.
+        $self->_add_node_metadata($formatted_node);
+
         return $formatted_node;
+    }
+
+    ##########################################################################
+    # Usage      : $formatter->_add_node_metadata($formatted_node);
+    #
+    # Purpose    : Adds any metadata that we require to the node.
+    #
+    # Returns    : Nothing.
+    #
+    # Parameters : $formatted_node - the partially formatted tree node.
+    #
+    # Throws     : No exceptions.
+    sub _add_node_metadata {
+        my ( $self, $formatted_node ) = @_;
+
+        # Extract the properties we need.
+        my $dbh            = $dbh_of{ ident $self };
+        my $tree_type      = $tree_type_of{ ident $self };
+        my $reconciliation = $reconciliation_of{ ident $self };
+
+        # Don't bother doing this if we don't have the information we need.
+        return if !defined $dbh;
+        return if !defined $tree_type;
+        return if !defined $reconciliation;
+
+        # Add the metadata for the type of tree that we're formatting.
+        if ( $tree_type eq 'species' ) {
+            $self->_add_species_node_metadata($formatted_node);
+        }
+        else {
+            $self->_add_protein_node_metadata($formatted_node);
+        }
+
+        return;
+    }
+
+    ##########################################################################
+    # Usage      : $formatter->_add_species_node_metadata($formatted_node);
+    #
+    # Purpose    : Adds any metadata that we require to a species tree node.
+    #              Currently, no metadata are required.
+    #
+    # Returns    : Nothing.
+    #
+    # Parameters : $formatted_node - the partially formatted tree node.
+    #
+    # Throws     : No exceptions.
+    sub _add_species_node_metadata {
+        my ( $self, $formatted_node ) = @_;
+        return;
+    }
+
+    ##########################################################################
+    # Usage      : $formatter->_add_protein_node_metadata($formatted_node);
+    #
+    # Purpose    : Adds any metadata that we require to a protein tree node.
+    #
+    # Returns    : Nothing.
+    #
+    # Parameters : $formatted_node - the partially formatted tree node.
+    #
+    # Throws     : No exceptions.
+    sub _add_protein_node_metadata {
+        my ( $self, $formatted_node ) = @_;
+
+        # Extract the properties we need.
+        my $dbh            = $dbh_of{ ident $self };
+        my $reconciliation = $reconciliation_of{ ident $self };
+
+        # Look up the reconciliation node.
+        my $reconciliation_node = $dbh->resultset('ReconciliationNode')->find(
+            {   'reconciliation_id' => $reconciliation->id(),
+                'node_id'           => $formatted_node->{id},
+            }
+        );
+
+        # Build the metadata.
+        $formatted_node->{metadata}{isSpeciation}
+            = $reconciliation_node->is_on_node() ? JSON::true : JSON::false;
+
+        return;
     }
 
     # The NHX tags that we support, indexed by the corresponding field name.

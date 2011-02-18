@@ -58,30 +58,25 @@ use Readonly;
     }
 
     ##########################################################################
-    # Usage      : $reconciliation_ref = $loader->load( $species_tree_name,
-    #                  $family_name );
+    # Usage      : $reconciliation_ref = $loader->load($reconciliation);
     #
-    # Purpose    : Loads the reconciliation for the given species tree name
-    #              and gene family name.
+    # Purpose    : Loads the information for the given reconciliation.
     #
     # Returns    : A reference to a data structure representing the
     #              reconciliation.
     #
-    # Parameters : $species_tree_name - the name of the species tree.
-    #              $family_name       - the name of the gene family.
+    # Parameters : $reconciliation - the reconciliation to load.
     #
     # Throws     : IPlant::TreeRec::GeneFamilyNotFoundException
     #              IPlant::TreeRec::TreeNotFoundException
-    #              IPlant::TreeRec::ReconciliationNotFoundException
     sub load {
-        my ( $self, $species_tree_name, $family_name ) = @_;
+        my ( $self, $reconciliation ) = @_;
+
+        # Make sure that there's a reconciliation to load.
+        return if !defined $reconciliation;
 
         # Get the database handle.
         my $dbh = $dbh_of{ ident $self };
-
-        # Get the reconciliation.
-        my $reconciliation = $dbh->resultset('Reconciliation')
-            ->for_species_tree_and_family( $species_tree_name, $family_name );
 
         return {
             speciesToGene => $self->_species_to_gene($reconciliation),
