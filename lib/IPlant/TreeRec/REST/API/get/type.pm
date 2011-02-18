@@ -25,11 +25,13 @@ Readonly my %PREPROCESSOR_FOR => (
 
 # The supported HTTP methods for the various object types.
 Readonly my %SUPPORTED_METHODS_FOR => (
-    'related-nodes' => [qw( POST )],
-    'species-tree'  => [qw( GET POST )],
-    'species-data'  => [qw( GET POST )],
-    'gene-tree'     => [qw( GET POST )],
-    'gene-data'     => [qw( GET POST )],
+    'related-nodes'     => [qw( POST )],
+    'species-tree'      => [qw( GET POST )],
+    'species-data'      => [qw( GET POST )],
+    'gene-tree'         => [qw( GET POST )],
+    'gene-data'         => [qw( GET POST )],
+    'go-cloud'          => [qw( GET POST )],
+    'genes-for-species' => [qw( POST )],
 );
 
 # The name of the default species tree.
@@ -37,13 +39,14 @@ Readonly my $SPECIES_TREE => 'bowers_rosids';
 
 # The getter subroutines for the various object types.
 Readonly my %GETTER_FOR => (
-    'related-nodes' => sub { $_[0]->resolve_reconciliations( $_[2] ) },
-    'species-tree'  => sub { $_[0]->get_species_tree_file( $_[2] ) },
-    'species-data'  => sub { $_[0]->get_species_tree_data( $_[2] ) },
-    'gene-tree'     => sub { $_[0]->get_gene_tree_file( $_[2] ) },
-    'gene-data'     => sub { $_[0]->get_gene_tree_data( $_[2] ) },
-    'go-cloud'      => sub { $_[0]->get_go_cloud( $_[2] ) },
-    'default'       => sub { $_[0]->get_file( $_[1], "" ) },
+    'related-nodes'     => sub { $_[0]->resolve_reconciliations( $_[2] ) },
+    'species-tree'      => sub { $_[0]->get_species_tree_file( $_[2] ) },
+    'species-data'      => sub { $_[0]->get_species_tree_data( $_[2] ) },
+    'gene-tree'         => sub { $_[0]->get_gene_tree_file( $_[2] ) },
+    'gene-data'         => sub { $_[0]->get_gene_tree_data( $_[2] ) },
+    'go-cloud'          => sub { $_[0]->get_go_cloud( $_[2] ) },
+    'genes-for-species' => sub { $_[0]->genes_for_species( $_[2] ) },
+    'default'           => sub { $_[0]->get_file( $_[1], "" ) },
 );
 
 use base 'IPlant::TreeRec::REST::Handler';

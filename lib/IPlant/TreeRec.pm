@@ -17,6 +17,7 @@ use IO::Scalar;
 use IPlant::DB::TreeRec;
 use IPlant::TreeRec::BlastArgs;
 use IPlant::TreeRec::DuplicationEventFinder;
+use IPlant::TreeRec::ProteinTreeNodeFinder;
 use IPlant::TreeRec::ReconciliationLoader;
 use IPlant::TreeRec::ReconciliationResolver;
 use IPlant::TreeRec::TreeDataFormatter;
