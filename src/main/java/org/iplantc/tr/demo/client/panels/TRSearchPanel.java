@@ -29,8 +29,8 @@ import com.extjs.gxt.ui.client.widget.VerticalPanel;
  */
 public class TRSearchPanel extends EventBusContainer
 {
-	TreeRetriever treeRetriever;
-	VerticalPanel outerPanel;
+	private TreeRetriever treeRetriever;
+	private VerticalPanel outerPanel;
 	private ArrayList<Receiver> receiversSelect;
 
 	/**
