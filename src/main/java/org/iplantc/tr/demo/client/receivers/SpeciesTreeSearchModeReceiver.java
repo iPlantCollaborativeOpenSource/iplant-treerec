@@ -105,7 +105,6 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 
 		window.show();
 		window.toFront();
->>>>>>> 05b920e23bbc535fdf3ca7cde0555799b0b83d33:src/main/java/org/iplantc/tr/demo/client/receivers/SpeciesTreeSearchModeReceiver.java
 	}
 
 }
