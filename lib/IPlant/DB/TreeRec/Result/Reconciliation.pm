@@ -63,6 +63,10 @@ __PACKAGE__->has_many(
     nodes => "IPlant::DB::TreeRec::Result::ReconciliationNode",
     { "foreign.reconciliation_id" => "self.reconciliation_id" }
 );
+__PACKAGE__->has_many(
+    attributes => "IPlant::DB::TreeRec::Result::ReconciliationAttribute",
+    { "foreign.reconciliation_id" => "self.reconciliation_id" }
+);
 __PACKAGE__->has_one(
     species_tree => "IPlant::DB::TreeRec::Result::SpeciesTree",
     { "foreign.species_tree_id" => "self.species_tree_id" }

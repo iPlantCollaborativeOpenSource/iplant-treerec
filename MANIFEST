@@ -28,6 +28,7 @@ lib/IPlant/DB/TreeRec/Result/ProteinTreeMember.pm
 lib/IPlant/DB/TreeRec/Result/ProteinTreeNode.pm
 lib/IPlant/DB/TreeRec/Result/ProteinTreeNodeAttribute.pm
 lib/IPlant/DB/TreeRec/Result/Reconciliation.pm
+lib/IPlant/DB/TreeRec/Result/ReconciliationAttribute.pm
 lib/IPlant/DB/TreeRec/Result/ReconciliationNode.pm
 lib/IPlant/DB/TreeRec/Result/Sequence.pm
 lib/IPlant/DB/TreeRec/Result/SpeciationCount.pm
