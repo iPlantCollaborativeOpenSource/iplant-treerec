@@ -476,25 +476,11 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         #Load the gene tree decorations
         my$gene_tree_decorations=$self->get_gene_tree_events($family_name);
 
-        #transform them into events
-        my@nodes=$tree->get_nodes;
-#TODO Add metadata
-#        for(@nodes){
-#        	print keys %{$_->{_tags}},"\n";	
-#        }
-#        my%state_id=%{$gene_tree_decorations->{'nodeStyleMappings'}};
-#        my%id_state = reverse %state_id;
-        	        
-        #Load the species tree decorations
-        my$species_tree_decorations=$self->get_species_tree_events($family_name);
 
         # Format the result.
         my %result = ( 'gene-tree' => $formatter->format_tree($tree) );
         $result{'gene-tree'}->{'styleMap'}=$gene_tree_decorations;
       
-        if ( defined $species_tree_decorations ) {
-            $result{'gene-tree'}->{'styleMap'}->{'branchDecorations'} = $species_tree_decorations;
-        }
         if ( defined $reconciliation ) {
             $result{'reconciliation'} = $reconciliation;
         }
@@ -559,7 +545,9 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     #              IPlant::TreeRec::IllegalArgumentException
     sub get_species_tree_data {
         my ( $self, $json ) = @_;
+		
 
+        
         # Extract the arguments.
         my ( $family_name, $species_tree_name )
             = $self->_extract_tree_args($json);
@@ -575,14 +563,14 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
 
         # Load the tree.
         my$tree = $tree_loader->load_species_tree($species_tree_name);
-
-		my%results;
+        my%results = %{$formatter->format_tree($tree)};
         
-        $results{tree} = $formatter->format_tree($tree);
+        		
+        #Load the species tree decorations
+        $results{styleMap}->{branchDecorations}=$self->get_species_tree_events($family_name, $species_tree_name);
         
-        $results{styleMap}->{branchDecorations}=$self->get_species_tree_events($species_tree_name);
 
-        # Format and return the tree.
+        #Returns the tree.
         return \%results;
     }
     
