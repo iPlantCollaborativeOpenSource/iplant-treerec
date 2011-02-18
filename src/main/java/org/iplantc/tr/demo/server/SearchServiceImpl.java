@@ -11,6 +11,8 @@ import java.net.URLConnection;
 
 import org.iplantc.tr.demo.client.services.SearchService;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -234,6 +236,28 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 		{
 			URLConnection connection =
 					get(HOSTNAME + "treereconciliation/get/go-cloud/" + idGeneFamily);
+
+			ret = retrieveResult(connection);
+		}
+		catch(IOException e)
+		{
+			throw new IllegalArgumentException("Search failed.", e);
+		}
+
+		return ret;
+	}
+
+	/** Performs a duplication search for a given node ID. Assumes the edge was clicked on. */
+	public String doDuplicationSearch(String idNode) throws IllegalArgumentException
+	{
+		String ret = "";
+
+		String json = "{\"nodeId\":" + idNode + ", \"edgeSelected\":true}";
+		
+		try
+		{
+			URLConnection connection =
+					update(HOSTNAME + "treereconciliation/search/duplication-search/", json);
 
 			ret = retrieveResult(connection);
 		}

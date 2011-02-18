@@ -10,6 +10,7 @@ import org.iplantc.tr.demo.client.services.SearchServiceAsync;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 import org.iplantc.tr.demo.client.utils.TRUtil;
 
+import com.extjs.gxt.ui.client.GXT;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
 import com.extjs.gxt.ui.client.data.BasePagingLoader;
@@ -36,7 +37,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Accessibility;
 import com.google.gwt.user.client.ui.HTML;
 
 public class TRSearchResultsWindow extends Window
@@ -49,6 +52,8 @@ public class TRSearchResultsWindow extends Window
 	private ContentPanel pnlGrid;
 	private PagingToolBar pageBar;
 	private SearchServiceAsync searchService;
+	private String searchTerms;
+	private String results;
 
 	private static TRSearchResultsWindow instance;
 
@@ -68,8 +73,9 @@ public class TRSearchResultsWindow extends Window
 		this.showBlastColumns = showBlastColumns;
 		this.cmdViewFamily = cmdViewFamily;
 		this.searchService = searchService;
+		this.searchTerms = searchTerms;
+		this.results = results;
 
-		init(searchTerms, results);
 	}
 
 	private void init(String heading, String results)
@@ -84,6 +90,8 @@ public class TRSearchResultsWindow extends Window
 		pnlGrid.setHeading(heading);
 
 		compose();
+		
+		pnlGrid.layout(true);
 		if(showBlastColumns)
 		{
 			// BLAST has two more columns
@@ -93,6 +101,17 @@ public class TRSearchResultsWindow extends Window
 		{
 			setSize(640, 300);
 		}
+		layout(true);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void onRender(Element parent, int pos)
+	{
+		super.onRender(parent, pos);
+		init(searchTerms, results);
 	}
 
 	private void compose()
@@ -103,7 +122,7 @@ public class TRSearchResultsWindow extends Window
 		pnlGrid.setBottomComponent(pageBar);
 
 		add(pnlGrid);
-		layout();
+		
 	}
 
 	/**
@@ -157,6 +176,7 @@ public class TRSearchResultsWindow extends Window
 				}
 			}
 		});
+			
 	}
 
 	// build column with custom renderer

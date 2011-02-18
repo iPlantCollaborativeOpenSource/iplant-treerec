@@ -1,6 +1,6 @@
 package org.iplantc.tr.demo.client.windows;
 
-import org.iplantc.tr.demo.client.commands.ClientCommand;
+import org.iplantc.tr.demo.client.commands.ViewTRResultCommand;
 import org.iplantc.tr.demo.client.panels.TRAdvancedSearchPanel;
 import org.iplantc.tr.demo.client.services.SearchService;
 import org.iplantc.tr.demo.client.services.SearchServiceAsync;
@@ -34,19 +34,9 @@ public class TRSearchWindow extends Window
 	{
 		removeAll();
 
-		add(new TRAdvancedSearchPanel(searchService, new ViewCommand()));
+		add(new TRAdvancedSearchPanel(searchService, new ViewTRResultCommand()));
 
 		layout();
-	}
-
-	private void doView(final String params)
-	{
-		if(params != null)
-		{
-			TRViewerWindow win = new TRViewerWindow(params);
-			win.show();
-			win.maximize();
-		}
 	}
 
 	public static TRSearchWindow getInstance()
@@ -57,14 +47,5 @@ public class TRSearchWindow extends Window
 		}
 
 		return instance;
-	}
-
-	class ViewCommand implements ClientCommand
-	{
-		@Override
-		public void execute(final String params)
-		{
-			doView(params);
-		}
 	}
 }
