@@ -10,7 +10,6 @@ import org.iplantc.tr.demo.client.services.SearchServiceAsync;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
 import org.iplantc.tr.demo.client.utils.TRUtil;
 
-import com.extjs.gxt.ui.client.GXT;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
 import com.extjs.gxt.ui.client.data.BasePagingLoader;
@@ -39,7 +38,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Accessibility;
 import com.google.gwt.user.client.ui.HTML;
 
 public class TRSearchResultsWindow extends Window
@@ -90,7 +88,7 @@ public class TRSearchResultsWindow extends Window
 		pnlGrid.setHeading(heading);
 
 		compose();
-		
+
 		pnlGrid.layout(true);
 		if(showBlastColumns)
 		{
@@ -122,7 +120,7 @@ public class TRSearchResultsWindow extends Window
 		pnlGrid.setBottomComponent(pageBar);
 
 		add(pnlGrid);
-		
+
 	}
 
 	/**
@@ -176,7 +174,7 @@ public class TRSearchResultsWindow extends Window
 				}
 			}
 		});
-			
+
 	}
 
 	// build column with custom renderer
@@ -195,8 +193,8 @@ public class TRSearchResultsWindow extends Window
 	{
 		List<ColumnConfig> config = new ArrayList<ColumnConfig>();
 
-		ColumnConfig geneFamilyConfig =
-				buildConfig("name", "Gene Family<br/>Identifier", 140, HorizontalAlignment.LEFT);
+		ColumnConfig geneFamilyConfig = buildConfig("name", "Gene Family<br/>Identifier", 140,
+				HorizontalAlignment.LEFT);
 		geneFamilyConfig.setRenderer(new GeneFamilyColumnRenderer());
 		config.add(geneFamilyConfig);
 
@@ -210,9 +208,8 @@ public class TRSearchResultsWindow extends Window
 		config.add(buildConfig("goAnnotations", "Molecular Function/<br/>Biological Process", 200,
 				HorizontalAlignment.LEFT));
 
-		ColumnConfig goTermsConfig =
-				buildConfig("numGoTerms", "Number of GO<br/>terms in family", 120,
-						HorizontalAlignment.LEFT);
+		ColumnConfig goTermsConfig = buildConfig("numGoTerms", "Number of GO<br/>terms in family", 120,
+				HorizontalAlignment.LEFT);
 		goTermsConfig.setRenderer(new GoTermsColumnRenderer());
 		config.add(goTermsConfig);
 
@@ -282,16 +279,24 @@ public class TRSearchResultsWindow extends Window
 		public Object render(final TRSearchResult result, String property, ColumnData config,
 				int rowIndex, int colIndex, ListStore<TRSearchResult> store, Grid<TRSearchResult> grid)
 		{
-			HTML link = new HTML(result.getGoTermCount() + " <a href=\"#\"> (view all)</a>");
-			link.addClickHandler(new ClickHandler()
+			String goTermCount = result.getGoTermCount();
+			if("0".equals(goTermCount))
 			{
-				@Override
-				public void onClick(ClickEvent arg0)
+				return new HTML("0");
+			}
+			else
+			{
+				HTML link = new HTML(goTermCount + " <a href=\"#\"> (view all)</a>");
+				link.addClickHandler(new ClickHandler()
 				{
-					showWordCloud(result);
-				}
-			});
-			return link;
+					@Override
+					public void onClick(ClickEvent arg0)
+					{
+						showWordCloud(result);
+					}
+				});
+				return link;
+			}
 		}
 
 		private void showWordCloud(TRSearchResult result)
@@ -299,7 +304,7 @@ public class TRSearchResultsWindow extends Window
 			String geneFamily = result.getName();
 			searchService.getGoCloud(geneFamily, getCallback(geneFamily));
 		}
-		
+
 		private AsyncCallback<String> getCallback(final String geneFamily)
 		{
 			return new AsyncCallback<String>()
@@ -315,11 +320,11 @@ public class TRSearchResultsWindow extends Window
 				public void onSuccess(String result)
 				{
 					JSONValue html = TRUtil.parseItem(result);
-					if (html != null)
+					if(html != null)
 					{
 						JSONObject htmlObj = html.isObject();
 						String cloud = JsonUtil.getString(htmlObj, "cloud");
-						if (cloud != null)
+						if(cloud != null)
 						{
 							WordCloudWindow window = WordCloudWindow.getInstance();
 							window.setContents(cloud, geneFamily);
