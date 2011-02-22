@@ -1137,8 +1137,12 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         my $stylemap = $self->_retrieve_decorations($style);
         my $results;
         for my $key ( keys %{$events} ) {
-               $results->{$key} = $stylemap->{function}( $events->{$key} );
-            
+            if ( !$key || $key eq '00' ) {
+                $results->{2} = $stylemap->{function}( $events->{$key} );
+            }
+            else {
+                $results->{$key} = $stylemap->{function}( $events->{$key} );
+            }
         }
         return $results;
 
