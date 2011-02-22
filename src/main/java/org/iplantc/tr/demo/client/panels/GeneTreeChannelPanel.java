@@ -188,7 +188,7 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 	private void getSpeciesDescendants(final int idNode, boolean edgeSelected, boolean includeSubtree,
 			final boolean highlightBranchs)
 	{
-		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName + "\",\"speciesTreeNode\":"
+		TreeServices.getRelationship("{\"familyName\":\"" + geneFamName + "\",\"geneTreeNode\":"
 				+ idNode + ",\"edgeSelected\":" + edgeSelected + ",\"includeSubtree\":" + includeSubtree
 				+ "}", new AsyncCallback<String>()
 		{
@@ -203,7 +203,7 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 					for(int i = 0;i < gene_nodes.size();i++)
 					{
 						nodesToHighlight.add(Integer.parseInt(JsonUtil.trim(gene_nodes.get(i).isObject()
-								.get("geneTreeNode").toString())));
+								.get("speciesTreeNode").toString())));
 					}
 				}
 
