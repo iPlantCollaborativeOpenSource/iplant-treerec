@@ -252,9 +252,6 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{
 		String ret = "{";
 
-		// XXX delete me
-		ret += "\"sequenceType\": \"protein\",";
-
 		ret += "\"sequence\": \"" + JsonUtil.escapeNewLine(pnlSearchBlast.getSearchTerms()) + "\"";
 
 		ret += "}";
