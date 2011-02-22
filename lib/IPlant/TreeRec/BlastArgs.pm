@@ -120,19 +120,7 @@ Readonly my %TYPE_INFO_FOR => (
 
 	# Determine the type of sequence if not defined.
 	if (!defined $sequence_type) {
-	    my $seq_test = $sequence;
-	    
-	    # Remove FASTA headers
-	    $seq_test =~ s/^>*.+\n//xsg; 
-
-	    # Check for diagnostic amino acid residues
-	    if ($seq_test =~ m/(E|F|I|L|P|Q|e|f|i|l|p|q)/xms) {
-		$sequence_type = 'protein';
-	    }
-	    else {
-		$sequence_type = 'nucleotide';
-	    }
-    
+            $sequence_type = _determine_sequence_type($sequence);
 	}
 
 	# Set default values for evalue and maxNumSeqs.
@@ -140,7 +128,6 @@ Readonly my %TYPE_INFO_FOR => (
         $evalue = '0.01' if !defined $evalue;
 
         # Get the information we need to create the object.
-	# Get the sequence type if not define
         my $type_info_ref = $TYPE_INFO_FOR{$sequence_type};
         IPlant::TreeRec::IllegalArgumentException->throw()
             if !defined $type_info_ref;
@@ -155,7 +142,6 @@ Readonly my %TYPE_INFO_FOR => (
             }
         );
     }
-
 
     ##########################################################################
     # Usage      : $sequence = $blast_args->get_sequence();
@@ -205,6 +191,33 @@ Readonly my %TYPE_INFO_FOR => (
 		 '-max_target_seqs', $max_num_seqs,
 		 '-outfmt', "6 qseqid sseqid evalue qstart qend" );
     }
+}
+
+##########################################################################
+# Usage      : $sequence_type = _determine_sequence_type($sequence);
+#
+# Purpose    : Determines the type of the given sequence.  The sequence
+#              type is assumed to be 'nucleotide' unless we can find a
+#              character that doesn't belong in a nucelotide sequence.
+#
+# Returns    : The sequence type ('nucleotide' or 'protein');
+#
+# Parameters : $sequence - the sequence to categorize.
+#
+# Throws     : No exceptions.
+sub _determine_sequence_type {
+    my ($sequence) = @_;
+    my @lines = split m/ [\r][\n]? | [\n] /ixms, $sequence;
+
+    # Search for sequence lines that do not contain only nucleotide bases.
+    LINE:
+    for my $line (@lines) {
+        next LINE if $line =~ m/ \A > /xms;
+        if ( $line !~ m/ \A [ACTG]* \z /xms ) {
+            return 'protein';
+        }
+    }
+    return 'nucleotide';
 }
 
 1;
