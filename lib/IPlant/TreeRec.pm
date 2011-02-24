@@ -1179,8 +1179,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
                         lineWidth   => 1
                     },
                     glyphStyle => {
-                        fillColor   => '#99FF99',
-                        strokeColor => '#19B319',
+                        fillColor   => '#ff0000',
+                        strokeColor => '#990000',
                         lineWidth   => 1
                     }
                 },
@@ -1196,8 +1196,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
                         lineWidth   => 1
                     },
                     glyphStyle => {
-                        fillColor   => '#99FF99',
-                        strokeColor => '#19B319',
+                        fillColor   => '#ff0000',
+                        strokeColor => '#990000',
                         lineWidth   => 1
                     }
                 }
@@ -1207,7 +1207,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         };
 
         sub _species_tree {
-            return "triangle";
+            return "circle";
         }
 
         return $deco->{$style};
