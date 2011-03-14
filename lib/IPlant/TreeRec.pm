@@ -757,7 +757,6 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Prune any results we don't want.
         my @results = $self->_prune_blast_results(@blast_results);
 
-        # Load the gene family summary information.
         $self->_load_gene_family_summaries( \@results, $species_tree_name );
 
         # Convert the hash keys to camel-case.
@@ -770,10 +769,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     ##########################################################################
     # Usage      : @results = $treerec->_prune_blast_results(@all_results);
     #
-    # Purpose    : Keeps only the best hit for each gene identifier.  The
-    #              BLAST program output is sorted with the best hit at the
-    #              top, so loading only the first result for each gene ID
-    #              will do what we want.
+    # Purpose    : Keeps only the best hit for each gene family.
     #
     # Returns    : The pruned list of BLAST results.
     #
@@ -782,11 +778,23 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
     # Throws     : No exceptions.
     sub _prune_blast_results {
         my ( $self, @all_results ) = @_;
-        my ( %seen, @results );
 
-        # Find the list of unique results.
-        foreach my $result (@all_results) {
-            push( @results, $result ) unless $seen{ $result->{'gene_id'} }++;
+        # Find the best result for each gene family.
+        my %best_result_for;
+        for my $result_ref (@all_results) {
+            my ( $name, $curr_evalue ) = @{$result_ref}{ 'name', 'evalue' };
+            my $best_result = $best_result_for{$name};
+            my $best_evalue
+                = defined $best_result ? $best_result->{'evalue'} : undef;
+            if ( !defined $best_evalue || $curr_evalue < $best_evalue ) {
+                $best_result_for{$name} = $result_ref;
+            }
+        }
+
+        # Build the array of results.
+        my @results;
+        for my $name ( sort keys %best_result_for ) {
+            push @results, $best_result_for{$name};
         }
 
         return @results;
@@ -824,8 +832,8 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
             my $member  = $dbh->resultset('Member')
                 ->find( { stable_id => $gene_id } );
 
-           # If the expectation is that a gene can belong to muliptle families
-           # then this would need to make gene_family_name an array
+            # If the expectation is that a gene can belong to muliptle
+            # families then this would need to make gene_family_name an array
             if ( defined $member ) {
                 for my $family ( $member->families() ) {
                     $blast_result->{'name'} = $family->stable_id();

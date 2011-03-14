@@ -113,12 +113,13 @@ use Readonly;
 	for my $row (@rows) {
 	    my $blast_result = {};
 	    my @cols = split (/\t/,$row);
-            $blast_result->{'query_id'} = $self->_strip_species( $cols[0] );
-            $blast_result->{'gene_id'}  = $self->_strip_species( $cols[1] );
-	    $blast_result->{'evalue'} = $cols[2];
-	    $blast_result->{'query_start'} = $cols[3];
-	    $blast_result->{'query_end'} = $cols[4];
-	    $blast_result->{'length'} = int($cols[4]) - int($cols[3]) + 1;
+            my ( $query_id, $gene_id, $evalue, $start, $end ) = @cols;
+            $blast_result->{'query_id'} = $self->_strip_species( $query_id );
+            $blast_result->{'gene_id'}  = $self->_strip_species( $gene_id );
+	    $blast_result->{'evalue'} = $evalue;
+	    $blast_result->{'query_start'} = $start;
+	    $blast_result->{'query_end'} = $end;
+	    $blast_result->{'length'} = abs( int $start - int $end ) + 1;
 	    push @output, $blast_result;
 	}
 	return @output;
