@@ -757,6 +757,7 @@ Readonly my $DEFAULT_DEFAULT_SPECIES_TREE => 'bowers_rosids';
         # Prune any results we don't want.
         my @results = $self->_prune_blast_results(@blast_results);
 
+        # Load the gene family summary information.
         $self->_load_gene_family_summaries( \@results, $species_tree_name );
 
         # Convert the hash keys to camel-case.
