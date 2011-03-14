@@ -109,20 +109,20 @@ use Readonly;
 
         # Extract the BLAST results to an array of hashes
         my @rows = split m/ [\r] [\n]? | [\n] /xms, $out;
-	my @output;
-	for my $row (@rows) {
-	    my $blast_result = {};
-	    my @cols = split (/\t/,$row);
+        my @output;
+        for my $row (@rows) {
+            my $blast_result = {};
+            my @cols = split( /\t/, $row );
             my ( $query_id, $gene_id, $evalue, $start, $end ) = @cols;
-            $blast_result->{'query_id'} = $self->_strip_species( $query_id );
-            $blast_result->{'gene_id'}  = $self->_strip_species( $gene_id );
-	    $blast_result->{'evalue'} = $evalue;
-	    $blast_result->{'query_start'} = $start;
-	    $blast_result->{'query_end'} = $end;
-	    $blast_result->{'length'} = abs( int $start - int $end ) + 1;
-	    push @output, $blast_result;
-	}
-	return @output;
+            $blast_result->{'query_id'}    = $self->_strip_species($query_id);
+            $blast_result->{'gene_id'}     = $self->_strip_species($gene_id);
+            $blast_result->{'evalue'}      = $evalue;
+            $blast_result->{'query_start'} = $start;
+            $blast_result->{'query_end'}   = $end;
+            $blast_result->{'length'}      = abs( int $start - int $end ) + 1;
+            push @output, $blast_result;
+        }
+        return @output;
     }
 
     ##########################################################################
