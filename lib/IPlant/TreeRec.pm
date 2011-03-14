@@ -1254,7 +1254,7 @@ IPlant::TreeRec - perl extension for accessing reconciled gene trees.
 
 =head1 VERSION
 
-This documentation refers to IPlant::TreeRec version 0.0.1.
+This documentation refers to IPlant::TreeRec version 0.0.3.
 
 =head1 SYNOPSIS
 
