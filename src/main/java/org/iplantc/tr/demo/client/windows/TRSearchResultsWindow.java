@@ -1,6 +1,7 @@
 package org.iplantc.tr.demo.client.windows;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.iplantc.tr.demo.client.JsTRSearchResult;
@@ -21,6 +22,8 @@ import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.WindowEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.store.Store;
+import com.extjs.gxt.ui.client.store.StoreSorter;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.Window;
@@ -146,6 +149,7 @@ public class TRSearchResultsWindow extends Window
 		PagingModelMemoryProxy proxy = new PagingModelMemoryProxy(results);
 		PagingLoader<PagingLoadResult<?>> loader = new BasePagingLoader<PagingLoadResult<?>>(proxy);
 		ListStore<TRSearchResult> store = new ListStore<TRSearchResult>(loader);
+		store.setStoreSorter(new TRResultsSorter());
 		pageBar = new PagingToolBar(20);
 		pageBar.bind(loader);
 		loader.load(0, 20);
@@ -156,7 +160,8 @@ public class TRSearchResultsWindow extends Window
 
 		gridResults.getSelectionModel().setSelectionMode(SelectionMode.MULTI);
 		gridResults.setAutoExpandColumn("name");
-
+		gridResults.getView().setSortingEnabled(true);
+		
 		gridResults.getView().setEmptyText("No results to display.");
 		gridResults.getView().setForceFit(true);
 
@@ -184,7 +189,7 @@ public class TRSearchResultsWindow extends Window
 		ColumnConfig ret = new ColumnConfig(id, caption, width);
 
 		ret.setMenuDisabled(true);
-		ret.setSortable(false);
+		//ret.setSortable(true);
 		ret.setAlignment(alignment);
 
 		return ret;
@@ -338,5 +343,41 @@ public class TRSearchResultsWindow extends Window
 		}
 
 	}
+	
+	
+	class TRResultsSorter extends StoreSorter<TRSearchResult>{
+		
+		@Override
+		public int compare(Store<TRSearchResult> store, TRSearchResult m1,
+				TRSearchResult m2, String property) {
+			
+			
+			
+			
+			if(property.equals("numGenes") || property.equals("numSpecies") ||   property.equals("numDuplications") || property.equals("alignLength")) {
+				
+				Integer m11 = Integer.parseInt(m1.get(property).toString());
+				Integer m22 = Integer.parseInt(m2.get(property).toString());
+				return m11.compareTo(m22);
+			}else if(property.equals("numGoTerms")){
+				
+				String[] values1 = m1.getGoTermCount().split(" ");
+				String[] values2 = m2.getGoTermCount().split(" ");
+				Integer m11 = Integer.parseInt(values1[0]);
+				Integer m22 = Integer.parseInt(values2[0]);
+				return m11.compareTo(m22);
+			}else if(property.equals("eValue")) {
+				Double m11 = Double.parseDouble(m1.get(property).toString());
+				Double m22 = Double.parseDouble(m2.get(property).toString());
+				return m11.compareTo(m22);
+			}
+			
+			
+			return super.compare(store, m1, m2, property);
+		}
+		
+	}
+	
+	
 
 }

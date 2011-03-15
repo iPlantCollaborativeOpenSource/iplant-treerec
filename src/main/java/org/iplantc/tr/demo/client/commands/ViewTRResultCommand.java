@@ -17,7 +17,8 @@ public class ViewTRResultCommand implements ClientCommand
 		{
 			TRViewerWindow win = new TRViewerWindow(params);
 			win.show();
-			win.maximize();
+			win.setSize(500,500);
+			win.setResizable(true);
 		}
 	}
 }
