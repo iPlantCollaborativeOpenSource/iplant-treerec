@@ -18,6 +18,7 @@ import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.ProgressBar;
+import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
@@ -28,11 +29,12 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
 
 public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 {
 	private final SearchServiceAsync searchService = GWT.create(SearchService.class);
-	private SeachCallback searchCallback;
+	private  SearchCallback searchCallback;
 	private SearchingDialog searchingDialog;
 
 	public SpeciesTreeSearchModeReceiver(EventBus eventbus, String id)
@@ -98,7 +100,7 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 
 		searchingDialog.setHideOnButtonClick(true);
 
-		searchCallback = new SeachCallback();
+		searchCallback = new SearchCallback();
 
 		searchingDialog.show();
 		searchService.doDuplicationSearch(nodeId, searchCallback);
@@ -109,7 +111,7 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
 
 		window.init("Duplication Events", result, false, new ViewTRResultCommand(), searchService);
-
+		window.layout();
 		window.show();
 		window.toFront();
 	}
@@ -127,13 +129,28 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 		}
 
 		public void init() {
-			setSize(200, 80);
-			setTitle("Searching for Duplication Events");
+			
+			
+			
+			setHeading("Searching");
+			setSize(250, 120);
+			
 		}
 
 		public void compose() {
+			VerticalPanel panel = new VerticalPanel();
+			Label text = new Label("Searching for Duplication Events");
 			ContinousProgressBar progress = new ContinousProgressBar("Searching...");
+			progress.setBorders(false);
+			panel.setBorders(false);
+			setBorders(false);
+			panel.add(text);
+			panel.add(progress);
+			
 			setLayout(new FitLayout());
+			
+			
+			
 			setButtons(Dialog.CANCEL);
 			Button cancel = getButtonById(Dialog.CANCEL);
 			
@@ -154,7 +171,7 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 				
 			});
 
-			add(progress);
+			add(panel);
 			progress.start();
 			layout();
 		}
@@ -162,7 +179,7 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 
 	}
 	
-	class SeachCallback implements AsyncCallback<String>{
+	class SearchCallback implements AsyncCallback<String>{
 		
 		boolean cancelled = false;
 
@@ -177,10 +194,11 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 		@Override
 		public void onSuccess(String result)
 		{
-			searchingDialog.hide();
+			
 			if(!cancelled) {
 				showResultsWindow(result);
 			}
+			searchingDialog.hide();
 		}
 
 

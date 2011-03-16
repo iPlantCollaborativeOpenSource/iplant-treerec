@@ -64,7 +64,7 @@ public class TRSearchResultsWindow extends Window
 		{
 			instance = new TRSearchResultsWindow();
 		}
-
+		instance.hide();
 		return instance;
 	}
 
@@ -87,7 +87,7 @@ public class TRSearchResultsWindow extends Window
 		this.searchService = searchService;
 		this.searchTerms = searchTerms;
 		this.results = results;
-
+		
 	}
 
 	private void init(String heading, String results)
@@ -122,7 +122,7 @@ public class TRSearchResultsWindow extends Window
 
 		pnlGrid.add(gridResults);
 		pnlGrid.setBottomComponent(pageBar);
-
+		gridResults.getView().refresh(false);
 		add(pnlGrid);
 
 	}
@@ -329,6 +329,7 @@ public class TRSearchResultsWindow extends Window
 					if(html != null)
 					{
 						JSONObject htmlObj = html.isObject();
+						MessageBox.info("", htmlObj.toString(), null);
 						String cloud = JsonUtil.getString(htmlObj, "cloud");
 						if(cloud != null)
 						{

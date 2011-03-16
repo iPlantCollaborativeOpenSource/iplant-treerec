@@ -11,7 +11,7 @@ public class ContinousProgressBar extends ProgressBar {
 	private String updateText;
 	
 	public ContinousProgressBar(String caption) {
-		setBounds(10, 10, 200, Style.DEFAULT);
+		setBounds(10, 10, 250, Style.DEFAULT);
 		setHeight(60);
 		updateText = caption;
 		timer = new Timer() {

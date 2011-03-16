@@ -19,7 +19,7 @@ public class WordCloudWindow extends Window
 		{
 			instance = new WordCloudWindow();
 		}
-
+		instance.hide();
 		return instance;
 	}
 
