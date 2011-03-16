@@ -278,7 +278,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		pnlSearchGeneName = new SimpleSearchPanel("Gene of interest:");
 		pnlSearchGO =
 				new SimpleSearchPanel(
-						"GO term to query (can be accession number or one or multiple terms):");
+						"GO term to query (can be GO IDS or one or multiple terms):");
 
 		pnlSearchFamilyId = new SimpleSearchPanel("Gene Family ID (internal identifier):");
 
@@ -596,7 +596,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
 
 		window.init(heading, results, isBlast, cmdView, searchService);
-		window.setSize(500,500);
+		
 		window.show();
 		window.toFront();
 	}

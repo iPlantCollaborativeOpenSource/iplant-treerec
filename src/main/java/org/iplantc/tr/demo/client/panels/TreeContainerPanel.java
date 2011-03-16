@@ -126,7 +126,7 @@ public class TreeContainerPanel extends EventBusContainer
 	private void buildNavButton()
 	{
 		btnNav =
-				PanelHelper.buildToggleButton("idNavBtn", "Navigate",
+				PanelHelper.buildToggleButton("idNavBtn", "Navigation Mode",
 						new SelectionListener<ButtonEvent>()
 						{
 							@Override
@@ -146,7 +146,7 @@ public class TreeContainerPanel extends EventBusContainer
 	private void buildSelectButton()
 	{
 		btnSelect =
-				PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation",
+				PanelHelper.buildToggleButton("idInvestigationBtn", "Investigation Mode",
 						new SelectionListener<ButtonEvent>()
 						{
 							@Override
