@@ -30,6 +30,7 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 
 public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 {
@@ -103,6 +104,7 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 		searchCallback = new SearchCallback();
 
 		searchingDialog.show();
+		
 		searchService.doDuplicationSearch(nodeId, searchCallback);
 	}
 
@@ -122,7 +124,7 @@ public class SpeciesTreeSearchModeReceiver extends TreeReceiver
 		
 		public SearchingDialog(ClientCommand cmdCancel) {
 			super();
-
+			setModal(true);
 			this.cmdCancel =cmdCancel;
 			init();
 			compose();

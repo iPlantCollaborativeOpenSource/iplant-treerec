@@ -62,6 +62,7 @@ public class TRSearchPanel extends EventBusContainer
 	private Component buildInfoLabel()
 	{
 		Hyperlink link = new Hyperlink("Advanced Search Options");
+		link.setStyleAttribute("color", "blue");
 		link.addListener(Events.OnClick, new Listener<BaseEvent>()
 		{
 			@Override
@@ -94,11 +95,12 @@ public class TRSearchPanel extends EventBusContainer
 		@Override
 		public void execute()
 		{
+			outerPanel.add(buildInfoLabel());
 			outerPanel.add(buildAdvSearch());
 			addSpeciesTreePanel(outerPanel, new TRSearchSpeciesChannelPanel(eventbus, "Species Tree",
 					"idSearchSpeciesTree", getTree(), getLayout()));
 
-			outerPanel.add(buildInfoLabel());
+			
 			layout();
 			show();
 		}

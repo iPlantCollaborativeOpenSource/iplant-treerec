@@ -2,6 +2,8 @@ package org.iplantc.tr.demo.client.panels;
 
 import java.util.List;
 
+import org.iplantc.tr.demo.client.callback.CancellableSearchCallback;
+import org.iplantc.tr.demo.client.ContinousProgressBar;
 import org.iplantc.tr.demo.client.commands.ClientCommand;
 import org.iplantc.tr.demo.client.services.SearchServiceAsync;
 import org.iplantc.tr.demo.client.utils.JsonUtil;
@@ -10,10 +12,13 @@ import org.iplantc.tr.demo.client.windows.TRSearchResultsWindow;
 
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
+import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.KeyListener;
+import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
@@ -23,6 +28,7 @@ import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.TextArea;
 import com.extjs.gxt.ui.client.widget.form.TextField;
+import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -277,8 +283,8 @@ public class TRAdvancedSearchPanel extends ContentPanel
 
 		pnlSearchGeneName = new SimpleSearchPanel("Gene of interest:");
 		pnlSearchGO =
-				new SimpleSearchPanel(
-						"GO term to query (can be GO IDS or one or multiple terms):");
+			new SimpleSearchPanel(
+			"GO term to query (can be GO IDS or one or multiple terms):");
 
 		pnlSearchFamilyId = new SimpleSearchPanel("Gene Family ID (internal identifier):");
 
@@ -307,29 +313,33 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	abstract class SearchPanel extends VerticalPanel
 	{
 		protected Button btnSearch;
-		protected Status waitIcon;
+		//protected Status waitIcon;
 
 		protected abstract void setFocusWidget();
 
 		protected abstract Widget getFocusWidget();
 
+		protected SearchingDialog dlg;
+		
 		private SearchPanel()
 		{
 			setSpacing(5);
+			
+			
 		}
 
 		private Button buildSearchButton()
 		{
 			Button btn =
-					PanelHelper.buildButton("idTRSearchBtn", "Search",
-							new SelectionListener<ButtonEvent>()
-							{
-								@Override
-								public void componentSelected(ButtonEvent ce)
-								{
-									performSearch();
-								}
-							});
+				PanelHelper.buildButton("idTRSearchBtn", "Search",
+						new SelectionListener<ButtonEvent>()
+						{
+					@Override
+					public void componentSelected(ButtonEvent ce)
+					{
+						performSearch();
+					}
+						});
 
 			btn.setEnabled(false);
 
@@ -343,24 +353,24 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			ret.setStyleAttribute("margin-top", "5px");
 
 			btnSearch = buildSearchButton();
-			waitIcon = new Status();
+
 
 			ret.add(btnSearch);
-			ret.add(waitIcon);
+
 
 			return ret;
 		}
 
 		protected void searchBegin()
 		{
-			waitIcon.setBusy("Searching");
+			dlg.show();
 			btnSearch.disable();
 		}
 
 		protected void searchComplete()
 		{
 			btnSearch.enable();
-			waitIcon.clearStatus("");
+
 		}
 
 		protected boolean isValidSearchEntry(String entry)
@@ -452,9 +462,9 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			return entrySearch;
 		}
 
-		public AsyncCallback<String> getSearchCallback(final String term)
+		public CancellableSearchCallback getSearchCallback(final String term)
 		{
-			return new AsyncCallback<String>()
+			return new CancellableSearchCallback()
 			{
 				@Override
 				public void onFailure(Throwable arg0)
@@ -468,16 +478,18 @@ public class TRAdvancedSearchPanel extends ContentPanel
 				@Override
 				public void onSuccess(String result)
 				{
-					searchComplete();
-					String value = selectSearchType.getValue(selectSearchType.getSelectedIndex());
+					if(!cancelled) {
+						searchComplete();
+						String value = selectSearchType.getValue(selectSearchType.getSelectedIndex());
 
-					if(value.equals(SEARCH_TYPE_FAMILY_ID))
-					{
-						showFamilyIdResult(result);
-					}
-					else
-					{
-						showSimpleResultsWindow("Results for term " + term + ":", result);
+						if(value.equals(SEARCH_TYPE_FAMILY_ID))
+						{
+							showFamilyIdResult(result);
+						}
+						else
+						{
+							showSimpleResultsWindow("Results for term " + term + ":", result);
+						}
 					}
 				}
 			};
@@ -491,7 +503,9 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		private static final String TR_BLAST_SEARCH_AREA_ID = "idTRSearchField";
 
 		private SearchTextArea areaSearch;
-
+		private CancellableSearchCallback blastCallBack;
+		
+		
 		public BLASTSearchPanel()
 		{
 			init();
@@ -534,7 +548,11 @@ public class TRAdvancedSearchPanel extends ContentPanel
 
 			// add search components
 			pnlInner.add(areaSearch);
-
+			dlg = new SearchingDialog(new StopSearchCommand(getSearchCallback()));
+			
+			dlg.setHideOnButtonClick(true);
+			dlg.setModal(true);
+			
 			add(pnlInner);
 			add(buildSearchBar());
 		}
@@ -557,26 +575,37 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			return areaSearch;
 		}
 
-		public AsyncCallback<String> getSearchCallback()
+		public CancellableSearchCallback getSearchCallback()
 		{
-			return new AsyncCallback<String>()
-			{
-				@Override
-				public void onFailure(Throwable arg0)
+			if(blastCallBack==null) {
+				blastCallBack  = new CancellableSearchCallback()
 				{
-					searchComplete();
+					@Override
+					public void onFailure(Throwable arg0)
+					{
+						searchComplete();
+						dlg.hide();
+						String err = "Search failed for term: " + pnlSearchBlast.getSearchTerms();
+						MessageBox.alert("Error", err, null);
+					}
 
-					String err = "Search failed for term: " + pnlSearchBlast.getSearchTerms();
-					MessageBox.alert("Error", err, null);
-				}
+					@Override
+					public void onSuccess(String result)
+					{
+						if(!cancelled) {
+							searchComplete();
+							dlg.hide();
+							showBlastResultsWindow("Results for BLAST search for entered sequence:", result);
+						}
+						searchComplete();
+					}
+				};
 
-				@Override
-				public void onSuccess(String result)
-				{
-					searchComplete();
-					showBlastResultsWindow("Results for BLAST search for entered sequence:", result);
-				}
-			};
+				return blastCallBack;
+			}else {
+				blastCallBack.enable();
+				return blastCallBack;
+			}
 		}
 
 		class SearchTextArea extends TextArea
@@ -596,7 +625,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		TRSearchResultsWindow window = TRSearchResultsWindow.getInstance();
 
 		window.init(heading, results, isBlast, cmdView, searchService);
-		
+
 		window.show();
 		window.toFront();
 	}
@@ -639,5 +668,90 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		}
 
 		MessageBox.alert("Not Found", "The gene family ID was not found.", null);
+	}
+
+
+	class SearchingDialog extends Dialog{
+
+		private StopSearchCommand cmdCancel;
+
+		public SearchingDialog(StopSearchCommand cmdCancel) {
+			super();
+
+			this.cmdCancel =cmdCancel;
+			init();
+			compose();
+		}
+
+		public void init() {
+
+
+
+			setHeading("Searching");
+			setSize(250, 120);
+
+		}
+
+		public void compose() {
+			VerticalPanel panel = new VerticalPanel();
+			Label text = new Label("Searching for Duplication Events");
+			ContinousProgressBar progress = new ContinousProgressBar("Searching...");
+			progress.setBorders(false);
+			panel.setBorders(false);
+			setBorders(false);
+			panel.add(text);
+			panel.add(progress);
+
+			setLayout(new FitLayout());
+
+
+
+			setButtons(Dialog.CANCEL);
+			Button cancel = getButtonById(Dialog.CANCEL);
+
+			cancel.addSelectionListener(new SelectionListener<ButtonEvent>() {
+
+				@Override
+				public void componentSelected(ButtonEvent ce) {
+					hide();
+
+				}
+			});
+
+			addListener(Events.Hide, new Listener<ComponentEvent>() {
+
+				public void handleEvent(ComponentEvent be) {
+					cmdCancel.executeCallbackAction();
+				};
+
+			});
+
+			add(panel);
+			progress.start();
+			layout();
+		}
+
+
+	}
+
+
+	class StopSearchCommand implements ClientCommand{
+
+		CancellableSearchCallback callback;
+
+		public  StopSearchCommand(CancellableSearchCallback callback) {
+			this.callback = callback;
+		}
+
+		@Override
+		public void execute(String params) {
+
+
+		}
+
+		public void executeCallbackAction() {
+			callback.cancel();
+		}
+
 	}
 }
