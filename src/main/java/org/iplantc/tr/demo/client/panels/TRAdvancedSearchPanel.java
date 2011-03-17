@@ -88,7 +88,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		setBorders(false);
 		setBodyBorder(false);
 		setHeaderVisible(false);
-		setSize(402, 214);
+		setSize(402, 180);
 		setBodyStyle("background-color: #EDEDED");
 		setStyleAttribute("background-color", "#EDEDED");
 	}
@@ -231,6 +231,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{
 		if(searchService != null && term != null)
 		{
+			pnlSearchGeneName.initSearchingDialog(new StopSearchCommand(pnlSearchGeneName.getSearchCallback(term)));
 			pnlSearchGeneName.searchBegin();
 			searchService.doGeneIdSearch(term, pnlSearchGeneName.getSearchCallback(term));
 		}
@@ -240,6 +241,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{
 		if(term != null)
 		{
+			pnlSearchGO.initSearchingDialog(new StopSearchCommand(pnlSearchGO.getSearchCallback(term)));
 			pnlSearchGO.searchBegin();
 			searchService.doGoTermSearch(term, pnlSearchGO.getSearchCallback(term));
 		}
@@ -249,6 +251,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	{
 		if(term != null)
 		{
+			pnlSearchFamilyId.initSearchingDialog(new StopSearchCommand(pnlSearchFamilyId.getSearchCallback(term)));
 			pnlSearchFamilyId.searchBegin();
 			searchService.getSummary(term, pnlSearchFamilyId.getSearchCallback(term));
 		}
@@ -320,12 +323,12 @@ public class TRAdvancedSearchPanel extends ContentPanel
 		protected abstract Widget getFocusWidget();
 
 		protected SearchingDialog dlg;
-		
+
 		private SearchPanel()
 		{
 			setSpacing(5);
-			
-			
+
+
 		}
 
 		private Button buildSearchButton()
@@ -391,9 +394,10 @@ public class TRAdvancedSearchPanel extends ContentPanel
 	class SimpleSearchPanel extends SearchPanel
 	{
 		private static final String TR_SEARCH_FIELD_ID = "idTRSearchField";
-
+		private CancellableSearchCallback searchCallback;
 		private TextField<String> entrySearch;
 		private String searchLabel;
+		private StopSearchCommand cmdCancel;
 
 		public SimpleSearchPanel(String searchLabel)
 		{
@@ -407,6 +411,20 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			entrySearch = buildSearchEntry();
 		}
 
+		public void initSearchingDialog(StopSearchCommand cmdStop) {
+			dlg = new SearchingDialog(cmdStop);
+			dlg.addListener(Events.Hide, new Listener<ComponentEvent>() {
+				
+				@Override
+				public void handleEvent(ComponentEvent be) {
+					searchComplete();
+				}
+				
+			});
+			dlg.setHideOnButtonClick(true);
+			dlg.setModal(true);
+		}
+
 		private void compose()
 		{
 			VerticalPanel pnlInner = new VerticalPanel();
@@ -417,6 +435,8 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			add(pnlInner);
 
 			add(buildSearchBar());
+
+
 		}
 
 		private TextField<String> buildSearchEntry()
@@ -462,38 +482,49 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			return entrySearch;
 		}
 
+
+
 		public CancellableSearchCallback getSearchCallback(final String term)
 		{
-			return new CancellableSearchCallback()
-			{
-				@Override
-				public void onFailure(Throwable arg0)
-				{
-					searchComplete();
 
-					String err = "Search failed for term: " + term;
-					MessageBox.alert("Error", err, null);
-				}
-
-				@Override
-				public void onSuccess(String result)
+			if(searchCallback==null) {
+				searchCallback = new CancellableSearchCallback()
 				{
-					if(!cancelled) {
+					@Override
+					public void onFailure(Throwable arg0)
+					{
 						searchComplete();
-						String value = selectSearchType.getValue(selectSearchType.getSelectedIndex());
-
-						if(value.equals(SEARCH_TYPE_FAMILY_ID))
-						{
-							showFamilyIdResult(result);
-						}
-						else
-						{
-							showSimpleResultsWindow("Results for term " + term + ":", result);
-						}
+						dlg.hide();
+						String err = "Search failed for term: " + term;
+						MessageBox.alert("Error", err, null);
 					}
-				}
-			};
+
+					@Override
+					public void onSuccess(String result)
+					{
+						if(!cancelled) {
+							searchComplete();
+							String value = selectSearchType.getValue(selectSearchType.getSelectedIndex());
+							dlg.hide();
+							if(value.equals(SEARCH_TYPE_FAMILY_ID))
+							{
+								showFamilyIdResult(result);
+							}
+							else
+							{
+								showSimpleResultsWindow("Results for term " + term + ":", result);
+							}
+						}
+						searchComplete();
+					}
+				};
+
+			}
+
+			return searchCallback;
 		}
+		
+		
 	}
 
 	// BLAST search panel - contains text area, search button and fields for supported
@@ -504,8 +535,8 @@ public class TRAdvancedSearchPanel extends ContentPanel
 
 		private SearchTextArea areaSearch;
 		private CancellableSearchCallback blastCallBack;
-		
-		
+
+
 		public BLASTSearchPanel()
 		{
 			init();
@@ -549,10 +580,10 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			// add search components
 			pnlInner.add(areaSearch);
 			dlg = new SearchingDialog(new StopSearchCommand(getSearchCallback()));
-			
+
 			dlg.setHideOnButtonClick(true);
 			dlg.setModal(true);
-			
+
 			add(pnlInner);
 			add(buildSearchBar());
 		}
@@ -713,7 +744,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 
 				@Override
 				public void componentSelected(ButtonEvent ce) {
-					hide();
+					cmdCancel.executeCallbackAction();
 
 				}
 			});
@@ -721,7 +752,7 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			addListener(Events.Hide, new Listener<ComponentEvent>() {
 
 				public void handleEvent(ComponentEvent be) {
-					cmdCancel.executeCallbackAction();
+
 				};
 
 			});
@@ -729,6 +760,10 @@ public class TRAdvancedSearchPanel extends ContentPanel
 			add(panel);
 			progress.start();
 			layout();
+		}
+
+		public void setCommand(StopSearchCommand cmdCommand) {
+			cmdCancel = cmdCommand;
 		}
 
 
