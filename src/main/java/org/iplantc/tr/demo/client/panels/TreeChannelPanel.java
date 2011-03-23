@@ -36,6 +36,9 @@ public abstract class TreeChannelPanel extends ContentPanel
 
 	protected List<HandlerRegistration> handlers;
 
+	int windowWidth=1600;
+	int windowHeight=800;
+	
 	/**
 	 * Instantiate from an event bus, caption, id, tree and layout
 	 * 
@@ -46,12 +49,15 @@ public abstract class TreeChannelPanel extends ContentPanel
 	 * @param layoutTree layout data.
 	 */
 	public TreeChannelPanel(final EventBus eventbus, final String caption, final String id,
-			final String jsonTree, final String layoutTree)
+			final String jsonTree, final String layoutTree, int w, int h)
 	{
 		this.eventbus = eventbus;
 		this.jsonTree = jsonTree;
 		this.layoutTree = layoutTree;
-
+		if(w>0 && h>0) {
+			windowWidth =w;
+			windowHeight=h;
+		}
 		init(caption, id);
 
 		initListeners();
@@ -76,8 +82,21 @@ public abstract class TreeChannelPanel extends ContentPanel
 
 	private final static native JsLayoutCladogram getLayout(String json) /*-{
 																			return eval(json);
-																			}-*/;
+	
+		
+																				}-*/;
 
+	public void resizeView(int w , int h){
+		treeView.resize(w-((int)w/2)-30, h-200);
+		treeView.requestRender();
+		treeView.zoomToFit();
+	}
+	
+	public void setInitialTreeSizes(int w, int h) {
+		windowWidth =w;
+		windowHeight=h;
+	}
+	
 	private DetailView buildTreeView()
 	{
 		DetailView ret = null; // assume failure
@@ -85,7 +104,7 @@ public abstract class TreeChannelPanel extends ContentPanel
 		// we need at least a tree and a layout for rendering
 		if(jsonTree != null && layoutTree != null)
 		{
-			ret = new DetailView(800, 600);
+			ret = new DetailView(windowWidth-((int)windowWidth/2)-30, windowHeight-200);
 
 			JsDocument doc = getDocument("(" + jsonTree + ") ");
 			JsLayoutCladogram layout = getLayout("(" + layoutTree + ")");

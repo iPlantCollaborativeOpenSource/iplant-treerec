@@ -172,6 +172,23 @@ public class JsonUtil
 
 		return ret;
 	}
+	
+	public static String getArrayString(final JSONObject jsonObj, final String key)
+	{
+		String ret = ""; // assume failure
+
+		if(jsonObj != null && key != null)
+		{
+			JSONValue val = jsonObj.get(key);
+
+			if(val != null && val.isNull() == null)
+			{
+					ret = val.toString();
+			}
+		}
+
+		return ret;
+	}
 
 	/**
 	 * 

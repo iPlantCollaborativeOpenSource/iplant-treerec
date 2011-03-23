@@ -22,6 +22,6 @@ public class TRSearchSpeciesChannelPanel extends TreeChannelPanel
 	public TRSearchSpeciesChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
 			String layoutTree)
 	{
-		super(eventbus, caption, id, jsonTree, layoutTree);
+		super(eventbus, caption, id, jsonTree, layoutTree,0,0);
 	}
 }

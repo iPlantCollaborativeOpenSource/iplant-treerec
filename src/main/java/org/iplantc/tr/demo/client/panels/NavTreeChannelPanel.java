@@ -27,9 +27,9 @@ public class NavTreeChannelPanel extends TreeChannelPanel
 	 * @param layoutTree layout data.
 	 */
 	public NavTreeChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
-			String layoutTree)
+			String layoutTree,int w,int h )
 	{
-		super(eventbus, caption, id, jsonTree, layoutTree);
+		super(eventbus, caption, id, jsonTree, layoutTree,w,h);
 	}
 
 	private Button buildHomeButton()
@@ -42,6 +42,7 @@ public class NavTreeChannelPanel extends TreeChannelPanel
 				if(treeView != null)
 				{
 					treeView.zoomToFit();
+					
 				}
 			}
 		});

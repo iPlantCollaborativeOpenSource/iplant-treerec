@@ -23,10 +23,31 @@ public class TRViewerWindow extends Window
 				pnl.cleanup();
 			}
 		});
-
+		setMaximizable(true);
 		compose();
 	}
 
+	@Override
+	protected void onResize(int width, int height) {
+	
+		
+		pnl.resizeTreePanels(width, height);
+		
+		super.onResize(width, height);
+	}
+	
+	
+	
+	
+	@Override
+	protected void onShow() {
+		// TODO Auto-generated method stub
+		
+		super.onShow();
+		
+		
+	}
+	
 	private void compose()
 	{
 		add(pnl);

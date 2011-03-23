@@ -319,7 +319,7 @@ public class TRSearchResultsWindow extends Window
 				public void onFailure(Throwable arg0)
 				{
 					String err = "GO term cloud creation failed.";
-					MessageBox.alert("Error", err, null);
+					MessageBox.alert("Error", err + arg0.toString(), null);
 				}
 
 				@Override
@@ -329,12 +329,15 @@ public class TRSearchResultsWindow extends Window
 					if(html != null)
 					{
 						JSONObject htmlObj = html.isObject();
-						MessageBox.info("", htmlObj.toString(), null);
+						
 						String cloud = JsonUtil.getString(htmlObj, "cloud");
+						String categories = JsonUtil.getArrayString(htmlObj, "categories");
+						
+						//MessageBox.info("", categories, null);
 						if(cloud != null)
 						{
 							WordCloudWindow window = WordCloudWindow.getInstance();
-							window.setContents(cloud, geneFamily);
+							window.setContents(cloud, geneFamily,categories);
 							window.show();
 							window.toFront();
 						}

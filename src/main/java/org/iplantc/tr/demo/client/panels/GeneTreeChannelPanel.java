@@ -47,9 +47,9 @@ public class GeneTreeChannelPanel extends NavTreeChannelPanel
 	 * @param geneFamName gene family id
 	 */
 	public GeneTreeChannelPanel(EventBus eventbus, String caption, String id, String jsonTree,
-			String layoutTree, String geneFamName)
+			String layoutTree, String geneFamName,int w, int h)
 	{
-		super(eventbus, caption, id, jsonTree, layoutTree);
+		super(eventbus, caption, id, jsonTree, layoutTree,w,h);
 		this.geneFamName = geneFamName;
 	}
 
