@@ -1,0 +1,419 @@
+To install:
+
+1. Install dependencies.
+
+	****************************************************************
+	* Upgrade CPAN:
+	  If you already keep CPAN up to date, you can skip this step. However, we recommend making certain you are using the latest version.
+
+	>perl -MCPAN -e shell
+	cpan>install Bundle::CPAN
+	cpan>q
+
+	If you need to re-run the config options, delete the config.pm
+	file and start over. You will have to commit the config once
+	completed.
+	/usr/lib/perl5/5.8.8/CPAN/Config.pm initialized. - user preferences. Save with ">o conf commit"
+	
+	You can also use the following to install the latest version of CPAN:
+	>perl -MCPAN -e 'install Bundle::CPAN'
+
+	****************************************************************
+	* Install/upgrade Module::Build.
+	If you already keep CPAN up to date, you can skip this step. However, we recommend making certain you are using the latest version. The IPlant::TreeRec module you will install below will fail to install all dependencies automatically with an older version of Module::Build.
+
+	>cpan
+	cpan>install Module::Build
+	cpan>o conf prefer_installer MB
+	cpan>o conf commit
+	cpan>q
+	
+	****************************************************************
+	* Install the Bioperl package:
+	
+	Install using CPAN:
+	> install Bio::Tree::Tree
+	
+	or see:
+	Installation wiki and download source:
+    http://www.bioperl.org/wiki/
+
+	****************************************************************
+	* Install Perl modules
+	On RHEL/CentOS systems, enter:
+	yum install mod_perl mod_perl-devel http-devel
+	
+	For other systems, you will have to discover and install the equivalent.
+
+
+2. Install Application
+
+    ****************************************************************
+	* Install IPlant::TreeRec
+	Source code is available at: https://github.com/iPlantCollaborativeOpenSource/________
+
+	To install:
+
+	tar xvf /path/to/IPlant-TreeRec-v0.0.3.tar.gz
+	cd IPlant-TreeRec-v0.0.3
+	perl Build.PL
+	./Build installdeps
+	./Build
+	./Build test
+	./Build install
+	
+	This takes the place of installing all of the dependency modules using CPAN.  You still have to tell CPAN that you want to install transitive dependencies, but it's still easier than remembering to install all of the dependencies manually.
+	
+	If the Build script complains about a missing installdeps target, you'll know you need to update Module::Build as suggested earlier.
+
+
+3. Make adjustments as needed
+
+	****************************************************************
+	* If necessary, update httpd.conf to load mod_perl and mod_apreq2:
+
+	  ** Note that mod_perl is sometimes loaded by /etc/httpd/conf.d/perl.conf
+
+	  ** Create /etc/httpd/conf.d/apreq.conf and perl.conf for perl. Add the lines below to load the module and issue "service httpd reload" to load the new config.
+
+	  LoadModule perl_module modules/mod_perl.so
+	  LoadModule apreq_module modules/mod_apreq2.so
+
+	****************************************************************
+	* During installation of libapreq2, the lib file was installed into /usr/lib.
+		 Because we use 64bit arch, the lib file should be installed to /usr/lib64. You may have to re-compile with the following steps:
+
+			Download the libapreq2 from:
+			http://search.cpan.org/CPAN/authors/id/I/IS/ISAAC/libapreq2-2.13.tar.gz.
+
+			Extract the file into an arbitrary directory and do this:
+			LDFLAGS='-L/lib64 -L/usr/lib64 -L/usr/local/lib64'
+			./configure --prefix=/usr --libdir=/usr/lib64 --enable-perl-glue
+			make
+			make install
+
+
+4. Install or configure other needed items
+
+	****************************************************************
+	* Unpack clusters.tar.gz and place into /usr/local/lib/clusters and change ownership to root.
+	
+	chown -R root:root clusters/
+	
+	The contents of clusters are described below under mysql DB - tree_reconciliation.
+
+	****************************************************************
+	* Unpack blastdb.tar.gz and place into /usr/local/lib/blastdb and change ownership to root. 
+		
+	chown -R root:root blastdb/
+	
+	The contents of blastdb are described below under mysql DB - tree_reconciliation.
+
+	****************************************************************
+	* Install BLAST Tools:
+	Get the files from ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.2.24+-1.x86_64.rpm
+	rpm -i <path to>/ncbi-blast-2.2.24+-1.x86_64.rpm
+
+	****************************************************************
+	* Create tr-standalone.conf in /httpd/conf.d with the following:
+	Change the parameters for DB connection & server.
+
+	  # Tree Reconciliation Configuration
+	  PerlModule Apache2::REST;
+	  <Location /treereconciliation/>
+		  SetHandler perl-script
+		  PerlOptions +GlobalRequest
+		  PerlSetVar Apache2RESTAPIBase "/treereconciliation/"
+		  PerlSetVar Apache2RESTHandlerRootClass "IPlant::TreeRec::REST::API"
+		  PerlSetVar TreeRecDsn "DBI:mysql:database=tree_reconciliation"
+		  PerlSetVar TreeRecUser "tr_searcher"
+		  PerlSetVar TreeRecPassword "put_your_password_here"
+		  PerlSetVar TreeRecDataDir "/usr/local/lib/clusters"
+		  PerlSetVar TreeRecBlastExeDir "/usr/bin"
+		  PerlSetVar TreeRecBlastDbDir "/usr/local/lib/blastdb"
+		  PerlResponseHandler Apache2::REST
+	  </Location>
+	
+	Here are some brief definitions of the configuration settings:
+
+	Apache2RESTAPIBase: this is the base URL for the services.  It's analogous to the context path in Tomcat.
+
+	Apache2RESTHandlerRootClass: this is the top level class used to access the services.  This setting should not change.
+
+	TreeRecDsn: the DSN used to access the database.  This should be in a format that is acceptable to DBI.
+
+	TreeRecUser: the username used to access the database.  No write operations are currently performed, so the database user may have read-only access to the database.
+
+	TreeRecPassword: the password used to access the database.
+
+	TreeRecDataDir: the location of the tree reconciliation data files.  This is still used to obtain the fat tree images, and sequence files.  Chances are that this will eventually go away, however.
+
+	TreeRecBlastExeDir: the path to the directory containing the BLAST executable files.
+
+	TreeRecBlastDbDir: the path to the directory containing the BLAST database files.
+
+	TreeRecDefaultSpeciesTree: this is the name of the species tree to use if no species tree name is specified in a call to a service that needs the species tree name.
+
+	TreeRecGoCategories: this setting helps to determine which GO terms will be displayed in the GO cloud and which GO term will be displayed on the summary information screen.  Precedence is assigned according to the order of the categories in the list, with the first category being assigned the highest precedence.  In the GO cloud, all terms in the first category will be listed first, all terms in the second category will be listed next, and so on.  In the summary screen, we choose the term with the greatest number of occurrences in the category with the highest precedence that has GO terms associated with the gene family.  In the event of a tie for the GO term with the greatest number of occurrences, the service arbitrarily picks one of the terms.
+
+	TreeRecGoCloudLevels: this setting determines the number of available tag weight levels assigned to GO terms in the GO cloud.  Note that the value of this parameter is passed to the constructor for HTML::TagCloud as the 'levels' parameter.
+
+
+The output of the relative URLs object:
+
+         "relativeUrls" : {
+            "downloadGeneTree" : {
+               "relativeUrl" : "download/gene-tree/<family_id>",
+               "fileFormat" : "NEWICK"
+            },
+            "getAminoAcidMultipleSequenceAlignment" : {
+               "relativeUrl" : "get/amino-acid-multiple-sequence-alignment/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "downloadGeneTreeImage" : {
+               "relativeUrl" : "download/gene-tree-image/<family_id>",
+               "fileFormat" : "IMAGE"
+            },
+            "downloadDnaSequence" : {
+               "relativeUrl" : "download/dna-sequence/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "getDnaSequence" : {
+               "relativeUrl" : "get/dna-sequence/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "getGeneFamilyDetails" : {
+               "relativeUrl" : "get/gene-family-details/<family_id>",
+               "fileFormat" : "TEXT"
+            },
+            "downloadSpeciesTree" : {
+               "relativeUrl" : "download/species-tree/<species_tree_id>",
+               "fileFormat" : "NEWICK"
+            },
+            "getDnaMultipleSequenceAlignment" : {
+               "relativeUrl" : "get/dna-multiple-sequence-alignment/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "getFatTreeImage" : {
+               "relativeUrl" : "get/fat-tree-image/<family_id>",
+               "fileFormat" : "IMAGE"
+            },
+            "getGeneTree" : {
+               "relativeUrl" : "get/gene-tree/<family_id>",
+               "fileFormat" : "NEWICK"
+            },
+            "downloadDnaMultipleSequenceAlignment" : {
+               "relativeUrl" : "download/dna-multiple-sequence-alignment/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "downloadFatTree" : {
+               "relativeUrl" : "download/fat-tree/<family_id>",
+               "fileFormat" : "NEWICK"
+            },
+            "downloadFatTreeImage" : {
+               "relativeUrl" : "download/fat-tree-image/<family_id>",
+               "fileFormat" : "IMAGE"
+            },
+            "downloadSpeciesTreeImage" : {
+               "relativeUrl" : "download/species-tree-image/<species_tree_id>",
+               "fileFormat" : "IMAGE"
+            },
+            "getAminoAcidSequence" : {
+               "relativeUrl" : "get/amino-acid-sequence/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "getGeneTreeImage" : {
+               "relativeUrl" : "get/gene-tree-image/<family_id>",
+               "fileFormat" : "IMAGE"
+            },
+            "getSpeciesTree" : {
+               "relativeUrl" : "get/species-tree/<species_tree_id>",
+               "fileFormat" : "NEWICK"
+            },
+            "downloadAminoAcidMultipleSequenceAlignment" : {
+               "relativeUrl" : "download/amino-acid-multiple-sequence-alignment/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "downloadAminoAcidSequence" : {
+               "relativeUrl" : "download/amino-acid-sequence/<family_id>",
+               "fileFormat" : "FASTA"
+            },
+            "getSpeciesTreeImage" : {
+               "relativeUrl" : "get/species-tree-image/<species_tree_id>",
+               "fileFormat" : "IMAGE"
+            },
+            "getFatTree" : {
+               "relativeUrl" : "get/fat-tree/<family_id>",
+               "fileFormat" : "NEWICK"
+            }
+         },
+
+	****************************************************************
+	* mysql DB - tree_reconciliation
+
+	The file tree_reconciliation.sql is a database dump. Contents were created using these two perl scripts, which are in this repo under /scripts:
+		reconcile_gene_tree.pl
+			# a script to:
+			# 1) use muscle to alignment of amino acid sequences
+			# 2) use treebest to backtranslate the alignments onto amino acids
+			# 3) use treebest to make the best species tree-guided gene trees
+			# 4) use reconcile (from the primetv package) to format the reconciled tree for primetv
+			
+			# -n Starts with fasta files of unaligned amino acid and nucleotide sequences
+			# -n Assumes muscle, treebest, primetv and their dependencies are installed
+			
+			# Muscle is available from:
+			# http://www.ebi.ac.uk/Tools/msa/muscle/
+			
+			# TreeBest is available from:
+			# http://treesoft.sourceforge.net/treebest.shtml
+			
+			# PrimeTV is available from:
+			# http://prime.sbc.su.se/primetv/
+		
+		draw_fat_trees.pl
+			# a script that draws fat trees with primetv
+	
+	Create a new database called tree_reconciliation and import the database dump into the new database:
+	mysql> create database tree_reconciliation;
+	# mysql tree_reconciliation < tree_reconciliation_back.sql
+
+	Create the user tr_searcher and grant all privileges:
+	#mysql -u root -p mysql
+	mysql> GRANT ALL PRIVILEGES on tree_reconciliation.* TO 'tr_searcher'@'localhost' IDENTIFIED BY 'password...';
+	
+	
+	This database, as well as clusters and blastdb, from which it is built and which are mentioned earlier in this file, contain public data from from phytozome, as linked, with pertinent contents of link following as they appeared on April 4, 2011: 
+		1. http://www.phytozome.net/dataUsagePolicy.php?org=Org_Athaliana 
+		
+		Arabidopsis thaliana Data Usage Policy
+		The data on the next page is public. Please cite this publication [link to PubMed]
+		
+		Swarbreck D, Wilks C, Lamesch P, Berardini TZ, Garcia-Hernandez M, Foerster H, Li D, Meyer T, Muller R, Ploetz L, Radenbaugh A, Singh S, Swing V, Tissier C, Zhang P, Huala E. The Arabidopsis Information Resource (TAIR): gene structure and function annotation. Nucleic Acids Res.. 2008 Jan ; 36(Database issue):D1009-14.
+		
+		2. http://www.phytozome.net/dataUsagePolicy.php?org=Org_Ptrichocarpa
+		
+		Populus trichocarpa Data Usage Policy
+		The data on the next page is public. Please cite this publication [link to PubMed]
+		
+		Tuskan GA, Difazio S, Jansson S, Bohlmann J, Grigoriev I, Hellsten U, Putnam N, Ralph S, Rombauts S, Salamov A, Schein J, Sterck L, Aerts A, Bhalerao RR, Bhalerao RP, Blaudez D, Boerjan W, Brun A, Brunner A, Busov V, Campbell M, Carlson J, Chalot M, Chapman J, Chen GL, Cooper D, Coutinho PM, Couturier J, Covert S, Cronk Q, Cunningham R, Davis J, Degroeve S, DÃ©jardin A, Depamphilis C, Detter J, Dirks B, Dubchak I, Duplessis S, Ehlting J, Ellis B, Gendler K, Goodstein D, Gribskov M, Grimwood J, Groover A, Gunter L, Hamberger B, Heinze B, Helariutta Y, Henrissat B, Holligan D, Holt R, Huang W, Islam-Faridi N, Jones S, Jones-Rhoades M, Jorgensen R, Joshi C, KangasjÃ¤rvi J, Karlsson J, Kelleher C, Kirkpatrick R, Kirst M, Kohler A, Kalluri U, Larimer F, Leebens-Mack J, LeplÃ© JC, Locascio P, Lou Y, Lucas S, Martin F, Montanini B, Napoli C, Nelson DR, Nelson C, Nieminen K, Nilsson O, Pereda V, Peter G, Philippe R, Pilate G, Poliakov A, Razumovskaya J, Richardson P, Rinaldi C, Ritland K, RouzÃ© P, Ryaboy D, Schmutz J, Schrader J, Segerman B, Shin H, Siddiqui A, Sterky F, Terry A, Tsai CJ, Uberbacher E, Unneberg P, Vahala J, Wall K, Wessler S, Yang G, Yin T, Douglas C, Marra M, Sandberg G, Van de Peer Y, Rokhsar D. The genome of black cottonwood, Populus trichocarpa (Torr. & Gray). Science. 2006 Sep 15; 313(5793):1596-604.
+		
+		3. http://www.phytozome.net/dataUsagePolicy.php?org=Org_Cpapaya
+		
+		Carica papaya Data Usage Policy
+		The data on the next page is public. Please cite this publication [link to PubMed]
+		
+		Ming R, Hou S, Feng Y, Yu Q, Dionne-Laporte A, Saw JH, Senin P, Wang W, Ly BV, Lewis KL, Salzberg SL, Feng L, Jones MR, Skelton RL, Murray JE, Chen C, Qian W, Shen J, Du P, Eustice M, Tong E, Tang H, Lyons E, Paull RE, Michael TP, Wall K, Rice DW, Albert H, Wang ML, Zhu YJ, Schatz M, Nagarajan N, Acob RA, Guan P, Blas A, Wai CM, Ackerman CM, Ren Y, Liu C, Wang J, Wang J, Na JK, Shakirov EV, Haas B, Thimmapuram J, Nelson D, Wang X, Bowers JE, Gschwend AR, Delcher AL, Singh R, Suzuki JY, Tripathi S, Neupane K, Wei H, Irikura B, Paidi M, Jiang N, Zhang W, Presting G, Windsor A, Navajas-PÃ©rez R, Torres MJ, Feltus FA, Porter B, Li Y, Burroughs AM, Luo MC, Liu L, Christopher DA, Mount SM, Moore PH, Sugimura T, Jiang J, Schuler MA, Friedman V, Mitchell-Olds T, Shippen DE, dePamphilis CW, Palmer JD, Freeling M, Paterson AH, Gonsalves D, Wang L, Alam M. The draft genome of the transgenic tropical fruit tree papaya (Carica papaya Linnaeus). Nature. 2008 Apr 24; 452(7190):991-6.
+		
+		4. http://www.phytozome.net/dataUsagePolicy.php?org=Org_Csativus
+		
+		Cucumis sativus Data Usage Policy
+		As a public service, the raw sequence data from the genome sequencing projects are being made available by the Department of Energy Joint Genome Institute (JGI) before scientific publication. The purpose of this policy is to balance the imperative of DOE and JGI that the data from its sequencing projects be made available to the scientific community as soon as possible with the reasonable expectation that the collaborators and the JGI will publish their results without concerns about potential preemption by other groups that did not participate in the effort.
+		
+		These pre-publication data are preliminary and may contain errors. The goal of our policy is that early release should enable the progress of science. By accessing these data, you agree not to publish any articles containing analyses of genes or genomic data on a whole genome or chromosome scale prior to publication by JGI and its collaborators of its comprehensive genome analysis. These restrictions will be lifted on the publication of the whole genome description or the expiration of a 12-month period after public release of the 8x assembly and draft annotation, whichever comes first. During this waiting period, the data will be available for any kind of publication that does not compete directly with planned publications (e.g. reserved analyses) of the JGI and collaborators. A principal collaborator or "champion," listed in the organsim's Info page and is the point of contact and arbiter regarding publication plans. Scientists are strongly encouraged to contact the principal collaborator and JGI about their intentions and any potential collaboration.
+		
+		Reserved analyses include the identification of complete (whole genome) sets of genomic features such as genes, gene families, regulatory elements, repeat structures, GC content, etc., and whole-genome comparisons of regions of evolutionary conservation or change. Manually annotated genes within the Genome Portal are also reserved. Studies of any type on the reserved data sets that are not in direct competition with those planned by the JGI and its collaborators may also be undertaken following an agreement to that effect. Interested parties are encouraged to contact the the principal collaborator and JGI to discuss such possibilities.
+		
+		If these data are used for publication, the following acknowledgment should be included: "These sequence data were produced by the US Department of Energy Joint Genome Institute http://www.jgi.doe.gov/ in collaboration with the user community." We request that you notify us upon publication so that this information can be included in the final annotation.
+		
+		The data may be freely downloaded and used by all who respect the restrictions in the previous paragraphs. While still in waiting period status, the assembly and raw sequence reads should not be redistributed or repackaged without permission from the JGI. Any redistribution of the data during this period should carry this notice: "The Joint Genome Institute provides these data in good faith, but makes no warranty, expressed or implied, nor assumes any legal liability or responsibility for any purpose for which the data are used." Once moved to unreserved status, the data are freely available for any subsequent use.
+		
+		5. http://www.phytozome.net/dataUsagePolicy.php?org=Org_Gmax
+		
+		Glycine max Data Usage Policy
+		The data on the next page is public. Please cite this publication [link to PubMed]
+		
+		Schmutz J, Cannon SB, Schlueter J, Ma J, Mitros T, Nelson W, Hyten DL, Song Q, Thelen JJ, Cheng J, Xu D, Hellsten U, May GD, Yu Y, Sakurai T, Umezawa T, Bhattacharyya MK, Sandhu D, Valliyodan B, Lindquist E, Peto M, Grant D, Shu S, Goodstein D, Barry K, Futrell-Griggs M, Abernathy B, Du J, Tian Z, Zhu L, Gill N, Joshi T, Libault M, Sethuraman A, Zhang XC, Shinozaki K, Nguyen HT, Wing RA, Cregan P, Specht J, Grimwood J, Rokhsar D, Stacey G, Shoemaker RC, Jackson SA. Genome sequence of the palaeopolyploid soybean. Nature. 2010 Jan 14; 463(7278):178-83.
+		
+		6. http://www.phytozome.net/dataUsagePolicy.php?org=Org_Vvinifera
+		
+		Vitis vinifera Data Usage Policy
+		The data on the next page is public. Please cite this publication [link to PubMed]
+		
+		French-Italian Public Consortium for Grapevine Genome Characterization. The grapevine genome sequence suggests ancestral hexaploidization in major angiosperm phyla. Nature. 2007 Sep 27; 449(7161):463-7.
+	
+	
+	****************************************************************
+	* Testing Backend Service
+
+	**Replace localhost with your install location
+
+	* curl http://localhost/treereconciliation/search/gene-id-search/V01G0952
+	Should return a 200 status code and produce JSON output.
+
+	* curl http://localhost/treereconciliation/get/gene-family-details/pg00892
+	Should return a 200 status code and produce JSON output.
+
+	* curl http://localhost/treereconciliation/search/go-search/miRNA
+	Should return a 200 status code and produce JSON output.
+
+	* curl -d miRNA http://localhost/treereconciliation/search/go-search
+	Should return a 200 status code and produce the same output as the previous command.
+
+	* curl http://localhost/treereconciliation/search/go-accession-search/0003677
+	Should return a 200 status code and produce a lot of JSON output.
+
+	* curl -d 0003677 http://localhost/treereconciliation/search/go-accession-search
+	Should return a 200 status code and produce the same output as the previous command.
+
+	* curl -d '{"sequenceType": "protein", "sequence": "MSAAAPPLVAARRPDSGGTEGPVISLLANHFLVQFDSSQRIYHYNVEISPSPSKEVARMI"}' http://localhost/treereconciliation/search/blast-search
+	Should return a 200 status code and produce JSON output.
+
+	* curl -d '{"sequenceType": "nucleotide", "sequence": "ATGAGCGCTGCAGCACCACCATTAGTGGCTGCAAGGAGACCGGATTCTGGTGGCACAGAA"}' http://localhost/treereconciliation/search/blast-search
+	Should return a 200 status code and produce JSON output.
+
+	* curl http://localhost/treereconciliation/get/amino-acid-multiple-sequence-alignment/pg00892
+	Should return a 200 status code and produce a FASTA file.
+
+	These tests aren't exhaustive, but if they all work then chances are that everything is configured correctly. For information about the rest of the URLs available, consult the output of the get-gene-family-details request. Here's an example (formatted and abridged for readability):
+
+	{
+	  "status": 200,
+	  "data": {
+		"item": {
+		  "relativeUrls": {
+			"downloadGeneTree": "download/gene-tree/pg00892",
+			"getAminoAcidMultipleSequenceAlignment": "get/amino-acid-multiple-sequence-alignment/pg00892",
+			"downloadGeneTreeImage": "download/gene-tree-image/pg00892",
+			"downloadDnaSequence": "download/dna-sequence/pg00892",
+			"getDnaSequence": "get/dna-sequence/pg00892",
+			"getGeneFamilyDetails": "get/gene-family-details",
+			"downloadSpeciesTree": "download/species-tree",
+			"getDnaMultipleSequenceAlignment": "get/dna-multiple-sequence-alignment/pg00892",
+			"getFatTreeImage": "get/fat-tree-image/pg00892",
+			"getGeneTree": "get/gene-tree/pg00892",
+			"downloadDnaMultipleSequenceAlignment": "download/dna-multiple-sequence-alignment/pg00892",
+			"downloadFatTree": "download/fat-tree/pg00892",
+			"downloadFatTreeImage": "download/fat-tree-image/pg00892",
+			"downloadSpeciesTreeImage": "download/species-tree-image",
+			"getAminoAcidSequence": "get/amino-acid-sequence/pg00892",
+			"getGeneTreeImage": "get/gene-tree-image/pg00892",
+			"getSpeciesTree": "get/species-tree",
+			"downloadAminoAcidSequence": "download/amino-acid-sequence/pg00892",
+			"downloadAminoAcidMultipleSequenceAlignment": "download/amino-acid-multiple-sequence-alignment/pg00892",
+			"getSpeciesTreeImage": "get/species-tree-image",
+			"getFatTree": "get/fat-tree/pg00892"
+		  },
+		  ...
+		}
+	 },
+	  "message": ""
+	}
+
+	Appending any of the relative URLs from the relativeUrls object to the end of the base URL (http://localhost/treereconciliation/) and performing a GET request for the resulting URL should produce a 200 status code and output of some kind. Images are usually binary data. The rest of the requests will result in plain text in NHX, FASTA or JSON format.
+
+	****************************************************************
+	* Testing Front End Application
+
+	Gene Identifier
+		use: V01G0952
+
+	Blast
+		For protein, use: MSAAAPPLVAARRPDSGGTEGPVISLLANHFLVQFDSSQRIYHYNVEISPSPSKEVARMI
+		For nucleotide, use: ATGAGCGCTGCAGCACCACCATTAGTGGCTGCAAGGAGACCGGATTCTGGTGGCACAGAA
+
+	GO Term
+		use: miRNA (can take a while)
+
+	GO ID
+		use: 0003677
