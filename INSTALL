@@ -4,7 +4,9 @@ To install:
 
 	****************************************************************
 	* Upgrade CPAN:
-	  If you already keep CPAN up to date, you can skip this step. However, we recommend making certain you are using the latest version.
+	  If you already keep CPAN up to date, you can skip this step. 
+          However, we recommend making certain you are using the latest
+          version.
 
 	>perl -MCPAN -e shell
 	cpan>install Bundle::CPAN
@@ -13,14 +15,18 @@ To install:
 	If you need to re-run the config options, delete the config.pm
 	file and start over. You will have to commit the config once
 	completed.
-	/usr/lib/perl5/5.8.8/CPAN/Config.pm initialized. - user preferences. Save with ">o conf commit"
+	/usr/lib/perl5/5.8.8/CPAN/Config.pm initialized. - user preferences.
+        Save with ">o conf commit"
 	
 	You can also use the following to install the latest version of CPAN:
 	>perl -MCPAN -e 'install Bundle::CPAN'
 
 	****************************************************************
 	* Install/upgrade Module::Build.
-	If you already keep CPAN up to date, you can skip this step. However, we recommend making certain you are using the latest version. The IPlant::TreeRec module you will install below will fail to install all dependencies automatically with an older version of Module::Build.
+	If you already keep CPAN up to date, you can skip this step. However,
+        we recommend making certain you are using the latest version. The
+        IPlant::TreeRec module you will install below will fail to install
+        all dependencies automatically with an older version of Module::Build.
 
 	>cpan
 	cpan>install Module::Build
@@ -43,14 +49,16 @@ To install:
 	On RHEL/CentOS systems, enter:
 	yum install mod_perl mod_perl-devel http-devel
 	
-	For other systems, you will have to discover and install the equivalent.
+	For other systems, you will have to discover and install the
+        equivalent.
 
 
 2. Install Application
 
     ****************************************************************
 	* Install IPlant::TreeRec
-	Source code is available at: https://github.com/iPlantCollaborativeOpenSource/________
+	Source code is available at:
+        https://github.com/iPlantCollaborativeOpenSource/________
 
 	To install:
 
@@ -62,9 +70,13 @@ To install:
 	./Build test
 	./Build install
 	
-	This takes the place of installing all of the dependency modules using CPAN.  You still have to tell CPAN that you want to install transitive dependencies, but it's still easier than remembering to install all of the dependencies manually.
+	This takes the place of installing all of the dependency modules
+        using CPAN.  You still have to tell CPAN that you want to install
+        transitive dependencies, but it's still easier than remembering
+        to install all of the dependencies manually.
 	
-	If the Build script complains about a missing installdeps target, you'll know you need to update Module::Build as suggested earlier.
+	If the Build script complains about a missing installdeps target,
+        you'll know you need to update Module::Build as suggested earlier.
 
 
 3. Make adjustments as needed
@@ -72,16 +84,22 @@ To install:
 	****************************************************************
 	* If necessary, update httpd.conf to load mod_perl and mod_apreq2:
 
-	  ** Note that mod_perl is sometimes loaded by /etc/httpd/conf.d/perl.conf
+	  ** Note that mod_perl is sometimes loaded by
+             /etc/httpd/conf.d/perl.conf
 
-	  ** Create /etc/httpd/conf.d/apreq.conf and perl.conf for perl. Add the lines below to load the module and issue "service httpd reload" to load the new config.
+	  ** Create /etc/httpd/conf.d/apreq.conf and perl.conf for perl.
+             Add the lines below to load the module and issue
+             "service httpd reload" to load the new config.
 
 	  LoadModule perl_module modules/mod_perl.so
 	  LoadModule apreq_module modules/mod_apreq2.so
 
 	****************************************************************
-	* During installation of libapreq2, the lib file was installed into /usr/lib.
-		 Because we use 64bit arch, the lib file should be installed to /usr/lib64. You may have to re-compile with the following steps:
+	* During installation of libapreq2, the lib file was installed
+          into /usr/lib.
+		 Because we use 64bit arch, the lib file should be
+                 installed to /usr/lib64. You may have to re-compile with
+                 the following steps:
 
 			Download the libapreq2 from:
 			http://search.cpan.org/CPAN/authors/id/I/IS/ISAAC/libapreq2-2.13.tar.gz.
@@ -96,14 +114,16 @@ To install:
 4. Install or configure other needed items
 
 	****************************************************************
-	* Unpack clusters.tar.gz and place into /usr/local/lib/clusters and change ownership to root.
+	* Unpack clusters.tar.gz and place into /usr/local/lib/clusters
+          and change ownership to root.
 	
 	chown -R root:root clusters/
 	
 	The contents of clusters are described below under mysql DB - tree_reconciliation.
 
 	****************************************************************
-	* Unpack blastdb.tar.gz and place into /usr/local/lib/blastdb and change ownership to root. 
+	* Unpack blastdb.tar.gz and place into /usr/local/lib/blastdb
+          and change ownership to root. 
 		
 	chown -R root:root blastdb/
 	
@@ -136,27 +156,47 @@ To install:
 	
 	Here are some brief definitions of the configuration settings:
 
-	Apache2RESTAPIBase: this is the base URL for the services.  It's analogous to the context path in Tomcat.
+	Apache2RESTAPIBase: this is the base URL for the services.
+            It's analogous to the context path in Tomcat.
 
-	Apache2RESTHandlerRootClass: this is the top level class used to access the services.  This setting should not change.
+	Apache2RESTHandlerRootClass: this is the top level class used to
+            access the services.  This setting should not change.
 
-	TreeRecDsn: the DSN used to access the database.  This should be in a format that is acceptable to DBI.
+	TreeRecDsn: the DSN used to access the database. This should be
+            in a format that is acceptable to DBI.
 
-	TreeRecUser: the username used to access the database.  No write operations are currently performed, so the database user may have read-only access to the database.
+	TreeRecUser: the username used to access the database. No write
+            operations are currently performed, so the database user may
+            have read-only access to the database.
 
 	TreeRecPassword: the password used to access the database.
 
-	TreeRecDataDir: the location of the tree reconciliation data files.  This is still used to obtain the fat tree images, and sequence files.  Chances are that this will eventually go away, however.
+	TreeRecDataDir: the location of the tree reconciliation data files. 
+            This is still used to obtain the fat tree images, and sequence files.
+            Chances are that this will eventually go away, however.
 
 	TreeRecBlastExeDir: the path to the directory containing the BLAST executable files.
 
 	TreeRecBlastDbDir: the path to the directory containing the BLAST database files.
 
-	TreeRecDefaultSpeciesTree: this is the name of the species tree to use if no species tree name is specified in a call to a service that needs the species tree name.
+	TreeRecDefaultSpeciesTree: this is the name of the species tree to use
+            if no species tree name is specified in a call to a service that needs the
+            species tree name.
 
-	TreeRecGoCategories: this setting helps to determine which GO terms will be displayed in the GO cloud and which GO term will be displayed on the summary information screen.  Precedence is assigned according to the order of the categories in the list, with the first category being assigned the highest precedence.  In the GO cloud, all terms in the first category will be listed first, all terms in the second category will be listed next, and so on.  In the summary screen, we choose the term with the greatest number of occurrences in the category with the highest precedence that has GO terms associated with the gene family.  In the event of a tie for the GO term with the greatest number of occurrences, the service arbitrarily picks one of the terms.
+	TreeRecGoCategories: this setting helps to determine which GO terms will be
+            displayed in the GO cloud and which GO term will be displayed on the summary
+            information screen. Precedence is assigned according to the order of the
+            categories in the list, with the first category being assigned the highest
+            precedence. In the GO cloud, all terms in the first category will be listed
+            first, all terms in the second category will be listed next, and so on.  In
+            the summary screen, we choose the term with the greatest number of occurrences
+            in the category with the highest precedence that has GO terms associated with
+            the gene family. In the event of a tie for the GO term with the greatest number
+            of occurrences, the service arbitrarily picks one of the terms.
 
-	TreeRecGoCloudLevels: this setting determines the number of available tag weight levels assigned to GO terms in the GO cloud.  Note that the value of this parameter is passed to the constructor for HTML::TagCloud as the 'levels' parameter.
+	TreeRecGoCloudLevels: this setting determines the number of available tag weight
+            levels assigned to GO terms in the GO cloud.  Note that the value of this
+            parameter is passed to the constructor for HTML::TagCloud as the 'levels' parameter.
 
 
 The output of the relative URLs object:
@@ -251,7 +291,9 @@ The output of the relative URLs object:
 	****************************************************************
 	* mysql DB - tree_reconciliation
 
-	The file tree_reconciliation.sql is a database dump. Contents were created using these two perl scripts, which are in this repo under /scripts:
+	The file tree_reconciliation.sql is a database dump. Contents were
+        created using these two perl scripts, which are in this repo under
+        /scripts:
 		reconcile_gene_tree.pl
 			# a script to:
 			# 1) use muscle to alignment of amino acid sequences
