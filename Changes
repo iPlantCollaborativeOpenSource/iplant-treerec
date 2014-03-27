@@ -1,0 +1,15 @@
+Revision history for Perl extension IPlant::TreeRec.
+
+0.0.1  Fri Oct 22 14:43:29 2010
+	- original version; created by h2xs 1.23 with options
+		-AXn IPlant::TreeRec
+
+0.0.2  Mon Feb 14 10:06:47 2011
+	- updated code to extract tree information from the database.
+	- added new services to support the next version of TR.
+
+0.0.3  Mon Mar 14 16:03:13 2011
+	- fixed a bug that caused negative sequence lengths to be displayed in
+	  BLAST search results.
+	- modified the BLAST search to include only the result with the best E
+	  value for each gene family.
